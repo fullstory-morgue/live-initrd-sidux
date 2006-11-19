@@ -1,0 +1,11 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+
+install/live-initrd-kanotix::
+	install -m0755 mklive-initrd.bash \
+		debian/live-initrd-kanotix/usr/sbin/mklive-initrd
+	install -m0755 linuxrc \
+		debian/live-initrd-kanotix/usr/share/live-initrd-kanotix/
+	cp -a templates \
+		debian/live-initrd-kanotix/usr/share/live-initrd-kanotix/

@@ -1,0 +1,12 @@
+#!/static/ash
+# This script is called in case of loading this initrd image as
+# root-partition, so execute linuxrc first, then replace process
+# with the real init.
+# (C) Klaus Knopper May 2004, License: GPL
+
+# linuxrc will configure the ramdisk system, anc then copy a static
+# init from CD to ramdisk, after finishing the autoconfiguration.
+/linuxrc
+
+# Call the real init now
+exec /etc/init "$@" </dev/console >/dev/console 2>&1
