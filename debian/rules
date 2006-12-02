@@ -2,10 +2,10 @@
 
 include /usr/share/cdbs/1/rules/debhelper.mk
 
-install/live-initrd-kanotix::
+install/live-initrd-sidux::
 	install -m0755 mklive-initrd.bash \
-		debian/live-initrd-kanotix/usr/sbin/mklive-initrd
+		debian/live-initrd-sidux/usr/sbin/mklive-initrd
 	install -m0755 linuxrc \
-		debian/live-initrd-kanotix/usr/share/live-initrd-kanotix/
+		debian/live-initrd-sidux/usr/share/live-initrd-sidux/
 	cp -a templates \
-		debian/live-initrd-kanotix/usr/share/live-initrd-kanotix/
+		debian/live-initrd-sidux/usr/share/live-initrd-sidux/

@@ -393,7 +393,7 @@ if mountit $i /cdrom "-o ro" >/dev/null 2>&1
 then
 if test -f /cdrom/$KNOPPIX_DIR/$KNOPPIX_NAME
 then
-echo -n "${CRE} ${GREEN}Accessing KANOTIX CDROM at ${MAGENTA}$i${GREEN}...${NORMAL}"
+echo -n "${CRE} ${GREEN}Accessing sidux CDROM at ${MAGENTA}$i${GREEN}...${NORMAL}"
 FOUND_KNOPPIX="$i"
 break
 fi
@@ -408,7 +408,7 @@ if mount -o loop,ro /isosrc/$KNOPPIX_ISO /cdrom >/dev/null 2>&1
 then
 if test -f /cdrom/$KNOPPIX_DIR/$KNOPPIX_NAME
 then
-echo -n "${CRE} ${GREEN}Accessing KANOTIX IMAGE at ${MAGENTA}$i/$KNOPPIX_ISO${GREEN}...${NORMAL}"
+echo -n "${CRE} ${GREEN}Accessing sidux IMAGE at ${MAGENTA}$i/$KNOPPIX_ISO${GREEN}...${NORMAL}"
 FOUND_KNOPPIX="$i/$KNOPPIX_ISO"
 break
 fi
@@ -495,14 +495,14 @@ boot_from()
   if [ $? -ne 0 ]
   then
      [ -n "$LOOP_SOURCE" ] && /bin/umount $LOOP_SOURCE
-     echo -n "${CRE} ${RED}Accessing KANOTIX CDROM failed. ${MAGENTA}$TARGET_DEV${RED} is not mountable.${NORMAL}"
+     echo -n "${CRE} ${RED}Accessing sidux CDROM failed. ${MAGENTA}$TARGET_DEV${RED} is not mountable.${NORMAL}"
      sleep 2
      return 1
   fi
   
   if [ -f $TARGET/$KNOPPIX_DIR/$KNOPPIX_NAME ]
   then
-    echo -n "${CRE} ${GREEN}Accessing KANOTIX CDROM at ${MAGENTA}$TARGET_DEV${GREEN}...${NORMAL}"
+    echo -n "${CRE} ${GREEN}Accessing sidux CDROM at ${MAGENTA}$TARGET_DEV${GREEN}...${NORMAL}"
   else
     echo -n "${CRE} ${RED}Accessing KNOPPIX CDROM failed. Could not find $KNOPPIX_DIR/$KNOPPIX_NAME on ${MAGENTA}$TARGET_DEV${RED}.${NORMAL}"
     [ -n "$LOOP_SOURCE" ] && /bin/umount $LOOP_SOURCE
@@ -544,7 +544,7 @@ copy_to()
       then
         :
       else
-        echo -n "${CRE} ${RED}Copying KANOTIX CDROM failed. ${MAGENTA}$TARGET_DEV_DESC${RED} is not mountable.${NORMAL}"
+        echo -n "${CRE} ${RED}Copying sidux CDROM failed. ${MAGENTA}$TARGET_DEV_DESC${RED} is not mountable.${NORMAL}"
 	sleep 2
         return 1
       fi
@@ -562,7 +562,7 @@ copy_to()
 
   if [ $FOUNDSPACE -lt $SIZE ]
   then
-    echo -n "${CRE} ${RED}Copying KANOTIX CDROM failed. Not enough free space on ${MAGENTA}${TARGET_DEV_DESC}${RED}. Found: ${MAGENTA}${FOUNDSPACE}k${RED} Need: ${MAGENTA}${SIZE}k${RED} ${NORMAL}"
+    echo -n "${CRE} ${RED}Copying sidux CDROM failed. Not enough free space on ${MAGENTA}${TARGET_DEV_DESC}${RED}. Found: ${MAGENTA}${FOUNDSPACE}k${RED} Need: ${MAGENTA}${SIZE}k${RED} ${NORMAL}"
     sleep 2
     umount $TARGET
     return 1
@@ -570,7 +570,7 @@ copy_to()
  
   # do the real copy
   
-  echo "${CRE} ${GREEN}Copying KANOTIX CDROM to ${MAGENTA}$TARGET_DEV_DESC${GREEN}... Please be patient. ${NORMAL}"
+  echo "${CRE} ${GREEN}Copying sidux CDROM to ${MAGENTA}$TARGET_DEV_DESC${GREEN}... Please be patient. ${NORMAL}"
   if [ -z "$use_cp" -a -x /usr/bin/rsync ]
   then 
     # first cp the small files
@@ -584,7 +584,7 @@ copy_to()
   fi
   if [ $? -ne 0 ]
   then
-    echo -n "${CRE} ${RED}Copying KANOTIX CDROM failed. ${MAGENTA}$TARGET_DEV_DESC${RED} possibly has not enough space left.${NORMAL}"
+    echo -n "${CRE} ${RED}Copying sidux CDROM failed. ${MAGENTA}$TARGET_DEV_DESC${RED} possibly has not enough space left.${NORMAL}"
     sleep 2
     return 1
   fi
@@ -779,7 +779,7 @@ rm -f /linuxrc
 exit 0
 
 else
-echo "${CRE}${RED}Can't find KANOTIX filesystem, sorry.${NORMAL}"
+echo "${CRE}${RED}Can't find sidux filesystem, sorry.${NORMAL}"
 echo "${RED}Dropping you to a (very limited) shell.${NORMAL}"
 echo "${RED}Press reset button to quit.${NORMAL}"
 echo ""
@@ -787,7 +787,7 @@ echo ""
 #echo "	cat        mount     umount"
 #echo "	insmod     rmmod     lsmod"
 #echo ""
-PS1="kanotix# "
+PS1="sidux# "
 export PS1
 echo "6" > /proc/sys/kernel/printk
 # Allow signals

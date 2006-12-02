@@ -47,21 +47,21 @@ TARGET_INITRD_DIR=$(mktemp -d)
 
 FINAL_INITRD="/boot/live-miniroot-${KVERS}.gz"
 
-# Static shell binary provided by busybox-kanotix
-BUSYBOX_BIN="/usr/lib/busybox-kanotix/busybox.static"
-BUSYBOX_LINKS="/usr/share/busybox-kanotix/busybox.links"
+# Static shell binary provided by busybox-sidux
+BUSYBOX_BIN="/usr/lib/busybox-sidux/busybox.static"
+BUSYBOX_LINKS="/usr/share/busybox-sidux/busybox.links"
 
 # XXX: are all these files in /etc really required?
 if [[ -d ${PWD}/templates ]]; then
 	TEMPLATE_DIR="${PWD}/templates"
 else
-	TEMPLATE_DIR="/usr/share/live-initrd-kanotix/templates"
+	TEMPLATE_DIR="/usr/share/live-initrd-sidux/templates"
 fi
 
 if [[ -x ${PWD}/linuxrc ]]; then
 	LINUXRC="${PWD}/linuxrc"
 else
-	LINUXRC="/usr/share/live-initrd-kanotix/linuxrc"
+	LINUXRC="/usr/share/live-initrd-sidux/linuxrc"
 fi
 
 SCSI_MODULES="

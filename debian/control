@@ -1,13 +1,13 @@
-Source: live-initrd-kanotix
+Source: live-initrd-sidux
 Section: misc
 Priority: optional
 Maintainer: Kel Modderman <kelmo@kanotixguide.org>
 Build-Depends: cdbs, debhelper (>= 5)
 Standards-Version: 3.7.2
 
-Package: live-initrd-kanotix
+Package: live-initrd-sidux
 Architecture: all
-Depends: bash (>= 2.05b), busybox-kanotix (>= 1.2.2-1), distro-defaults
-Description: Tools required to build an initial ramdisk for KANOTIX
- This package provides the tools required to build the KANOTIX live
+Depends: bash (>= 2.05b), busybox-sidux, distro-defaults
+Description: Tools required to build an initial ramdisk for sidux
+ This package provides the tools required to build the sidux live
  environment initial ramdisk.
