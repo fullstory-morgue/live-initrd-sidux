@@ -1,8 +1,8 @@
-live-initrd-siduxx (0.0.1) unstable; urgency=low
+live-initrd-sidux (0.0.1) unstable; urgency=low
 
   * Initial sidux release.
 
- -- Kel Modderman <kelmo@kanotixguide.org>  Tue, 31 Oct 2006 23:15:04 +1000
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sat,  2 Dec 2006 01:34:08 +0100
 
 live-initrd-kanotix (0.0.0) unstable; urgency=low
 
