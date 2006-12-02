@@ -1,3 +1,9 @@
+live-initrd-sidux (0.0.2) UNRELEASED; urgency=low
+
+  * NOT RELEASED YET
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sat,  2 Dec 2006 01:35:36 +0100
+
 live-initrd-sidux (0.0.1) unstable; urgency=low
 
   * Initial sidux release.
