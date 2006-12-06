@@ -1,7 +1,4 @@
-live-initrd-sidux (0.0.2) UNRELEASED; urgency=low
-
-  [ Stefan Lippers-Hollmann ]
-  * NOT RELEASED YET
+live-initrd-sidux (0.0.2) unstable; urgency=low
 
   [ Kel Modderman ]
   * Allow for selection of KVERS version.
@@ -9,7 +6,11 @@ live-initrd-sidux (0.0.2) UNRELEASED; urgency=low
     with different host kernel.
   * Change --verbose cli option to --debug to make room for new --version option.
 
- -- Kel Modderman <kelmo@kanotixguide.org>  Wed,  6 Dec 2006 18:28:20 +1000
+  [ Stefan Lippers-Hollmann ]
+  * re- indent.
+  * sidux, not KANOTIX.
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Wed,  6 Dec 2006 11:50:01 +0100
 
 live-initrd-sidux (0.0.1) unstable; urgency=low
 
