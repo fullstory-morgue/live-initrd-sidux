@@ -1,8 +1,15 @@
 live-initrd-sidux (0.0.2) UNRELEASED; urgency=low
 
+  [ Stefan Lippers-Hollmann ]
   * NOT RELEASED YET
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sat,  2 Dec 2006 01:35:36 +0100
+  [ Kel Modderman ]
+  * Allow for selection of KVERS version.
+    - disable create_scsi_parse_file() for now, as it does not like to be run
+    with different host kernel.
+  * Change --verbose cli option to --debug to make room for new --version option.
+
+ -- Kel Modderman <kelmo@kanotixguide.org>  Wed,  6 Dec 2006 18:28:20 +1000
 
 live-initrd-sidux (0.0.1) unstable; urgency=low
 

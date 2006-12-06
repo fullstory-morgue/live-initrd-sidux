@@ -32,11 +32,40 @@ else
 fi
 
 #####################################################################
+# Process arguments
+
+while (($#)); do
+	case $1 in
+#		-k|--keep)
+#			XXX: make 1:1 of working directory for investigation
+#			;;
+		-v|--version)
+			shift
+			KVERS=$1
+			;;
+		-d|--debug)
+			VERBOSITY=1
+			;;
+		-o|--output)
+			shift
+			FINAL_INITRD=$1
+			;;
+		*)
+			;;
+	esac
+	shift
+done
+
+#####################################################################
 # Initialize variables
 
 # Kernel version
-# XXX: allow for target kernel selection
-KVERS=$(uname -r)
+[[ $KVERS ]] || KVERS=$(uname -r)
+
+if ! modprobe --set-version=${KVERS} --ignore-install --list >/dev/null 2>&1; then
+	echo "Invalid kernel version: ${KVERS}, aborting"
+	exit 1
+fi
 
 # Working directories
 TARGET_INITRD_NAME="miniroot"
@@ -120,27 +149,6 @@ MODULES="
 	vfat
 	isofs
 "
-
-#####################################################################
-# Process arguments
-
-while (($#)); do
-	case $1 in
-		-k|--keep)
-			# XXX: make 1:1 of working directory for investigation
-			;;
-		-v|--verbose)
-			VERBOSITY=1
-			;;
-		-o|--output)
-			FINAL_INITRD=$2
-			shift
-			;;
-		*)
-			;;
-	esac
-	shift
-done
 
 #####################################################################
 # Utility functions
@@ -318,7 +326,7 @@ for module in ${SCSI_MODULES}; do
 	install_kmod ${module} modules/scsi
 done
 
-create_scsi_parse_file > ${TARGET_INITRD_DIR}/modules/scsi/scsi-modules.txt
+#create_scsi_parse_file > ${TARGET_INITRD_DIR}/modules/scsi/scsi-modules.txt
 
 # Populate /dev with MAKEDEV
 pushd ${TARGET_INITRD_DIR}/dev >/dev/null
