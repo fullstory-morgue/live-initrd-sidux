@@ -1,4 +1,4 @@
-live-initrd-kanotix (0.0.4) unstable; urgency=low
+live-initrd-sidux (0.0.4) unstable; urgency=low
 
   [ Stefan Lippers-Hollmann ]
   * fix BUILTIN_FS.
