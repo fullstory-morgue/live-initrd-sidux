@@ -29,6 +29,7 @@ BUILTIN_FS="iso9660 ext2 ext3 reiserfs vfat reiser"
 # override tool behaviour through distro-defaults
 FLL_DISTRO_NAME="sidux"
 FLL_DISTRO_MODE="live"
+FLL_LIVE_USER="sidux"
 FLL_IMAGE_DIR="KNOPPIX"
 FLL_IMAGE_FILE="KNOPPIX"
 FLL_IMAGE_LOCATION="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
