@@ -1,11 +1,18 @@
-live-initrd-kanotix (0.0.4) UNRELEASED; urgency=low
+live-initrd-kanotix (0.0.4) unstable; urgency=low
 
   * NOT RELEASED YET.
   * fix BUILTIN_FS.
   * adapt for busybox insmod.
   * simplify kernel module handling.
+  * load loop for squashfs
+  * initial definition of distro-defaults default values.
+  * don't probe for ISA SCSI on default, scsiisa as cheatcode.
+  * clean up.
+  * actually use FLL_LIVE_USER.
+  * unify real file creation.
+  * create /dev/pts.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Thu,  7 Dec 2006 15:08:42 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Thu,  7 Dec 2006 19:35:31 +0100
 
 live-initrd-sidux (0.0.3) unstable; urgency=low
 

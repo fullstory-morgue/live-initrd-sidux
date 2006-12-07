@@ -26,11 +26,23 @@ MODULE_DIRS="/cdrom/KNOPPIX/modules /modules /modules/scsi"
 # Builtin fielsystems
 BUILTIN_FS="iso9660 ext2 ext3 reiserfs vfat reiser"
 
+# override tool behaviour through distro-defaults
+FLL_DISTRO_NAME="sidux"
+FLL_DISTRO_MODE="live"
+FLL_IMAGE_DIR="KNOPPIX"
+FLL_IMAGE_FILE="KNOPPIX"
+FLL_IMAGE_LOCATION="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
+FLL_MOUNTPOINT="/KNOPPIX"
+FLL_UNION_SOURCE="/ramdisk/var/tmp/union"
+FLL_UNION_TARGET="$FLL_MOUNTPOINT"
+FLL_UNION_OPTIONS="rw"
+FLL_PERSISTENT_HOME="sidux.img"
+
 # Misc functions
 mountit()
 {
 	# Usage: mountit src dst "options"
-	# Uses builtin mount of ash.knoppix
+	# Uses builtin mount of busybox
 	for fs in $BUILTIN_FS; do
 		case "$fs" in
 			ntfs)
@@ -96,10 +108,10 @@ export PATH
 
 umask 022
 
-# Mount /proc and /dev/pts
+# Mount /proc, /sys and /dev/pts
 mount -t proc /proc /proc
-mount -t devpts /dev/pts /dev/pts
-mount -t sysfs /sys /sys >/dev/null 2>&1
+mount -t sysfs /sys /sys
+mount -t devpts -o noexec,nosuid devpts /dev/pts
 
 # Disable kernel messages while probing modules in autodetect mode
 echo "0" > /proc/sys/kernel/printk
@@ -381,7 +393,6 @@ unloadmodule()
 
 # Check for SCSI, use modules on bootfloppy first
 ISA_SCSI="aha1740 aha1542 aha152x pas16 psi240i qlogicfas qlogicfc seagate t128 u14-34f wd7000"
-SCSI_PROBE="$ISA_SCSI"
 
 # Trying to do kind of /proc/pci hardware detection
 # SCSI detection using /sys/devices
@@ -749,7 +760,7 @@ done
 # (KNOPPIX can be booted directly from HD now).
 mount_knoppix()
 {
-	if test -n "$FOUND_KNOPPIX" -a -f $1/$KNOPPIX_DIR/$KNOPPIX_NAME; then
+	if test -n "$FOUND_KNOPPIX" && test -f $1/$KNOPPIX_DIR/$KNOPPIX_NAME; then
 		# DEBUG
 		# echo "6" > /proc/sys/kernel/printk
 		# detect compression
@@ -762,6 +773,7 @@ mount_knoppix()
 				;;
 			"hsqs")
 				COMP=squashfs
+				loadmodule loop
 				loadmodule squashfs 
 				mount -t squashfs $1/$KNOPPIX_DIR/$KNOPPIX_NAME /KNOPPIX -o loop,ro || FOUND_KNOPPIX=""
 				;;
@@ -1086,34 +1098,29 @@ if test -n "$FOUND_KNOPPIX"; then
 	test -z "$RAMSIZE" -o "$RAMSIZE" -lt "$MINSIZE" && RAMSIZE="$MINSIZE"
 	mkdir -p /ramdisk
 
-	# We need /bin/mount here for the -o size= option
-	/bin/mount -t tmpfs -o "size=${RAMSIZE}k" /ramdisk /ramdisk
-	mkdir -p /ramdisk/home /ramdisk/var && \
-		ln -s /ramdisk/home /ramdisk/var /
-
-	echo "${BLUE}Done.${NORMAL}"
-	
 	# tmpfs/varsize version, can use swap
 	RAMSIZE=$(expr $RAMSIZE \* 4)
 	echo -n "${CRE}${BLUE}Creating ${YELLOW}/ramdisk${BLUE} (dynamic size=${RAMSIZE}k) on ${MAGENTA}shared memory${BLUE}...${NORMAL}"
 
 	# We need /bin/mount here for the -o size= option
-	/bin/mount -t tmpfs -o "size=${RAMSIZE}k" /ramdisk /ramdisk
-	if [ "$?" = 0 ] && [ "$UNIONS" = "yes" ]; then
+	/bin/mount -t tmpfs -o "size=${RAMSIZE}k" /ramdisk /ramdisk || echo "creating the ramdisk failed"
+
+	if [ "$UNIONS" = "yes" ]; then
 		mkdir -p	/ramdisk/tmp \
-				/ramdisk/home/knoppix 
+				/ramdisk/home/${FLL_LIVE_USER}
 
 		chmod 1777 /ramdisk/tmp
-		chown knoppix:knoppix /ramdisk/home/knoppix
+		chown knoppix:knoppix /ramdisk/home/${FLL_LIVE_USER}
 
 		ln -snf /ramdisk/home /home
 		mv /tmp /tmp.old
 		ln -s /ramdisk/tmp /tmp
 		rm -rf tmp.old
 	else
-		mkdir -p	/ramdisk/home \
-				/ramdisk/var
-		ln -s /ramdisk/home /ramdisk/var
+		mkdir -p	/ramdisk/home
+		ln -s /ramdisk/home /home
+		mkdir -p	/ramdisk/var
+		ln -s /ramdisk/var  /var
 	fi
 
 	echo "${BLUE}Done.${NORMAL}"
@@ -1173,7 +1180,7 @@ if test -n "$FOUND_KNOPPIX"; then
 	
 		echo ""
 		echo "${GREEN}>> Read-only ${MEDIUM} system successfully merged with read-write /ramdisk.${NORMAL}"
-		chown knoppix:knoppix /home/knoppix
+		chown ${FLL_LIVE_USER}:${FLL_LIVE_USER} /home/${FLL_LIVE_USER}
 	else
 		###############
 		## link farm ##
@@ -1195,14 +1202,14 @@ if test -n "$FOUND_KNOPPIX"; then
 				/var/lib \
 				/var/spool/cups/tmp \
 				/var/lib/samba \
-				/home/knoppix \
+				/home/${FLL_LIVE_USER} \
 				/root \
 				/etc/sysconfig \
 				/etc/X11 \
 				/etc/cups \
 				/etc/dhcpc
-		chown knoppix:knoppix /home/knoppix
-	
+		chown ${FLL_LIVE_USER}:${FLL_LIVE_USER} /home/${FLL_LIVE_USER}
+
 		# All files in here should be size zero after Knoppix.clean was run
 		cp -a	/KNOPPIX/var/local \
 			/KNOPPIX/var/games \
@@ -1254,11 +1261,6 @@ if test -n "$FOUND_KNOPPIX"; then
 	# resolv.conf must be writable as well
 	cp -a /KNOPPIX/etc/dhcpc/resolv.conf /etc/dhcpc/ 2>/dev/null
 
-
-	# Create empty utmp and wtmp
-	:> /var/run/utmp
-	:> /var/run/wtmp
-
 	# Make SURE that these are files, not links!
 	rm -rf	/etc/ftpusers \
 		/etc/passwd \
@@ -1292,9 +1294,19 @@ if test -n "$FOUND_KNOPPIX"; then
 		/KNOPPIX/etc/dhcpc \
 			/etc/ 2>/dev/null
 
-	# Extremely important, init crashes on shutdown if this is only a link
-	:> /etc/ioctl.save
-	:> /etc/pnm2ppa.conf
+	# Create empty utmp and wtmp
+	# /etc/ioctl.save and /etc/pnm2ppa.conf are extremly important, init crashes on shutdown if this is only a link
+	# get rid of broken xorg.conf
+	rm -f	/var/run/utmp \
+		/var/run/wtmp \
+		/etc/ioctl.save \
+		/etc/pnm2ppa.conf \
+		/etc/X11/xorg.conf \
+		/var/lib/samba/unexpected.tdb
+	:>	/var/run/utmp
+	:>	/var/run/wtmp
+	:>	/etc/ioctl.save
+	:>	/etc/pnm2ppa.conf
 
 	# Must exist for samba to work
 	[ -d /var/lib/samba ] && :> /var/lib/samba/unexpected.tdb
@@ -1306,7 +1318,7 @@ if test -n "$FOUND_KNOPPIX"; then
 	chmod 1777 /tmp /var/tmp
 	
 	echo "${BLUE}Done.${NORMAL}"
-	
+
 	# Clean up /etc/mtab (and - just in case - make a nice entry for looped ISO)
 	/bin/egrep " /KNOPPIX[0-9]* | /cdrom " /proc/mounts | sed 's|/dev/loop0 /cdrom \(.*\) 0 0|'$LOOP_SOURCE$ISO_PATH' /cdrom/ \1,loop=/dev/loop0 0 0|g' >> /etc/mtab
 
@@ -1321,9 +1333,9 @@ if test -n "$FOUND_KNOPPIX"; then
 	# Give control to the init process.
 	echo "${CRE}${BLUE}Starting init process.${NORMAL}"
 	rm -f /linuxrc
-	exit 0
 	
-	else
+	exit 0
+else
 	echo "${CRE}${RED}Can't find sidux filesystem, sorry.${NORMAL}"
 	echo "${RED}Dropping you to a (very limited) shell.${NORMAL}"
 	echo "${RED}Press reset button to quit.${NORMAL}"
