@@ -23,25 +23,7 @@ trap "" 1 2 3 15
 # look for kernel modules in these directories
 MODULE_DIRS="/cdrom/KNOPPIX/modules /modules /modules/scsi"
 
-
 # Misc functions
-
-INSMOD="insmod"
-[ -x /modules/insmod ] && INSMOD="/modules/insmod"
-
-RMMOD="rmmod"
-[ -x /modules/rmmod ] && RMMOD="/modules/rmmod"
-
-# Builtin fielsystems
-BUILTIN_FS="iso9660 ext2 ext3 reiserfs vfat reiser"
-
-# Need to insmod the ntfs module to make it BUILTIN
-[ -f /modules/ntfs.*o ] && $INSMOD /modules/ntfs.*o >/dev/null 2>&1 && BUILTIN_FS="$BUILTIN_FS ntfs"
-
-# Load loop and squashfs
-[ -f /modules/loop.*o ] && $INSMOD /modules/loop.*o >/dev/null 2>&1
-[ -f /modules/squashfs.*o ] && $INSMOD /modules/squashfs.*o >/dev/null 2>&1
-
 mountit()
 {
 	# Usage: mountit src dst "options"
@@ -777,11 +759,13 @@ mount_knoppix()
 				;;
 			"hsqs")
 				COMP=squashfs
+				loadmodule squashfs.ko 
 				mount -t squashfs $1/$KNOPPIX_DIR/$KNOPPIX_NAME /KNOPPIX -o loop,ro || FOUND_KNOPPIX=""
 				;;
 		esac
 	fi
-	
+
+	#FIXME
 	## Allow multi-image KNOPPIX mounts
 	#if [ -n "$FOUND_KNOPPIX" ] && [ -x "$DYNLOADER" ] && [ -x /KNOPPIX/sbin/losetup ]; then
 	#	echo ""
