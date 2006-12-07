@@ -1,5 +1,6 @@
 live-initrd-kanotix (0.0.4) unstable; urgency=low
 
+  [ Stefan Lippers-Hollmann ]
   * NOT RELEASED YET.
   * fix BUILTIN_FS.
   * adapt for busybox insmod.
@@ -14,7 +15,11 @@ live-initrd-kanotix (0.0.4) unstable; urgency=low
   * not everything needs capitals.
   * preserve enforce /etc/rc?.d/ to be deleted while mastering.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Thu,  7 Dec 2006 21:01:01 +0100
+  [ Niall Walsh ]
+  * Lots of FLL_ variables fully used including:
+  * FLL_MOUNTPOINT, FLL_MEDIUM, FLL_IMAGE(_*), FLL_ISO(*)
+
+ -- Niall Walsh <niallwalsh@users.berlios.de>  Thu,  7 Dec 2006 22:59:45 +0000
 
 live-initrd-sidux (0.0.3) unstable; urgency=low
 

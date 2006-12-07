@@ -9,35 +9,36 @@
 # mount/umount, insmod/rmmod are also a builtin in busybox.
 #
 
-# Just informational: This is a CD or DVD edition
-MEDIUM="cd"
-
-# hardcoded configurable options
-# Default maximum size of dynamic ramdisk in kilobytes
-RAMSIZE=1000000
-# End of options
-
-# Don't allow interrupt signals
-trap "" 1 2 3 15
-
-# look for kernel modules in these directories
-MODULE_DIRS="/cdrom/KNOPPIX/modules /modules /modules/scsi"
-
-# Builtin fielsystems
-BUILTIN_FS="iso9660 ext2 ext3 reiserfs vfat reiser"
-
 # override tool behaviour through distro-defaults
 FLL_DISTRO_NAME="sidux"
 FLL_DISTRO_MODE="live"
 FLL_LIVE_USER="sidux"
 FLL_IMAGE_DIR="KNOPPIX"
 FLL_IMAGE_FILE="KNOPPIX"
-FLL_IMAGE_LOCATION="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
+FLL_IMAGE="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
 FLL_MOUNTPOINT="/KNOPPIX"
 FLL_UNION_SOURCE="/ramdisk/var/tmp/union"
 FLL_UNION_TARGET="$FLL_MOUNTPOINT"
 FLL_UNION_OPTIONS="rw"
 FLL_PERSISTENT_HOME="sidux.img"
+FLL_ISO_DIR="KNOPPIX"
+FLL_ISO_NAME="KNOPPIX.ISO"
+FLL_ISO="$FLL_ISO_DIR/$FLL_ISO_NAME"
+FLL_MEDIUM="cdrom"
+
+# hardcoded configurable options
+# Default maximum size of dynamic ramdisk in kilobytes
+RAMSIZE=1000000
+# End of options
+
+# look for kernel modules in these directories
+MODULE_DIRS="/$FLL_MEDIUM/$FLL_IMAGE_DIR/modules /modules /modules/scsi"
+
+# Builtin fielsystems
+BUILTIN_FS="iso9660 ext2 ext3 reiserfs vfat reiser"
+
+# Don't allow interrupt signals
+trap "" 1 2 3 15
 
 # Misc functions
 mountit()
@@ -99,7 +100,7 @@ WHITE="[1;37m"
 # echo -n "[H[J"
 echo ""
 # Be verbose
-echo "${WHITE}Welcome to the sidux live linux-on-cd!${NORMAL}"
+echo "${WHITE}Welcome to $FLL_DISTRO_NAME live linux!${NORMAL}"
 echo ""
 echo ""
 
@@ -203,38 +204,36 @@ case "$CMDLINE" in
 	;;
 esac
 
-KNOPPIX_DIR="KNOPPIX"
-KNOPPIX_NAME="KNOPPIX"
 case "$CMDLINE" in
 	*knoppix_dir=*)
-		KNOPPIX_DIR="$knoppix_dir"
+		FLL_IMAGE_DIR="$knoppix_dir"
 		;;
 esac
 case "$CMDLINE" in
 	*knoppix_name=*)
-		KNOPPIX_NAME="$knoppix_name"
+		FLL_IMAGE_FILE="$knoppix_name"
 		;;
 esac
 
-KNOPPIX_ISO_DIR="KNOPPIX"
-KNOPPIX_ISO_NAME="KNOPPIX.ISO"
 case "$CMDLINE" in
 	*knoppix_iso_dir=*)
-		KNOPPIX_ISO_DIR="$knoppix_iso_dir"
+		FLL_ISO_DIR="$knoppix_iso_dir"
 		;;
 esac
 case "$CMDLINE" in
 	*knoppix_iso_name=*)
-		KNOPPIX_ISO_NAME="$knoppix_iso_name"
+		FLL_ISO_NAME="$knoppix_iso_name"
 		;;
 esac
 
-KNOPPIX_ISO="$KNOPPIX_ISO_DIR/$KNOPPIX_ISO_NAME"
 case "$CMDLINE" in
 	*fromiso=*)
-		KNOPPIX_ISO="$fromiso"
+		FLL_ISO="$fromiso"
 		;;
 esac
+
+FLL_IMAGE="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
+FLL_ISO="$FLL_ISO_DIR/$FLL_ISO_NAME"
 
 # Run a shell if in debug mode
 stage=1
@@ -727,28 +726,28 @@ case "$CMDLINE" in
 esac
 
 for i in $DEVICES; do
-	echo -n "${CRE}${BLUE}Looking for ${MEDIUM} in: ${MAGENTA}$i${NORMAL}   "
+	echo -n "${CRE}${BLUE}Looking for ${FLL_MEDIUM} in: ${MAGENTA}$i${NORMAL}   "
 	if test -z "$FROMISO"; then
-		if mountit $i /cdrom "-o ro" >/dev/null 2>&1; then
-			if test -r /cdrom/$KNOPPIX_DIR/$KNOPPIX_NAME; then
-				echo -n "${CRE}${GREEN}Accessing sidux ${MEDIUM} at ${MAGENTA}$i${GREEN}...${NORMAL}"
+		if mountit $i /$FLL_MEDIUM "-o ro" >/dev/null 2>&1; then
+			if test -r /$FLL_MEDIUM/$FLL_IMAGE; then
+				echo -n "${CRE}${GREEN}Accessing $FLL_DISTRO_NAME ${FLL_MEDIUM} at ${MAGENTA}$i${GREEN}...${NORMAL}"
 				FOUND_KNOPPIX="$i"
 				break
 			fi
 			
-			umount /cdrom
+			umount /$FLL_MEDIUM
 		fi
 	else
 		if mountit $i /isosrc "-o ro" >/dev/null 2>&1; then
 			if test -f /isosrc/$KNOPPIX_ISO; then
-				if mount -o loop,ro /isosrc/$KNOPPIX_ISO /cdrom >/dev/null 2>&1; then
-					if test -f /cdrom/$KNOPPIX_DIR/$KNOPPIX_NAME; then
-						echo -n "${CRE} ${GREEN}Accessing sidux image at ${MAGENTA}$i/$KNOPPIX_ISO${GREEN}...${NORMAL}"
+				if mount -o loop,ro /isosrc/$FLL_ISO /$FLL_MEDIUM >/dev/null 2>&1; then
+					if test -f /$FLL_MEDIUM/$FLL_IMAGE; then
+						echo -n "${CRE} ${GREEN}Accessing $FLL_DISTRO_NAME image at ${MAGENTA}$i/$FLL_IMAGE${GREEN}...${NORMAL}"
 						FOUND_KNOPPIX="$i/$KNOPPIX_ISO"
 						break
 					fi
 			
-				umount /cdrom
+				umount /$FLL_MEDIUM
 				fi
 			fi
 		
@@ -761,22 +760,22 @@ done
 # (KNOPPIX can be booted directly from HD now).
 mount_knoppix()
 {
-	if test -n "$FOUND_KNOPPIX" && test -f $1/$KNOPPIX_DIR/$KNOPPIX_NAME; then
+	if test -n "$FOUND_KNOPPIX" && test -f $1/$FLL_IMAGE; then
 		# DEBUG
 		# echo "6" > /proc/sys/kernel/printk
 		# detect compression
 		COMP=""
-		case $(dd if=$1/$KNOPPIX_DIR/$KNOPPIX_NAME bs=4 count=1 2>/dev/null) in
+		case $(dd if=$1/$FLL_IMAGE bs=4 count=1 2>/dev/null) in
 			"#!/b")
 				COMP=cloop
-				loadmodule cloop file="$1/$KNOPPIX_DIR/$KNOPPIX_NAME"
-				mountit /dev/cloop /KNOPPIX "-o ro" || FOUND_KNOPPIX=""
+				loadmodule cloop file="$1/$FLL_IMAGE"
+				mountit /dev/cloop /$FLL_MOUNTPOINT "-o ro" || FOUND_KNOPPIX=""
 				;;
 			"hsqs")
 				COMP=squashfs
 				loadmodule loop
 				loadmodule squashfs 
-				mount -t squashfs $1/$KNOPPIX_DIR/$KNOPPIX_NAME /KNOPPIX -o loop,ro || FOUND_KNOPPIX=""
+				mount -t squashfs $1/$FLL_IMAGE /$FLL_MOUNTPOINT -o loop,ro || FOUND_KNOPPIX=""
 				;;
 		esac
 	fi
@@ -808,11 +807,13 @@ mount_knoppix()
 
 remount_knoppix()
 {
-	if test -f $TARGET/$KNOPPIX_DIR/$KNOPPIX_NAME; then
-		umount /KNOPPIX
-		for c in 0 1 2 3 4 5 6 7; do
-			umount "/$KNOPPIX_NAME$c" >/dev/null 2>&1
-		done
+	if test -f $TARGET/$FLL_IMAGE; then
+		umount $FLL_MOUNTPOINT
+# FIXME
+# as multi-image mounts are commented out of mount_knoppix
+#		for c in 0 1 2 3 4 5 6 7; do
+#			umount "/$KNOPPIX_NAME$c" >/dev/null 2>&1
+#		done
 	
 		if [ "$COMP" == "cloop" ]; then
 			unloadmodule cloop # release CD
@@ -848,15 +849,15 @@ boot_from()
 	LOOP_SOURCE=""
   
 	# load filesystems
-	/KNOPPIX/sbin/modprobe reiserfs
-	/KNOPPIX/sbin/modprobe ntfs
+	/$FLL_MOUNTPOINT/sbin/modprobe reiserfs
+	/$FLL_MOUNTPOINT/sbin/modprobe ntfs
  
 	if [ -n "$ISO_PATH" ]; then
 		LOOP_SOURCE="$TARGET.loop"
 		LOOP_SOURCE2="$LOOP_SOURCE"
 		TARGET_DEV="$LOOP_SOURCE$ISO_PATH"
 		/bin/mkdir $LOOP_SOURCE
-		/KNOPPIX/sbin/modprobe loop
+		/$FLL_MOUNTPOINT/sbin/modprobe loop
 
 		/bin/mount -o ro $LOOP_DEV $LOOP_SOURCE || LOOP_SOURCE=""
 		/bin/mount -n -o loop $LOOP_SOURCE2$ISO_PATH $TARGET
@@ -867,16 +868,16 @@ boot_from()
 
 	if [ $? -ne 0 ]; then
 		[ -n "$LOOP_SOURCE" ] && /bin/umount $LOOP_SOURCE
-		echo -n "${CRE} ${RED}Accessing sidux cdrom failed. ${MAGENTA}$TARGET_DEV${RED} is not mountable.${NORMAL}"
+		echo -n "${CRE} ${RED}Accessing $FLL_DISTRO_NAME $FLL_MEDIUM failed. ${MAGENTA}$TARGET_DEV${RED} is not mountable.${NORMAL}"
 		sleep 2
 		
 		return 1
 	fi
   
-	if [ -f $TARGET/$KNOPPIX_DIR/$KNOPPIX_NAME ]; then
-		echo -n "${CRE} ${GREEN}Accessing sidux cdrom at ${MAGENTA}$TARGET_DEV${GREEN}...${NORMAL}"
+	if [ -f $TARGET/$FLL_IMAGE ]; then
+		echo -n "${CRE} ${GREEN}Accessing $FLL_DISTRO_NAME $FLL_MEDIUM at ${MAGENTA}$TARGET_DEV${GREEN}...${NORMAL}"
 	else
-		echo -n "${CRE} ${RED}Accessing sidux cdrom failed. Could not find $KNOPPIX_DIR/$KNOPPIX_NAME on ${MAGENTA}$TARGET_DEV${RED}.${NORMAL}"
+		echo -n "${CRE} ${RED}Accessing $FLL_DISTRO_NAME $FLL_MEDIUM failed. Could not find $FLL_IMAGE on ${MAGENTA}$TARGET_DEV${RED}.${NORMAL}"
 		[ -n "$LOOP_SOURCE" ] && /bin/umount $LOOP_SOURCE
 		umount $TARGET
 		sleep 2
@@ -892,7 +893,7 @@ copy_to()
 {
 	# preparations
 	/bin/mkdir $TARGET
-	COPY="$SOURCE/$KNOPPIX_DIR"
+	COPY="$SOURCE/$FLL_IMAGE_DIR"
 	
 	# look if we copy to hd or to ram
 	SIZE="$(/usr/bin/du -s $COPY | /usr/bin/gawk '{print int($1*1.1)}')"
@@ -910,22 +911,22 @@ copy_to()
 			TARGET_DEV_DESC="$TARGET_DEV"
 
 			# load filesystems
-			/KNOPPIX/sbin/modprobe reiserfs
-			/KNOPPIX/sbin/modprobe jbd
-			/KNOPPIX/sbin/modprobe ext3
-			#/KNOPPIX/sbin/modprobe fuse	#we don't allow writing to ntfs, sorry
+			/$FLL_MOUNTPOINT/sbin/modprobe reiserfs
+			/$FLL_MOUNTPOINT/sbin/modprobe jbd
+			/$FLL_MOUNTPOINT/sbin/modprobe ext3
+			#/$FLL_MOUNTPOINT/sbin/modprobe fuse	#we don't allow writing to ntfs, sorry
 			FS="ext3 ext2 reiserfs vfat"
 			MOUNTED=""
 			
 			for i in $FS; do
-				if /KNOPPIX/bin/mount -o rw -t "$i" "$TARGET_DEV" "$TARGET"; then
+				if /$FLL_MOUNTPOINT/bin/mount -o rw -t "$i" "$TARGET_DEV" "$TARGET"; then
 					MOUNTED="true"
 					break
 				fi
 			done
 			
 			if test -z "$MOUNTED"; then
-				echo -n "${CRE}${RED}Copying sidux ${MEDIUM} failed. ${MAGENTA}$TARGET_DEV_DESC${RED} is not mountable.${NORMAL}"
+				echo -n "${CRE}${RED}Copying $FLL_DISTRO_NAME ${FLL_MEDIUM} failed. ${MAGENTA}$TARGET_DEV_DESC${RED} is not mountable.${NORMAL}"
 				sleep 2
 
 				return 1
@@ -933,7 +934,7 @@ copy_to()
 			
 			# check for enough free space
 			USED_SPACE=0
-			test -r $TARGET/$KNOPPIX_DIR/$KNOPPIX_NAME && USED_SPACE=$(/usr/bin/du -s $TARGET/$KNOPPIX_DIR/$KNOPPIX_NAME | /usr/bin/gawk '{ print $1 }')
+			test -r $TARGET/$FLL_IMAGE && USED_SPACE=$(/usr/bin/du -s $TARGET/$FLL_IMAGE | /usr/bin/gawk '{ print $1 }')
 			FOUNDSPACE="$(/bin/df -k $TARGET | /usr/bin/tail -1 | /usr/bin/gawk '{ print $4+int('$USED_SPACE') }')"
 			;;
 		*)
@@ -943,7 +944,7 @@ copy_to()
 	
 	# sanity check
 	if [ $FOUNDSPACE -lt $SIZE ]; then
-		echo -n "${CRE} ${RED}Copying sidux cdrom failed. Not enough free space on ${MAGENTA}${TARGET_DEV_DESC}${RED}. Found: ${MAGENTA}${FOUNDSPACE}k${RED} Need: ${MAGENTA}${SIZE}k${RED} ${NORMAL}"
+		echo -n "${CRE} ${RED}Copying $FLL_DISTRO_NAME $FLL_MEDIUM failed. Not enough free space on ${MAGENTA}${TARGET_DEV_DESC}${RED}. Found: ${MAGENTA}${FOUNDSPACE}k${RED} Need: ${MAGENTA}${SIZE}k${RED} ${NORMAL}"
 		sleep 2
 		umount $TARGET
 
@@ -951,20 +952,20 @@ copy_to()
 	fi
 	
 	# do the real copy
-	echo "${CRE} ${GREEN}Copying sidux cdrom to ${MAGENTA}$TARGET_DEV_DESC${GREEN}... Please be patient. ${NORMAL}"
+	echo "${CRE} ${GREEN}Copying $FLL_DISTRO_NAME $FLL_MEDIUM to ${MAGENTA}$TARGET_DEV_DESC${GREEN}... Please be patient. ${NORMAL}"
 
 	if [ -z "$COPY_COMMAND" ] && [ -x /usr/bin/rsync ]; then
 		# first cp the small files
-		/usr/bin/rsync -a --exclude="$KNOPPIX_DIR/$KNOPPIX_NAME*" $COPY $TARGET # Copy Knoppix to $TARGET
+		/usr/bin/rsync -a --exclude="$FLL_IMAGE*" $COPY $TARGET # Copy Knoppix to $TARGET
 
 		# then the big file with nice progress meter
-		/usr/bin/rsync -a --progress --include="$KNOPPIX_DIR/$KNOPPIX_NAME*" --include="$KNOPPIX_DIR/" --exclude="*" $COPY $TARGET
+		/usr/bin/rsync -a --progress --include="$FLL_IMAGE*" --include="$FLL_IMAGE_DIR/" --exclude="*" $COPY $TARGET
 	else
 		"$COPY_COMMAND" $COPY $TARGET
 	fi
 
 	if [ $? -ne 0 ]; then
-		echo -n "${CRE} ${RED}Copying sidux cdrom failed. ${MAGENTA}$TARGET_DEV_DESC${RED} possibly has not enough space left.${NORMAL}"
+		echo -n "${CRE} ${RED}Copying $FLL_DISTRO_NAME $FLL_MEDIUM failed. ${MAGENTA}$TARGET_DEV_DESC${RED} possibly has not enough space left.${NORMAL}"
 		sleep 2
 
 		return 1
@@ -975,7 +976,7 @@ copy_to()
 	remount_knoppix
 }
 
-mount_knoppix /cdrom
+mount_knoppix /$FLL_MEDIUM
 
 COPYTO=""
 BOOTFROM=""
@@ -1008,11 +1009,11 @@ esac
 # pre-test if everything succeeded
 if  test -n "$DO_REMOUNT" -a -n "$FOUND_KNOPPIX"; then
 	# copy library cache 
-	cat /KNOPPIX/etc/ld.so.cache > /etc/ld.so.cache 
+	cat /$FLL_MOUNTPOINT/etc/ld.so.cache > /etc/ld.so.cache 
 	echo "" 
 	
-	SOURCE="/cdrom"
-	TARGET="/cdrom2"
+	SOURCE="/$FLL_MEDIUM"
+	TARGET="/$FLL_MEDIUM2"
 	
 	# first test for possible hdboot/fromiso (which can be combined with toram / tohd)
 	if [ -n "$BOOTFROM" ]; then
@@ -1021,8 +1022,8 @@ if  test -n "$DO_REMOUNT" -a -n "$FOUND_KNOPPIX"; then
 			# set new source / target paths
 			REAL_TARGET="$TARGET"
 			SOURCE2="$LOOP_SOURCE"
-			SOURCE="/cdrom2"
-			TARGET="/cdrom3"
+			SOURCE="/$FLL_MEDIUM2"
+			TARGET="/$FLL_MEDIUM3"
 		fi
 	fi
 
@@ -1034,13 +1035,13 @@ fi
 # Final test if everything succeeded.
 if test -n "$FOUND_KNOPPIX"; then
 	# copy library cache
-	cat /KNOPPIX/etc/ld.so.cache > /etc/ld.so.cache
+	cat /$FLL_MOUNTPOINT/etc/ld.so.cache > /etc/ld.so.cache
 	echo ""
 
 	# don't use unionfs unconditionally for now
 	case "$CMDLINE" in
 		*unionfs*)
-				loadmodule unionfs 2>/dev/null && UNIONFS="yes"
+			loadmodule unionfs 2>/dev/null && UNIONFS="yes"
 			;;
 	esac
 	
@@ -1053,22 +1054,22 @@ if test -n "$FOUND_KNOPPIX"; then
 	export PATH
 
 	# Debian weirdness
-	/KNOPPIX/bin/cp -a /KNOPPIX/etc/alternatives /etc/ 2>/dev/null
+	/$FLL_MOUNTPOINT/bin/cp -a /$FLL_MOUNTPOINT/etc/alternatives /etc/ 2>/dev/null
 	
 	# Replace /sbin
-	/KNOPPIX/bin/rm -f /sbin
-	/KNOPPIX/bin/ln -sf /KNOPPIX/sbin /sbin
+	/$FLL_MOUNTPOINT/bin/rm -f /sbin
+	/$FLL_MOUNTPOINT/bin/ln -sf /$FLL_MOUNTPOINT/sbin /sbin
 	
 	# From here, we should have all essential commands available.
 	hash -r
 	
 	# Did we remount the source media ? 
 	if  test -n "$REAL_TARGET"; then
-		/bin/mount -n --move $REAL_TARGET /cdrom # move it back and go on to normal boot 
+		/bin/mount -n --move $REAL_TARGET /$FLL_MEDIUM # move it back and go on to normal boot 
 	fi
 	
 	# Clean up /
-	/KNOPPIX/bin/rm -rf /modules /static
+	/$FLL_MOUNTPOINT/bin/rm -rf /modules /static
 	
 	# New in Kernel 2.4.x: tempfs with variable ramdisk size.
 	# We check for available memory anyways and limit the ramdisks
@@ -1111,7 +1112,7 @@ if test -n "$FOUND_KNOPPIX"; then
 				/ramdisk/home/${FLL_LIVE_USER}
 
 		chmod 1777 /ramdisk/tmp
-		chown knoppix:knoppix /ramdisk/home/${FLL_LIVE_USER}
+		chown $FLL_LIVE_USER:$FLL_LIVE_USER /ramdisk/home/${FLL_LIVE_USER}
 
 		ln -snf /ramdisk/home /home
 		mv /tmp /tmp.old
@@ -1140,10 +1141,12 @@ if test -n "$FOUND_KNOPPIX"; then
 		UNION="/ramdisk=rw"
 	
 		# Add all KNOPPIX images to the union
-		for c in "" 1 2 3 4 5 6 7; do
-			[ -d "/KNOPPIX$c" ] && UNION="$UNION:/KNOPPIX$c=ro"
-		done
-	
+#		for c in "" 1 2 3 4 5 6 7; do
+#			[ -d "/KNOPPIX$c" ] && UNION="$UNION:/KNOPPIX$c=ro"
+#		done
+		# FIXME:Multi-Image
+		# No multi-images in here
+		[ -d "$FLL_MOUNTPOINT" ] && UNION="$UNION:/$FLL_MOUNTPOINT=ro"
 		# Do the actual mount
 		if /bin/mount -t unionfs -o "dirs=$UNION,delete=whiteout" /UNIONFS /UNIONFS; then
 			# We now have unionfs, copy some data from the initial ramdisk first
@@ -1163,7 +1166,7 @@ if test -n "$FOUND_KNOPPIX"; then
 			for i in bin boot etc $UNIONDEV sbin var lib opt root usr; do
 				# Move directories to unionfs
 				if test -d /$i; then
-					mv /$i /$i.old && /KNOPPIX/lib/ld-linux.so.2 --library-path /KNOPPIX/lib /KNOPPIX/bin/ln -snf /UNIONFS/$i /$i && rm -rf /$i.old
+					mv /$i /$i.old && /$FLL_MOUNTPOINT/lib/ld-linux.so.2 --library-path /$FLL_MOUNTPOINT/lib /$FLL_MOUNTPOINT/bin/ln -snf /UNIONFS/$i /$i && rm -rf /$i.old
 				else
 					ln -snf /UNIONFS/$i /$i
 				fi
@@ -1176,11 +1179,11 @@ if test -n "$FOUND_KNOPPIX"; then
 			done
 		else
 			echo -n "${CRE}${RED}ERROR: CANNOT UNITE READ-ONLY MEDIA AND INITIAL RAMDISK!${NORMAL}"
-			/KNOPPIX/sbin/halt -f -n
+			/$FLL_MOUNTPOINT/sbin/halt -f -n
 		fi
 	
 		echo ""
-		echo "${GREEN}>> Read-only ${MEDIUM} system successfully merged with read-write /ramdisk.${NORMAL}"
+		echo "${GREEN}>> Read-only ${FLL_MEDIUM} system successfully merged with read-write /ramdisk.${NORMAL}"
 		chown ${FLL_LIVE_USER}:${FLL_LIVE_USER} /home/${FLL_LIVE_USER}
 	else
 		###############
@@ -1212,55 +1215,55 @@ if test -n "$FOUND_KNOPPIX"; then
 		chown ${FLL_LIVE_USER}:${FLL_LIVE_USER} /home/${FLL_LIVE_USER}
 
 		# All files in here should be size zero after Knoppix.clean was run
-		cp -a	/KNOPPIX/var/local \
-			/KNOPPIX/var/games \
-			/KNOPPIX/var/log \
-			/KNOPPIX/var/spool \
+		cp -a	/$FLL_MOUNTPOINT/var/local \
+			/$FLL_MOUNTPOINT/var/games \
+			/$FLL_MOUNTPOINT/var/log \
+			/$FLL_MOUNTPOINT/var/spool \
 				/var/ 2>/dev/null
-		cp -a	/KNOPPIX/var/lib/games \
-			/KNOPPIX/var/lib/wine \
-			/KNOPPIX/var/lib/nfs \
-			/KNOPPIX/var/lib/xkb \
-			/KNOPPIX/var/lib/isdn \
-			/KNOPPIX/var/lib/kdm \
-			/KNOPPIX/var/lib/pcmcia \
-			/KNOPPIX/var/lib/dhcp* \
+		cp -a	/$FLL_MOUNTPOINT/var/lib/games \
+			/$FLL_MOUNTPOINT/var/lib/wine \
+			/$FLL_MOUNTPOINT/var/lib/nfs \
+			/$FLL_MOUNTPOINT/var/lib/xkb \
+			/$FLL_MOUNTPOINT/var/lib/isdn \
+			/$FLL_MOUNTPOINT/var/lib/kdm \
+			/$FLL_MOUNTPOINT/var/lib/pcmcia \
+			/$FLL_MOUNTPOINT/var/lib/dhcp* \
 				/var/lib/ 2>/dev/null
 	
 		# Link device files (real device file copies should NOT require more space, but in fact, they do)
 		cp -aus /dev/capi /dev/ 2>/dev/null
-		ln -s /KNOPPIX/dev/* /dev/ 2>/dev/null
+		ln -s /$FLL_MOUNTPOINT/dev/* /dev/ 2>/dev/null
 	
 		# Problematic directories in /var/lib (lots and lots of inodes)
-		ln -s	/KNOPPIX/var/lib/dpkg \
-			/KNOPPIX/var/lib/apt \
-			/KNOPPIX/var/lib/doc-base \
-			/KNOPPIX/var/lib/gnome \
-			/KNOPPIX/var/lib/kde \
-			/KNOPPIX/var/lib/scrollkeeper \
-			/KNOPPIX/var/lib/texmf \
+		ln -s	/$FLL_MOUNTPOINT/var/lib/dpkg \
+			/$FLL_MOUNTPOINT/var/lib/apt \
+			/$FLL_MOUNTPOINT/var/lib/doc-base \
+			/$FLL_MOUNTPOINT/var/lib/gnome \
+			/$FLL_MOUNTPOINT/var/lib/kde \
+			/$FLL_MOUNTPOINT/var/lib/scrollkeeper \
+			/$FLL_MOUNTPOINT/var/lib/texmf \
 				/var/lib/ 2>/dev/null
 	
 		# Debian-apt
-		ln -s /KNOPPIX/var/cache/apt /var/cache/ 2>/dev/null
+		ln -s /$FLL_MOUNTPOINT/var/cache/apt /var/cache/ 2>/dev/null
 		rm -f /etc/resolv.conf 2>/dev/null
-		ln -s	/KNOPPIX/etc/skel \
-			/KNOPPIX/etc/nessus \
+		ln -s	/$FLL_MOUNTPOINT/etc/skel \
+			/$FLL_MOUNTPOINT/etc/nessus \
 			/etc/dhcpc/resolv.conf \
 				/etc/ 2>/dev/null
 	
 		# Index files can be HUGE, so better replace cache/man tree by links later
-		# cp -a /KNOPPIX/var/cache/man /var/cache/ 2>/dev/null
+		# cp -a /$FLL_MOUNTPOINT/var/cache/man /var/cache/ 2>/dev/null
 		# Create links from CDROM for UNWRITABLE (remaining) files
-		cp -aus /KNOPPIX/var/* /var/ 2>/dev/null
-		cp -aus /KNOPPIX/etc/* /etc/ 2>/dev/null
+		cp -aus /$FLL_MOUNTPOINT/var/* /var/ 2>/dev/null
+		cp -aus /$FLL_MOUNTPOINT/etc/* /etc/ 2>/dev/null
 	fi
 
 	# CUPS wants writable files. :-/
-	cp -a /KNOPPIX/etc/cups/*.conf /etc/cups/ 2>/dev/null
+	cp -a /$FLL_MOUNTPOINT/etc/cups/*.conf /etc/cups/ 2>/dev/null
 	
 	# resolv.conf must be writable as well
-	cp -a /KNOPPIX/etc/dhcpc/resolv.conf /etc/dhcpc/ 2>/dev/null
+	cp -a /$FLL_MOUNTPOINT/etc/dhcpc/resolv.conf /etc/dhcpc/ 2>/dev/null
 
 	# Make SURE that these are files, not links!
 	rm -rf	/etc/ftpusers \
@@ -1280,19 +1283,19 @@ if test -n "$FOUND_KNOPPIX"; then
 		/etc/dhcpc \
 		/etc/pnm2ppa.conf 2>/dev/null
 
-	cp -a	/KNOPPIX/etc/ftpusers \
-		/KNOPPIX/etc/passwd \
-		/KNOPPIX/etc/shadow \
-		/KNOPPIX/etc/gshadow \
-		/KNOPPIX/etc/group \
-		/KNOPPIX/etc/ppp \
-		/KNOPPIX/etc/isdn \
-		/KNOPPIX/etc/ssh \
-		/KNOPPIX/etc/inittab \
-		/KNOPPIX/etc/network \
-		/KNOPPIX/etc/sudoers \
-		/KNOPPIX/sbin/init \
-		/KNOPPIX/etc/dhcpc \
+	cp -a	/$FLL_MOUNTPOINT/etc/ftpusers \
+		/$FLL_MOUNTPOINT/etc/passwd \
+		/$FLL_MOUNTPOINT/etc/shadow \
+		/$FLL_MOUNTPOINT/etc/gshadow \
+		/$FLL_MOUNTPOINT/etc/group \
+		/$FLL_MOUNTPOINT/etc/ppp \
+		/$FLL_MOUNTPOINT/etc/isdn \
+		/$FLL_MOUNTPOINT/etc/ssh \
+		/$FLL_MOUNTPOINT/etc/inittab \
+		/$FLL_MOUNTPOINT/etc/network \
+		/$FLL_MOUNTPOINT/etc/sudoers \
+		/$FLL_MOUNTPOINT/sbin/init \
+		/$FLL_MOUNTPOINT/etc/dhcpc \
 			/etc/ 2>/dev/null
 
 	# Create empty utmp and wtmp
@@ -1313,7 +1316,7 @@ if test -n "$FOUND_KNOPPIX"; then
 	[ -d /var/lib/samba ] && :> /var/lib/samba/unexpected.tdb
 
 	# Diet libc bug workaround
-	/bin/cp -f /KNOPPIX/etc/localtime /etc/localtime
+	/bin/cp -f /$FLL_MOUNTPOINT/etc/localtime /etc/localtime
 
 	# busybox/cloop workaround
 	chmod 1777 /tmp /var/tmp
@@ -1321,7 +1324,8 @@ if test -n "$FOUND_KNOPPIX"; then
 	echo "${BLUE}Done.${NORMAL}"
 
 	# Clean up /etc/mtab (and - just in case - make a nice entry for looped ISO)
-	/bin/egrep " /KNOPPIX[0-9]* | /cdrom " /proc/mounts | sed 's|/dev/loop0 /cdrom \(.*\) 0 0|'$LOOP_SOURCE$ISO_PATH' /cdrom/ \1,loop=/dev/loop0 0 0|g' >> /etc/mtab
+	# FIXME Multi-Image
+	/bin/egrep " /$FLL_MOUNTPOINT | /$FLL_MEDIUM " /proc/mounts | sed 's|/dev/loop0 /$FLL_MEDIUM \(.*\) 0 0|'$LOOP_SOURCE$ISO_PATH' /$FLL_MEDIUM/ \1,loop=/dev/loop0 0 0|g' >> /etc/mtab
 
 	# Now tell kernel where the real modprobe lives
 	echo "/sbin/modprobe" > /proc/sys/kernel/modprobe
@@ -1333,14 +1337,14 @@ if test -n "$FOUND_KNOPPIX"; then
 	for i in 0 1 2 3 4 5 6 S; do
 		rm -rf "/etc/rc${i}.d"
 		mkdir -p "/etc/rc${i}.d"
-		ln -fs "/KNOPPIX/etc/rc${i}.d/README" "/etc/rc${i}.d/"
+		ln -fs "/$FLL_MOUNTPOINT/etc/rc${i}.d/README" "/etc/rc${i}.d/"
 	done
 	for i in 0 1 2 3 4 6; do
-		ln -fs "/KNOPPIX/etc/init.d/xsession" "/etc/rc${i}.d/K10xsession"
+		ln -fs "/$FLL_MOUNTPOINT/etc/init.d/xsession" "/etc/rc${i}.d/K10xsession"
 	done
-	ln -fs "/KNOPPIX/etc/init.d/live-autoconfig" "/etc/rcS.d/S00live-autoconfig"
-	ln -fs "/KNOPPIX/etc/init.d/live-halt" "/etc/rc0.d/S90live-halt"
-	ln -fs "/KNOPPIX/etc/init.d/live-reboot" "/etc/rc6.d/S90live-reboot"
+	ln -fs "/$FLL_MOUNTPOINT/etc/init.d/live-autoconfig" "/etc/rcS.d/S00live-autoconfig"
+	ln -fs "/$FLL_MOUNTPOINT/etc/init.d/live-halt" "/etc/rc0.d/S90live-halt"
+	ln -fs "/$FLL_MOUNTPOINT/etc/init.d/live-reboot" "/etc/rc6.d/S90live-reboot"
 
 	stage=3
 	rundebugshell	
@@ -1350,7 +1354,7 @@ if test -n "$FOUND_KNOPPIX"; then
 	
 	exit 0
 else
-	echo "${CRE}${RED}Can't find sidux filesystem, sorry.${NORMAL}"
+	echo "${CRE}${RED}Can't find $FLL_DISTRO_NAME filesystem, sorry.${NORMAL}"
 	echo "${RED}Dropping you to a (very limited) shell.${NORMAL}"
 	echo "${RED}Press reset button to quit.${NORMAL}"
 	echo ""
