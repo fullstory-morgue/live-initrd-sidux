@@ -1,8 +1,11 @@
 live-initrd-kanotix (0.0.4) UNRELEASED; urgency=low
 
-  * NOT RELEASED YET
+  * NOT RELEASED YET.
+  * fix BUILTIN_FS.
+  * adapt for busybox insmod.
+  * simplify kernel module handling.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Thu,  7 Dec 2006 14:05:47 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Thu,  7 Dec 2006 15:08:42 +0100
 
 live-initrd-sidux (0.0.3) unstable; urgency=low
 

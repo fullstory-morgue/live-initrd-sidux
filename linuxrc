@@ -23,6 +23,9 @@ trap "" 1 2 3 15
 # look for kernel modules in these directories
 MODULE_DIRS="/cdrom/KNOPPIX/modules /modules /modules/scsi"
 
+# Builtin fielsystems
+BUILTIN_FS="iso9660 ext2 ext3 reiserfs vfat reiser"
+
 # Misc functions
 mountit()
 {
@@ -317,7 +320,7 @@ loadmodule()
 	test -z "$INSMOD" && INSMOD="insmod" # builtin insmod
 	LOAD=""
 	for p in $MODULE_DIRS; do
-		for ext in "" ".ko" ".o"; do
+		for ext in ".ko" "" ".o"; do
 			checkfor="$p/$MODULE$ext"
 			if test -r "$checkfor"; then
 				LOAD="$checkfor"
@@ -328,7 +331,7 @@ loadmodule()
 	test -n "$LOAD" || return 1
 
 	# For a new process to avoid crashing our main shell
-	echo "$INSMOD -f $LOAD" "$@" | /static/ash
+	echo "$INSMOD $LOAD" "$@" | /static/ash
 	return "$?"
 }
 
@@ -377,7 +380,7 @@ unloadmodule()
 }
 
 # Check for SCSI, use modules on bootfloppy first
-ISA_SCSI="aha1740.ko aha1542.ko aha152x.ko pas16.ko psi240i.ko qlogicfas.ko qlogicfc.ko seagate.ko t128.ko u14-34f.ko wd7000.ko"
+ISA_SCSI="aha1740 aha1542 aha152x pas16 psi240i qlogicfas qlogicfc seagate t128 u14-34f wd7000"
 SCSI_PROBE="$ISA_SCSI"
 
 # Trying to do kind of /proc/pci hardware detection
@@ -393,118 +396,118 @@ for d in /sys/devices/*/*; do
 				
 				case "$VENDOR:$DEVICE" in
 					*1000:*00[0-2]?)
-						SCSI_PROBE="$SCSI_PROBE sym53c8xx.ko"
+						SCSI_PROBE="$SCSI_PROBE sym53c8xx"
 						;;
 					*1000:*040?|*1000:*196?|*101e:*196?|*1028:*000[ef]|*1028:*0013)
-						SCSI_PROBE="$SCSI_PROBE megaraid_mbox.ko"
+						SCSI_PROBE="$SCSI_PROBE megaraid_mbox"
 						;;
 					*1000:*04[1-9]?|*1028:*0015)
-						SCSI_PROBE="$SCSI_PROBE megaraid_sas.ko"
+						SCSI_PROBE="$SCSI_PROBE megaraid_sas"
 						;;
 					*1001:*9100|*1101:*)
-						SCSI_PROBE="$SCSI_PROBE initio.ko"
+						SCSI_PROBE="$SCSI_PROBE initio"
 						;;
 					*9004:*|*9005:*00??)
-						SCSI_PROBE="$SCSI_PROBE aic7xxx.ko"
+						SCSI_PROBE="$SCSI_PROBE aic7xxx"
 						;;
 					*1011:*|*1028:*000[1-9a]|*9005:*02[08]?)
-						SCSI_PROBE="$SCSI_PROBE aacraid.ko"
+						SCSI_PROBE="$SCSI_PROBE aacraid"
 						;;
 					*1014:*002e|*1014:*01bd|*9005:*0250)
-						SCSI_PROBE="$SCSI_PROBE ips.ko"
+						SCSI_PROBE="$SCSI_PROBE ips"
 						;;
 					*1014:*0[1-2]8?|*1069:*|*9005:*0503)
-						SCSI_PROBE="$SCSI_PROBE ipr.ko"
+						SCSI_PROBE="$SCSI_PROBE ipr"
 						;;
 					*1022:*)
-						SCSI_PROBE="$SCSI_PROBE tmscsim.ko"
+						SCSI_PROBE="$SCSI_PROBE tmscsim"
 						;;
 					*1044:*)
-						SCSI_PROBE="$SCSI_PROBE dpt_i2o.ko"
+						SCSI_PROBE="$SCSI_PROBE dpt_i2o"
 						;;
 					*1077:*1???)
-						SCSI_PROBE="$SCSI_PROBE qla1280.ko"
+						SCSI_PROBE="$SCSI_PROBE qla1280"
 						;;
 					*1077:*21??)
-						SCSI_PROBE="$SCSI_PROBE qla2xxx.ko qla2100.ko"
+						SCSI_PROBE="$SCSI_PROBE qla2xxx qla2100"
 						;;
 					*1077:*22??)
-						SCSI_PROBE="$SCSI_PROBE qla2xxx.ko qla2200.ko"
+						SCSI_PROBE="$SCSI_PROBE qla2xxx qla2200"
 						;;
 					*1077:*23[0-1]?)
-						SCSI_PROBE="$SCSI_PROBE qla2xxx.ko qla2300.ko"
+						SCSI_PROBE="$SCSI_PROBE qla2xxx qla2300"
 						;;
 					*1077:*232?)
-						SCSI_PROBE="$SCSI_PROBE qla2xxx.ko qla2322.ko"
+						SCSI_PROBE="$SCSI_PROBE qla2xxx qla2322"
 						;;
 					*1077:*24??)
-						SCSI_PROBE="$SCSI_PROBE qla2xxx.ko"
+						SCSI_PROBE="$SCSI_PROBE qla2xxx"
 						;;
 					*1077:*63??)
-						SCSI_PROBE="$SCSI_PROBE qla2xxx.ko qla6312.ko"
+						SCSI_PROBE="$SCSI_PROBE qla2xxx qla6312"
 						;;
 					*10df:*)
-						SCSI_PROBE="$SCSI_PROBE lpfc.ko"
+						SCSI_PROBE="$SCSI_PROBE lpfc"
 						;;
 					*10fc:*|*1145:*)
-						SCSI_PROBE="$SCSI_PROBE nsp32.ko"
+						SCSI_PROBE="$SCSI_PROBE nsp32"
 						;;
 					*1101:*)
-						SCSI_PROBE="$SCSI_PROBE a100u2w.ko"
+						SCSI_PROBE="$SCSI_PROBE a100u2w"
 						;;
 					*1119:*|*8086:*)
-						SCSI_PROBE="$SCSI_PROBE gdth.ko"
+						SCSI_PROBE="$SCSI_PROBE gdth"
 						;;
 					*1191:*)
-						SCSI_PROBE="$SCSI_PROBE atp870u.ko"
+						SCSI_PROBE="$SCSI_PROBE atp870u"
 						;;
 					*134a:*)
-						SCSI_PROBE="$SCSI_PROBE dmx3191d.ko"
+						SCSI_PROBE="$SCSI_PROBE dmx3191d"
 						;;
 					*1de1:*)
-						SCSI_PROBE="$SCSI_PROBE dc395x.ko"
+						SCSI_PROBE="$SCSI_PROBE dc395x"
 						;;
 					*9005:*8???)
-						SCSI_PROBE="$SCSI_PROBE aic79xx.ko"
+						SCSI_PROBE="$SCSI_PROBE aic79xx"
 						;;
 					*104b:*)
-						SCSI_PROBE="$SCSI_PROBE BusLogic.ko"
+						SCSI_PROBE="$SCSI_PROBE BusLogic"
 						;;
 					*1[0d]e1:*)
-						SCSI_PROBE="$SCSI_PROBE dc395x.ko"
+						SCSI_PROBE="$SCSI_PROBE dc395x"
 						;;
 					*1000:*00[34]?)
-						SCSI_PROBE="$SCSI_PROBE mptscsih.ko"
+						SCSI_PROBE="$SCSI_PROBE mptscsih"
 						;;
 					*10cd:*)
-						SCSI_PROBE="$SCSI_PROBE advansys.ko"
+						SCSI_PROBE="$SCSI_PROBE advansys"
 						;;
 					*1191:*)
-						SCSI_PROBE="$SCSI_PROBE atp870u.ko"
+						SCSI_PROBE="$SCSI_PROBE atp870u"
 						;;
 					*134a:*)
-						SCSI_PROBE="$SCSI_PROBE dtc.ko"
+						SCSI_PROBE="$SCSI_PROBE dtc"
 						;;
 					*1d44:*)
-						SCSI_PROBE="$SCSI_PROBE eata.ko"
+						SCSI_PROBE="$SCSI_PROBE eata"
 						;;
 					*1036:*)
-						SCSI_PROBE="$SCSI_PROBE fdomain.ko"
+						SCSI_PROBE="$SCSI_PROBE fdomain"
 						;;
 					*1256:*4201)
-						SCSI_PROBE="$SCSI_PROBE pci2220i.ko"
+						SCSI_PROBE="$SCSI_PROBE pci2220i"
 						;;
 					*1256:*5201)
-						SCSI_PROBE="$SCSI_PROBE pci2000.ko"
+						SCSI_PROBE="$SCSI_PROBE pci2000"
 						;;
 					*1022:*)
-						SCSI_PROBE="$SCSI_PROBE tmscsim.ko"
+						SCSI_PROBE="$SCSI_PROBE tmscsim"
 						;;
 					*6356:*)
-						SCSI_PROBE="$SCSI_PROBE ultrastor.ko"
+						SCSI_PROBE="$SCSI_PROBE ultrastor"
 						;;
 					*13c1:*)
-						SCSI_PROBE="$SCSI_PROBE 3w-xxxx.ko"
+						SCSI_PROBE="$SCSI_PROBE 3w-xxxx"
 						;;
 				esac
 				;;
@@ -550,11 +553,11 @@ if test -z "$NOIDERAID"; then
 	(
 		cd /modules/scsi
 		{
-			loadmodule ataraid.ko >/dev/null 2>&1 && \
-			loadmodule silraid.ko >/dev/null 2>&1
+			loadmodule ataraid >/dev/null 2>&1 && \
+			loadmodule silraid >/dev/null 2>&1
 		} || \
-		loadmodule medley.ko >/dev/null 2>&1 || \
-		loadmodule pdcraid.ko >/dev/null 2>&1
+		loadmodule medley >/dev/null 2>&1 || \
+		loadmodule pdcraid >/dev/null 2>&1
 	)
 fi
 # End of IDE-Raid check
@@ -562,7 +565,7 @@ fi
 # Check for USB, use modules on bootfloppy first
 if test -z "$NOUSB"; then
 	echo -n "${CRE}${BLUE}Checking for for USB...${NORMAL}"
-	if loadmodule usbcore.ko >/dev/null 2>&1; then
+	if loadmodule usbcore >/dev/null 2>&1; then
 		FOUNDUSB=""
 
 		for i in $USB2 uhci-hcd ohci-hcd; do
@@ -570,8 +573,8 @@ if test -z "$NOUSB"; then
 		done
 
 		if test -n "$FOUNDUSB"; then
-			if ! loadmodule libusual.ko >/dev/null 2>&1 && usb-storage.ko >/dev/null 2>&1; then
-				loadmodule ub.ko >/dev/null 2>&1
+			if ! loadmodule libusual >/dev/null 2>&1 && usb-storage >/dev/null 2>&1; then
+				loadmodule ub >/dev/null 2>&1
 			fi
 		else
 			# For an unknown reason, unloading usbcore hangs sometimes
@@ -587,17 +590,17 @@ fi
 # Check for Firewire, use modules on bootfloppy first
 if test -z "$NOFIREWIRE"; then
 	echo -n "${CRE}${BLUE}Checking for Firewire...${NORMAL}"
-	if loadmodule ieee1394.ko >/dev/null 2>&1; then
+	if loadmodule ieee1394 >/dev/null 2>&1; then
 		FOUNDFIREWIRE=""
 		
-		for i in ohci1394.ko; do
+		for i in ohci1394; do
 			echo -n "${CRE}${BLUE}Loading $i...${NORMAL}"
 			loadmodule "$i" >/dev/null 2>&1 && FOUNDFIREWIRE="yes"
 		done
 
 		if test -n "$FOUNDFIREWIRE"; then
-			echo -n "${CRE}${BLUE}Loading sbp2.ko...${NORMAL}"
-			loadmodule sbp2.ko serialize_io=1 >/dev/null 2>&1
+			echo -n "${CRE}${BLUE}Loading sbp2...${NORMAL}"
+			loadmodule sbp2 serialize_io=1 >/dev/null 2>&1
 		else
 			# For an unknown reason, unloading ieee1394 hangs sometimes
 			# echo -n "${CRE}${BLUE}Unloading ieee1394...${NORMAL}"
@@ -754,12 +757,12 @@ mount_knoppix()
 		case $(dd if=$1/$KNOPPIX_DIR/$KNOPPIX_NAME bs=4 count=1 2>/dev/null) in
 			"#!/b")
 				COMP=cloop
-				loadmodule cloop.ko file="$1/$KNOPPIX_DIR/$KNOPPIX_NAME"
+				loadmodule cloop file="$1/$KNOPPIX_DIR/$KNOPPIX_NAME"
 				mountit /dev/cloop /KNOPPIX "-o ro" || FOUND_KNOPPIX=""
 				;;
 			"hsqs")
 				COMP=squashfs
-				loadmodule squashfs.ko 
+				loadmodule squashfs 
 				mount -t squashfs $1/$KNOPPIX_DIR/$KNOPPIX_NAME /KNOPPIX -o loop,ro || FOUND_KNOPPIX=""
 				;;
 		esac
@@ -1024,7 +1027,7 @@ if test -n "$FOUND_KNOPPIX"; then
 	# don't use unionfs unconditionally for now
 	case "$CMDLINE" in
 		*unionfs*)
-				loadmodule unionfs.ko 2>/dev/null && UNIONFS="yes"
+				loadmodule unionfs 2>/dev/null && UNIONFS="yes"
 			;;
 	esac
 	
