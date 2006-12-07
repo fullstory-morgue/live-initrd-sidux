@@ -1,13 +1,16 @@
 #!/static/sh
 #
-# KNOPPIX General Startup Script
+# sidux general startup script
 # (C) Klaus Knopper <knoppix@knopper.net>
-# modified for KANOTIX Joerg Schirottke <master@kanotix.com>
+# (C) 2003-2006 Joerg Schirottke <master@kanotix.com>
+# (C) 2006 Stefan Lippers-Hollmann <s.l-h@gmx.de>
 #
+# This script needs some of the builtin busybox commands (if, test, ...)
+# mount/umount, insmod/rmmod are also a builtin in busybox.
 #
-# This script needs some of the builtin ash commands (if, test, ...)
-# mount/umount, insmod/rmmod are also a builtin in ash-knoppix.
-#
+
+# Just informational: This is a CD or DVD edition
+MEDIUM="CD"
 
 # hardcoded configurable options
 # Default maximum size of dynamic ramdisk in kilobytes
@@ -17,79 +20,9 @@ RAMSIZE=1000000
 # Don't allow interrupt signals
 trap "" 1 2 3 15
 
-# Mount /proc and /dev/pts
-mount -t proc /proc /proc
+# look for kernel modules in these directories
+MODULE_DIRS="/cdrom/KNOPPIX/modules /modules /modules/scsi"
 
-# Disable kernel messages while probing modules in autodetect mode
-echo "0" > /proc/sys/kernel/printk
-
-mount -t devpts /dev/pts /dev/pts
-# Kernel 2.6
-mount -t sysfs /sys /sys >/dev/null 2>&1
-
-# "Safe" SCSI modules in the right order for autoprobe
-# Warning: The sym53c8xx.o and g_NCR* cause a kernel Oops if no such adapter
-# is present.
-#
-# NB: It looks like that ncr53c8xx.o is more stable than 53c7,8xx.o for
-# a ncr53c810 controller (at least on my installation box it's more
-# immune to SCSI timeouts)
-# Removed 53c7,8xx -> crashes if no device attached.
-# Removed AM53C974 -> crashes tmscsim if adapter found
-# Added initio.o on request (untested)
-#SCSI_MODULES="aic7xxx.o aic7xxx_old.o BusLogic.o \
-#ncr53c8xx.o NCR53c406a.o \
-#initio.o mptscsih.o \
-#advansys.o aha1740.o aha1542.o aha152x.o \
-#atp870u.o dtc.o eata.o fdomain.o gdth.o \
-#megaraid.o pas16.o pci2220i.o pci2000.o psi240i.o \
-#qlogicfas.o qlogicfc.o qlogicisp.o \
-#seagate.o t128.o tmscsim.o u14-34f.o ultrastor.o wd7000.o \
-#a100u2w.o 3w-xxxx.o"
-
-# Trying to do kind of /proc/pci hardware detection
-ISA_SCSI="aha1740.o aha1542.o aha152x.o pas16.o psi240i.o qlogicfas.o qlogicfc.o seagate.o t128.o u14-34f.o wd7000.o"
-#PROCPCI="`cat /proc/pci 2>/dev/null`"
-#case "$PROCPCI" in *[Aa][Ii][Cc]-*|*[Aa][Hh][Aa]-*) SCSI_PROBE="$SCSI_PROBE aic7xxx.o" ;; esac
-#case "$PROCPCI" in *[Bb][Uu][Ss][Ll][Oo][Gg][Ii][Cc]*) SCSI_PROBE="$SCSI_PROBE BusLogic.o" ;; esac
-#case "$PROCPCI" in *[Tt][Rr][Mm]-[Ss]1040*|*[Dd][Cc]395*|*[Dd][Cc]315*) SCSI_PROBE="$SCSI_PROBE dc395x.o" ;; esac
-#case "$PROCPCI" in *53[Cc]8*) SCSI_PROBE="$SCSI_PROBE sym53c8xx.o" ;; esac
-#case "$PROCPCI" in *53[Cc]406*) SCSI_PROBE="$SCSI_PROBE NCR53c406a.o" ;; esac
-#case "$PROCPCI" in *[Ii][Nn][Ii][Tt][Ii][Oo]\ *|*[Ii][Nn][Ii]-[Aa]100[Uu]2[Ww]*) SCSI_PROBE="$SCSI_PROBE initio.o" ;; esac
-#case "$PROCPCI" in *[Mm][Pp][Tt]*[Ss][Cc][Ss][Ii]*) SCSI_PROBE="$SCSI_PROBE mptscsih.o" ;; esac
-#case "$PROCPCI" in *[Aa][Dd][Vv][Aa][Nn][Cc][Ee][Dd]\ [Ss][Yy][Ss]*) SCSI_PROBE="$SCSI_PROBE advansys.o" ;; esac
-#case "$PROCPCI" in *[Aa][Tt][Pp]8*|*[Aa][Ee][Cc]6*) SCSI_PROBE="$SCSI_PROBE atp870u.o" ;; esac
-#case "$PROCPCI" in *[Dd][Tt][Cc]*) SCSI_PROBE="$SCSI_PROBE dtc.o" ;; esac
-#case "$PROCPCI" in *[Ee][Aa][Tt][Aa]*) SCSI_PROBE="$SCSI_PROBE eata.o" ;; esac
-#case "$PROCPCI" in *[Ff]*[Dd][Oo][Mm][Aa][Ii][Nn]*) SCSI_PROBE="$SCSI_PROBE fdomain.o" ;; esac
-#case "$PROCPCI" in *[Gg][Dd][Tt]\ *) SCSI_PROBE="$SCSI_PROBE gdth.o" ;; esac
-#case "$PROCPCI" in *[Mm][Ee][Gg][Aa][Rr][Aa][Ii][Dd]*) SCSI_PROBE="$SCSI_PROBE megaraid.o" ;; esac
-#case "$PROCPCI" in *[Pp][Cc][Ii]-22*) SCSI_PROBE="$SCSI_PROBE pci2220i.o" ;; esac
-#case "$PROCPCI" in *[Pp][Cc][Ii]-2000*) SCSI_PROBE="$SCSI_PROBE pci2000.o" ;; esac
-#case "$PROCPCI" in *[Qq][Ll][Oo][Gg][Ii][Cc]*) SCSI_PROBE="$SCSI_PROBE qlogicisp.o" ;; esac
-#case "$PROCPCI" in *53[Cc]974*) SCSI_PROBE="$SCSI_PROBE tmscsim.o" ;; esac
-#case "$PROCPCI" in *[Uu][Ll][Tt][Rr][Aa][Ss][Tt][Oo][Rr]*) SCSI_PROBE="$SCSI_PROBE ultrastor.o" ;; esac
-#case "$PROCPCI" in *3[Ww][Aa][Rr][Ee]*) SCSI_PROBE="$SCSI_PROBE 3w-xxxx.o" ;; esac
-#[ -n "$SCSI_PROBE" ] && SCSI_PROBE="scsi_transport_spi.o $SCSI_PROBE"
-
-# New sysfs based SCSI detection
-#SYS=$(find /sys/devices/ -name modalias|xargs grep pci: -h 2>/dev/null|cut -f2 -d:)
-SYS=$(for x in $(find /sys/devices/ -name modalias); do grep pci: $x; done|cut -f2 -d:)
-while read id driver; do
-	for sysid in $SYS; do
-		case $sysid in
-			$id)
-				if [ -z "$SCSI_PROBE" ]; then
-					SCSI_PROBE="$driver"
-				else
-					SCSI_PROBE="$SCSI_PROBE $driver"
-				fi
-				;;
-		esac
-	done
-done <<EOF
-$(cat /modules/scsi/scsi-modules.txt)
-EOF
 
 # Misc functions
 
@@ -178,6 +111,14 @@ export PATH
 
 umask 022
 
+# Mount /proc and /dev/pts
+mount -t proc /proc /proc
+mount -t devpts /dev/pts /dev/pts
+mount -t sysfs /sys /sys >/dev/null 2>&1
+
+# Disable kernel messages while probing modules in autodetect mode
+echo "0" > /proc/sys/kernel/printk
+
 # Read boot command line with builtin cat command (shell read function fails in Kernel 2.4.19-rc1)
 CMDLINE="$(cat /proc/cmdline)"
 
@@ -192,6 +133,13 @@ esac
 case "$CMDLINE" in
 	*modules-disk*)
 		INTERACTIVE="yes"
+		;;
+esac
+
+# enable debugging?
+case "$CMDLINE" in
+	*BOOT_IMAGE=debug\ *|*\ debug\ *)
+		DEBUG="yes"
 		;;
 esac
 
@@ -290,11 +238,16 @@ case "$CMDLINE" in
 		;;
 esac
 
-# Check for IDE-SCSI capable CD-Rom(s) first
-test -n "$IDECD" || $INSMOD /modules/scsi/ide-scsi.o >/dev/null 2>&1 
-
-# Use ide-cd for ATAPI-only CD-Rom(s)
-$INSMOD /modules/scsi/ide-cd.o >/dev/null 2>&1
+# Run a shell if in debug mode
+stage=1
+rundebugshell()
+{
+	if [ -n "$DEBUG" ]; then
+		echo "${CRE}${BLUE}Starting intermediate Shell stage $stage as requested by \"debug\" option.${NORMAL}"
+		echo "${CRE}${BLUE}Type \"exit\" to continue with normal bootup.${NORMAL}"
+		[ -x /static/ash ] && /static/ash || /bin/bash
+	fi
+}
 
 # Mount module disk
 mountmodules()
@@ -337,7 +290,7 @@ askmodules()
 	echo "${BLUE}${TYPE} modules available:${WHITE}"
 	c=""
 	for m in "$@"; do
-		if test -f "/modules/scsi/$m"; then
+		if test -r "/modules/scsi/$m"; then
 			test -z "$c"  && { echo -n "	$m"; c="1"; } || { echo "		$m"; c=""; }
 		fi
 	done
@@ -358,24 +311,56 @@ askmodules()
 	esac
 }
 
-# Try to load the given modules (full path or current directory)
+# Try to load the given module with optional parameters
+# module can be a full path or a module.ko name
+# (in which case $MODULE_DIRS is searched).
+# loadmodule module options...
+loadmodule()
+{
+	MODULE="$1"
+	shift
+
+	INSMOD=""
+
+	# Find insmod in CURRENT file system configuration
+	for p in $MODULE_DIRS /static; do
+		checkfor="$p/insmod"
+		if test -x "$checkfor"; then
+			INSMOD="$checkfor"
+			break
+		fi
+	done
+
+	# At last resort, try builtin insmod
+	test -z "$INSMOD" && INSMOD="insmod" # builtin insmod
+	LOAD=""
+	for p in $MODULE_DIRS; do
+		for ext in "" ".ko" ".o"; do
+			checkfor="$p/$MODULE$ext"
+			if test -r "$checkfor"; then
+				LOAD="$checkfor"
+				break 2
+			fi
+		done
+	done
+	test -n "$LOAD" || return 1
+
+	# For a new process to avoid crashing our main shell
+	echo "$INSMOD -f $LOAD" "$@" | /static/ash
+	return "$?"
+}
+
+# Load many modules at once
+# loadmodules TYPE(comment) module ...
 loadmodules()
 {
 	TYPE="$1"
 	shift
 
 	test -n "$INTERACTIVE" && echo "6" > /proc/sys/kernel/printk
-	for i in "$@"; do
-		echo -n "${CRE}${BLUE}Probing ${TYPE}... ${MAGENTA}$i${NORMAL}"
-		if test -f /modules/scsi/$i && $INSMOD /modules/scsi/$i >/dev/null 2>&1; then
-			case "$i" in
-				*ataraid*)
-					;;
-				*)
-					echo "${CRE} ${GREEN}Found ${TYPE} device(s) handled by ${MAGENTA}$i${GREEN}.${NORMAL}"
-					;;
-			esac
-
+	for m in "$@"; do
+		echo -n "${CRE}${BLUE}Probing ${TYPE}... ${MAGENTA}$m${NORMAL}"
+		if loadmodule "$m" >/dev/null 2>&1; then
 			case "$TYPE" in
 				scsi|SCSI)
 					FOUND_SCSI="yes"
@@ -388,10 +373,188 @@ loadmodules()
 	echo -n "${CRE}"
 }
 
+unloadmodule()
+{
+	MODULE="$1"
+	RMMOD=""
+
+	# Find insmod in CURRENT file system configuration
+	for p in $MODULE_DIRS /static; do
+		checkfor="$p/rmmod"
+		if test -x "$checkfor"; then
+			RMMOD="$checkfor"; break
+		fi
+	done
+
+	# At last resort, try builtin insmod
+	test -z "$RMMOD" && RMMOD="rmmod" # builtin rmmod
+
+	# For a new process to avoid crashing our main shell
+	echo "$RMMOD" "$MODULE" | /static/ash
+	return "$?"
+}
+
 # Check for SCSI, use modules on bootfloppy first
+ISA_SCSI="aha1740.ko aha1542.ko aha152x.ko pas16.ko psi240i.ko qlogicfas.ko qlogicfc.ko seagate.ko t128.ko u14-34f.ko wd7000.ko"
+SCSI_PROBE="$ISA_SCSI"
+
+# Trying to do kind of /proc/pci hardware detection
+# SCSI detection using /sys/devices
+for d in /sys/devices/*/*; do
+	if test -r "$d"/class -a -r "$d"/vendor -a -r "$d"/device; then
+		read CLASS  < "$d"/class 2>/dev/null
+		
+		case "$CLASS" in
+			0x0100*)
+				read VENDOR < "$d"/vendor 2>/dev/null
+				read DEVICE < "$d"/device 2>/dev/null
+				
+				case "$VENDOR:$DEVICE" in
+					*1000:*00[0-2]?)
+						SCSI_PROBE="$SCSI_PROBE sym53c8xx.ko"
+						;;
+					*1000:*040?|*1000:*196?|*101e:*196?|*1028:*000[ef]|*1028:*0013)
+						SCSI_PROBE="$SCSI_PROBE megaraid_mbox.ko"
+						;;
+					*1000:*04[1-9]?|*1028:*0015)
+						SCSI_PROBE="$SCSI_PROBE megaraid_sas.ko"
+						;;
+					*1001:*9100|*1101:*)
+						SCSI_PROBE="$SCSI_PROBE initio.ko"
+						;;
+					*9004:*|*9005:*00??)
+						SCSI_PROBE="$SCSI_PROBE aic7xxx.ko"
+						;;
+					*1011:*|*1028:*000[1-9a]|*9005:*02[08]?)
+						SCSI_PROBE="$SCSI_PROBE aacraid.ko"
+						;;
+					*1014:*002e|*1014:*01bd|*9005:*0250)
+						SCSI_PROBE="$SCSI_PROBE ips.ko"
+						;;
+					*1014:*0[1-2]8?|*1069:*|*9005:*0503)
+						SCSI_PROBE="$SCSI_PROBE ipr.ko"
+						;;
+					*1022:*)
+						SCSI_PROBE="$SCSI_PROBE tmscsim.ko"
+						;;
+					*1044:*)
+						SCSI_PROBE="$SCSI_PROBE dpt_i2o.ko"
+						;;
+					*1077:*1???)
+						SCSI_PROBE="$SCSI_PROBE qla1280.ko"
+						;;
+					*1077:*21??)
+						SCSI_PROBE="$SCSI_PROBE qla2xxx.ko qla2100.ko"
+						;;
+					*1077:*22??)
+						SCSI_PROBE="$SCSI_PROBE qla2xxx.ko qla2200.ko"
+						;;
+					*1077:*23[0-1]?)
+						SCSI_PROBE="$SCSI_PROBE qla2xxx.ko qla2300.ko"
+						;;
+					*1077:*232?)
+						SCSI_PROBE="$SCSI_PROBE qla2xxx.ko qla2322.ko"
+						;;
+					*1077:*24??)
+						SCSI_PROBE="$SCSI_PROBE qla2xxx.ko"
+						;;
+					*1077:*63??)
+						SCSI_PROBE="$SCSI_PROBE qla2xxx.ko qla6312.ko"
+						;;
+					*10df:*)
+						SCSI_PROBE="$SCSI_PROBE lpfc.ko"
+						;;
+					*10fc:*|*1145:*)
+						SCSI_PROBE="$SCSI_PROBE nsp32.ko"
+						;;
+					*1101:*)
+						SCSI_PROBE="$SCSI_PROBE a100u2w.ko"
+						;;
+					*1119:*|*8086:*)
+						SCSI_PROBE="$SCSI_PROBE gdth.ko"
+						;;
+					*1191:*)
+						SCSI_PROBE="$SCSI_PROBE atp870u.ko"
+						;;
+					*134a:*)
+						SCSI_PROBE="$SCSI_PROBE dmx3191d.ko"
+						;;
+					*1de1:*)
+						SCSI_PROBE="$SCSI_PROBE dc395x.ko"
+						;;
+					*9005:*8???)
+						SCSI_PROBE="$SCSI_PROBE aic79xx.ko"
+						;;
+					*104b:*)
+						SCSI_PROBE="$SCSI_PROBE BusLogic.ko"
+						;;
+					*1[0d]e1:*)
+						SCSI_PROBE="$SCSI_PROBE dc395x.ko"
+						;;
+					*1000:*00[34]?)
+						SCSI_PROBE="$SCSI_PROBE mptscsih.ko"
+						;;
+					*10cd:*)
+						SCSI_PROBE="$SCSI_PROBE advansys.ko"
+						;;
+					*1191:*)
+						SCSI_PROBE="$SCSI_PROBE atp870u.ko"
+						;;
+					*134a:*)
+						SCSI_PROBE="$SCSI_PROBE dtc.ko"
+						;;
+					*1d44:*)
+						SCSI_PROBE="$SCSI_PROBE eata.ko"
+						;;
+					*1036:*)
+						SCSI_PROBE="$SCSI_PROBE fdomain.ko"
+						;;
+					*1256:*4201)
+						SCSI_PROBE="$SCSI_PROBE pci2220i.ko"
+						;;
+					*1256:*5201)
+						SCSI_PROBE="$SCSI_PROBE pci2000.ko"
+						;;
+					*1022:*)
+						SCSI_PROBE="$SCSI_PROBE tmscsim.ko"
+						;;
+					*6356:*)
+						SCSI_PROBE="$SCSI_PROBE ultrastor.ko"
+						;;
+					*13c1:*)
+						SCSI_PROBE="$SCSI_PROBE 3w-xxxx.ko"
+						;;
+				esac
+				;;
+		esac
+	fi
+done
+
+## Trying to do kind of /proc/pci hardware detection
+#ISA_SCSI="aha1740.o aha1542.o aha152x.o pas16.o psi240i.o qlogicfas.o qlogicfc.o seagate.o t128.o u14-34f.o wd7000.o"
+#
+## New sysfs based SCSI detection
+##SYS=$(find /sys/devices/ -name modalias|xargs grep pci: -h 2>/dev/null|cut -f2 -d:)
+#SYS=$(for x in $(find /sys/devices/ -name modalias); do grep pci: $x; done|cut -f2 -d:)
+#while read id driver; do
+#	for sysid in $SYS; do
+#		case $sysid in
+#			$id)
+#				if [ -z "$SCSI_PROBE" ]; then
+#					SCSI_PROBE="$driver"
+#				else
+#					SCSI_PROBE="$SCSI_PROBE $driver"
+#				fi
+#				;;
+#		esac
+#	done
+#done <<EOF
+#$(cat /modules/scsi/scsi-modules.txt)
+#EOF
+
 if test -n "$INTERACTIVE"; then
 	# Let the user select interactively
-	askmodules SCSI $(cd /modules/scsi; echo *.o)
+	askmodules SCSI $(cd /modules/scsi; echo *.ko)
 else
 	# these are the autoprobe-safe modules
 	MODULES="$SCSI_PROBE"
@@ -401,25 +564,35 @@ test -z "$NOSCSI" && test -n "$MODULES" && loadmodules SCSI $MODULES
 # End of SCSI check
 
 # Check for IDE-Raid devices
-test -z "$NOIDERAID" && MODULES="$(cd /modules/scsi; echo *raid.* 2>/dev/null)" && loadmodules IDE-SOFTRAID $MODULES
+if test -z "$NOIDERAID"; then
+	(
+		cd /modules/scsi
+		{
+			loadmodule ataraid.ko >/dev/null 2>&1 && \
+			loadmodule silraid.ko >/dev/null 2>&1
+		} || \
+		loadmodule medley.ko >/dev/null 2>&1 || \
+		loadmodule pdcraid.ko >/dev/null 2>&1
+	)
+fi
 # End of IDE-Raid check
 
 # Check for USB, use modules on bootfloppy first
 if test -z "$NOUSB"; then
 	echo -n "${CRE}${BLUE}Checking for for USB...${NORMAL}"
-	if test -f /modules/scsi/usbcore.o; then
-		$INSMOD /modules/scsi/usbcore.o >/dev/null 2>&1
+	if loadmodule usbcore.ko >/dev/null 2>&1; then
 		FOUNDUSB=""
 
-		for i in $USB2 usb-uhci.o usb-ohci.o; do
-			test -f /modules/scsi/$i && $INSMOD /modules/scsi/$i >/dev/null 2>&1 && FOUNDUSB="yes"
+		for i in $USB2 uhci-hcd ohci-hcd; do
+			loadmodule $i >/dev/null 2>&1 && FOUNDUSB="yes"
 		done
 
 		if test -n "$FOUNDUSB"; then
-			test -f /modules/scsi/libusual.o && $INSMOD /modules/scsi/libusual.o >/dev/null 2>&1
-			test -f /modules/scsi/usb-storage.o && $INSMOD /modules/scsi/usb-storage.o >/dev/null 2>&1
+			if ! loadmodule libusual.ko >/dev/null 2>&1 && usb-storage.ko >/dev/null 2>&1; then
+				loadmodule ub.ko >/dev/null 2>&1
+			fi
 		else
-			# For an unknown reason, unloading usbcore hangs smetimes
+			# For an unknown reason, unloading usbcore hangs sometimes
 			# rmmod usbcore >/dev/null 2>&1
 			true
 		fi
@@ -432,21 +605,19 @@ fi
 # Check for Firewire, use modules on bootfloppy first
 if test -z "$NOFIREWIRE"; then
 	echo -n "${CRE}${BLUE}Checking for Firewire...${NORMAL}"
-	if test -f /modules/scsi/ieee1394.o; then
-		echo -n "${CRE}${BLUE}Loading ieee1394...${NORMAL}"
-		$INSMOD /modules/scsi/ieee1394.o >/dev/null 2>&1
+	if loadmodule ieee1394.ko >/dev/null 2>&1; then
 		FOUNDFIREWIRE=""
 		
-		for i in ohci1394.o; do
+		for i in ohci1394.ko; do
 			echo -n "${CRE}${BLUE}Loading $i...${NORMAL}"
-			test -f /modules/scsi/$i && $INSMOD /modules/scsi/$i >/dev/null 2>&1 && FOUNDFIREWIRE="yes"
+			loadmodule "$i" >/dev/null 2>&1 && FOUNDFIREWIRE="yes"
 		done
 
 		if test -n "$FOUNDFIREWIRE"; then
-			echo -n "${CRE}${BLUE}Loading sbp2.o...${NORMAL}"
-			test -f /modules/scsi/sbp2.o && $INSMOD /modules/scsi/sbp2.o sbp2_serialize_io=1 >/dev/null 2>&1
+			echo -n "${CRE}${BLUE}Loading sbp2.ko...${NORMAL}"
+			loadmodule sbp2.ko serialize_io=1 >/dev/null 2>&1
 		else
-			# For an unknown reason, unloading ieee1394 hangs smetimes
+			# For an unknown reason, unloading ieee1394 hangs sometimes
 			# echo -n "${CRE}${BLUE}Unloading ieee1394...${NORMAL}"
 			# rmmod ieee1394 >/dev/null 2>&1
 			true
@@ -500,7 +671,7 @@ if test -n "$INTERACTIVE"; then
 		esac
 
 		if mountmodules new; then
-			askmodules new $(cd /modules/scsi; echo *.o)
+			askmodules new $(cd /modules/scsi; echo *.ko)
 			test -n "$MODULES" && loadmodules new $MODULES
 			umountmodules current
 		fi
@@ -508,13 +679,20 @@ if test -n "$INTERACTIVE"; then
 fi
 # All interactively requested modules should be loaded now.
 
+# Give USB-Storage devices some more time to register
+if test -d /proc/scsi/usb-storage; then
+	echo -n "${CRE}${BLUE}Allowing slow USB-devices some more time to register...${NORMAL}"
+	ash -c "sleep 6"
+	echo "${BLUE}Ok.${NORMAL}"
+fi
+
 # Check for ide-scsi supported CD-Roms et al.
-test -f /proc/scsi/scsi && FOUND_SCSI="yes"
+test -r /proc/scsi/scsi && FOUND_SCSI="yes"
 
 # Disable kernel messages again
 echo "0" > /proc/sys/kernel/printk
 
-# We now disable DMA right here, for faster reading/writing from/to IDE devices
+# disable DMA in case of hardware bugs
 # in FROMHD or TORAM mode
 case "$CMDLINE" in
 	*\ nodma*)
@@ -529,9 +707,12 @@ case "$CMDLINE" in
 		;;
 esac
 
+stage=1
+rundebugshell
+
 # Now that the right SCSI driver is (hopefully) loaded, try to find CDROM
 DEVICES="/dev/hd?"
-test -n "$FOUND_SCSI" -a -z "$NOCD" && DEVICES="/dev/scd? /dev/scd?? $DEVICES"
+test -n "$FOUNDUSB$FOUNDFIREWIRE" && test -z "$NOCD" && DEVICES="/dev/sr? $DEVICES"
 
 # New: Also try parallel port CD-Roms [for Mike].
 DEVICES="$DEVICES /dev/pcd?"
@@ -541,7 +722,7 @@ test -n "$FOUND_SCSI" -a -z "$NOSCSI" && DEVICES="$DEVICES /dev/sd?[1-9] /dev/sd
 
 # Look for CDROMs first
 CDROM=$(awk '/name/{for (i=NF;i>=3;i--) {print "/dev/" $i}}' /proc/sys/dev/cdrom/info)
-DEVICES="$CDROM $DEVICES /dev/hd?[1-9] /dev/hd?[1-9][0-9]"
+DEVICES="$CDROM $DEVICES /dev/ub?[1-9] /dev/ub?[1-9][0-9] /dev/ub? /dev/hd?[1-9] /dev/hd?[1-9][0-9]"
 case "$CMDLINE" in
 	*fromhd=/dev/*)
 		DEVICES="$fromhd"
@@ -549,11 +730,11 @@ case "$CMDLINE" in
 esac
 
 for i in $DEVICES; do
-	echo -n "${CRE}${BLUE}Looking for CDROM in: ${MAGENTA}$i${NORMAL}   "
+	echo -n "${CRE}${BLUE}Looking for ${MEDIUM} in: ${MAGENTA}$i${NORMAL}   "
 	if test -z "$FROMISO"; then
 		if mountit $i /cdrom "-o ro" >/dev/null 2>&1; then
-			if test -f /cdrom/$KNOPPIX_DIR/$KNOPPIX_NAME; then
-				echo -n "${CRE} ${GREEN}Accessing sidux CDROM at ${MAGENTA}$i${GREEN}...${NORMAL}"
+			if test -r /cdrom/$KNOPPIX_DIR/$KNOPPIX_NAME; then
+				echo -n "${CRE}${GREEN}Accessing sidux ${MEDIUM} at ${MAGENTA}$i${GREEN}...${NORMAL}"
 				FOUND_KNOPPIX="$i"
 				break
 			fi
@@ -591,26 +772,50 @@ mount_knoppix()
 		case $(dd if=$1/$KNOPPIX_DIR/$KNOPPIX_NAME bs=4 count=1 2>/dev/null) in
 			"#!/b")
 				COMP=cloop
-				$INSMOD /modules/cloop.o file=$1/$KNOPPIX_DIR/$KNOPPIX_NAME
+				loadmodule cloop.ko file="$1/$KNOPPIX_DIR/$KNOPPIX_NAME"
 				mountit /dev/cloop /KNOPPIX "-o ro" || FOUND_KNOPPIX=""
 				;;
 			"hsqs")
 				COMP=squashfs
 				mount -t squashfs $1/$KNOPPIX_DIR/$KNOPPIX_NAME /KNOPPIX -o loop,ro || FOUND_KNOPPIX=""
-				#losetup /dev/loop0 $1/$KNOPPIX_DIR/$KNOPPIX_NAME
-				#mount -t squashfs /dev/loop0 /KNOPPIX -o loop,ro || FOUND_KNOPPIX=""
 				;;
 		esac
 	fi
+	
+	## Allow multi-image KNOPPIX mounts
+	#if [ -n "$FOUND_KNOPPIX" ] && [ -x "$DYNLOADER" ] && [ -x /KNOPPIX/sbin/losetup ]; then
+	#	echo ""
+	#	echo -n "${CRE} ${GREEN}Found primary KNOPPIX compressed image at ${MAGENTA}$1/$KNOPPIX_DIR/$KNOPPIX_NAME${GREEN}.${NORMAL}"
+	#	
+	#	for c in 1 2 3 4 5 6 7; do
+	#		if test -r "$1/$KNOPPIX_DIR/$KNOPPIX_NAME$c"; then
+	#			if "$DYNLOADER" --library-path /KNOPPIX/lib /KNOPPIX/sbin/losetup "/dev/cloop$c" "$1/$KNOPPIX_DIR/$KNOPPIX_NAME$c"; then
+	#				if "$DYNLOADER" --library-path /KNOPPIX/lib /KNOPPIX/bin/mkdir -p "/KNOPPIX$c"; then
+	#					if mountit "/dev/cloop$c" "/KNOPPIX$c" "-o ro"; then
+	#						echo ""
+	#						echo -n "${CRE} ${GREEN}Found additional KNOPPIX compressed image at ${MAGENTA}$1/$KNOPPIX_DIR/$KNOPPIX_NAME$c${GREEN}.${NORMAL}"
+	#					else
+	#						"$DYNLOADER" --library-path /KNOPPIX/lib /KNOPPIX/bin/rmdir "/KNOPPIX$c" 2>/dev/null
+	#					fi
+	#				else
+	#					"$DYNLOADER" --library-path /KNOPPIX/lib /KNOPPIX/bin/losetup -d "/dev/cloop$c" 2>/dev/null
+	#				fi
+	#			fi
+	#		fi
+	#	done
+	#fi
 }
 
 remount_knoppix()
 {
 	if test -f $TARGET/$KNOPPIX_DIR/$KNOPPIX_NAME; then
-		umount /KNOPPIX # unmount it
+		umount /KNOPPIX
+		for c in 0 1 2 3 4 5 6 7; do
+			umount "/$KNOPPIX_NAME$c" >/dev/null 2>&1
+		done
 	
 		if [ "$COMP" == "cloop" ]; then
-			echo "$RMMOD cloop" | /static/ash # release CD - ash crashes with parts of libc in memory -- FF
+			unloadmodule cloop # release CD
 		fi
 
 		umount $SOURCE  # unmount CD
@@ -631,7 +836,6 @@ boot_from()
 	/bin/mkdir $TARGET
 
 	SOURCE_DEV=$(echo $CMDLINE | /usr/bin/tr ' ' '\n' | /bin/sed -n '/bootfrom=/s/.*=//p' | /usr/bin/tail -1)
-  
 	LOOP_DEV=$(echo $SOURCE_DEV | /usr/bin/gawk -F/ '{ print $1 "/" $2 "/" $3 }')
 	ISO_PATH=$(echo $SOURCE_DEV | /bin/sed "s|$LOOP_DEV||g" )
 	case "$ISO_PATH" in
@@ -645,7 +849,7 @@ boot_from()
   
 	# load filesystems
 	/KNOPPIX/sbin/modprobe reiserfs
-	/KNOPPIX/sbin/modprobe ntfs    # BE CAREFUL! - Only mount it read only! - FF
+	/KNOPPIX/sbin/modprobe ntfs
  
 	if [ -n "$ISO_PATH" ]; then
 		LOOP_SOURCE="$TARGET.loop"
@@ -704,23 +908,32 @@ copy_to()
 		hd)
 			TARGET_DEV=$(echo $CMDLINE | /usr/bin/tr ' ' '\n' | /bin/sed -n '/tohd=/s/.*=//p' | /usr/bin/tail -1)
 			TARGET_DEV_DESC="$TARGET_DEV"
+
 			# load filesystems
 			/KNOPPIX/sbin/modprobe reiserfs
 			/KNOPPIX/sbin/modprobe jbd
 			/KNOPPIX/sbin/modprobe ext3
-			BUILTIN_FS="iso9660 ext3 ext2 reiserfs vfat"
-			# we need to use mountit to prevent NTFS to be mounted!
-			if mountit $TARGET_DEV $TARGET "-o rw"; then
-				:
-			else
-				echo -n "${CRE} ${RED}Copying sidux CDROM failed. ${MAGENTA}$TARGET_DEV_DESC${RED} is not mountable.${NORMAL}"
+			#/KNOPPIX/sbin/modprobe fuse	#we don't allow writing to ntfs, sorry
+			FS="ext3 ext2 reiserfs vfat"
+			MOUNTED=""
+			
+			for i in $FS; do
+				if /KNOPPIX/bin/mount -o rw -t "$i" "$TARGET_DEV" "$TARGET"; then
+					MOUNTED="true"
+					break
+				fi
+			done
+			
+			if test -z "$MOUNTED"; then
+				echo -n "${CRE}${RED}Copying sidux ${MEDIUM} failed. ${MAGENTA}$TARGET_DEV_DESC${RED} is not mountable.${NORMAL}"
 				sleep 2
+
 				return 1
 			fi
 			
 			# check for enough free space
 			USED_SPACE=0
-			[ -f $TARGET/$KNOPPIX_DIR/$KNOPPIX_NAME ] && USED_SPACE=$(/usr/bin/du -s $TARGET/$KNOPPIX_DIR/$KNOPPIX_NAME | /usr/bin/gawk '{ print $1 }')
+			test -r $TARGET/$KNOPPIX_DIR/$KNOPPIX_NAME && USED_SPACE=$(/usr/bin/du -s $TARGET/$KNOPPIX_DIR/$KNOPPIX_NAME | /usr/bin/gawk '{ print $1 }')
 			FOUNDSPACE="$(/bin/df -k $TARGET | /usr/bin/tail -1 | /usr/bin/gawk '{ print $4+int('$USED_SPACE') }')"
 			;;
 		*)
@@ -729,7 +942,6 @@ copy_to()
 	esac
 	
 	# sanity check
-	
 	if [ $FOUNDSPACE -lt $SIZE ]; then
 		echo -n "${CRE} ${RED}Copying sidux CDROM failed. Not enough free space on ${MAGENTA}${TARGET_DEV_DESC}${RED}. Found: ${MAGENTA}${FOUNDSPACE}k${RED} Need: ${MAGENTA}${SIZE}k${RED} ${NORMAL}"
 		sleep 2
@@ -740,15 +952,15 @@ copy_to()
 	
 	# do the real copy
 	echo "${CRE} ${GREEN}Copying sidux CDROM to ${MAGENTA}$TARGET_DEV_DESC${GREEN}... Please be patient. ${NORMAL}"
-	if [ -z "$use_cp" -a -x /usr/bin/rsync ]; then
+
+	if [ -z "$COPY_COMMAND" ] && [ -x /usr/bin/rsync ]; then
 		# first cp the small files
-		/usr/bin/rsync -a --exclude="$KNOPPIX_DIR/$KNOPPIX_NAME" $COPY $TARGET # Copy Knoppix to $TARGET
+		/usr/bin/rsync -a --exclude="$KNOPPIX_DIR/$KNOPPIX_NAME*" $COPY $TARGET # Copy Knoppix to $TARGET
+
 		# then the big file with nice progress meter
-		[ -f $TARGET/$KNOPPIX_DIR/$KNOPPIX_NAME ] && /bin/rm -f $TARGET/$KNOPPIX_DIR/$KNOPPIX_NAME
-		/usr/bin/rsync -a --progress --include="$KNOPPIX_DIR/$KNOPPIX_NAME" --include="$KNOPPIX_DIR/" --exclude="*" $COPY $TARGET # Copy Knoppix to $TARGET
-		#/usr/bin/rsync -avP $COPY $TARGET # Copy Knoppix to $TARGET
+		/usr/bin/rsync -a --progress --include="$KNOPPIX_DIR/$KNOPPIX_NAME*" --include="$KNOPPIX_DIR/" --exclude="*" $COPY $TARGET
 	else
-		/bin/cp -a -f $COPY $TARGET # Copy Knoppix to $TARGET
+		"$COPY_COMMAND" $COPY $TARGET
 	fi
 
 	if [ $? -ne 0 ]; then
@@ -759,7 +971,7 @@ copy_to()
 	fi
 
 	# remount r/o
-	/bin/mount -n -o remount,ro $TARGET_DEV $TARGET
+	/bin/mount -n -o remount,ro $TARGET
 	remount_knoppix
 }
 
@@ -769,6 +981,7 @@ COPYTO=""
 BOOTFROM=""
 DO_REMOUNT=""
 REAL_TARGET=""
+UNIONFS=""
 
 case "$CMDLINE" in
 	 *toram*)
@@ -812,7 +1025,7 @@ if  test -n "$DO_REMOUNT" -a -n "$FOUND_KNOPPIX"; then
 			TARGET="/cdrom3"
 		fi
 	fi
-	
+
 	if [ -n "$COPYTO" ]; then
 		copy_to $COPYTO && REAL_TARGET="$TARGET"
 	fi
@@ -823,15 +1036,22 @@ if test -n "$FOUND_KNOPPIX"; then
 	# copy library cache
 	cat /KNOPPIX/etc/ld.so.cache > /etc/ld.so.cache
 	echo ""
+
+	# don't use unionfs unconditionally for now
+	case "$CMDLINE" in
+		*unionfs*)
+				loadmodule unionfs.ko 2>/dev/null && UNIONFS="yes"
+			;;
+	esac
 	
 	# Enable kernel messages
 	echo "6" > /proc/sys/kernel/printk
 	
 	# Set paths
 	echo -n "${CRE}${BLUE}Setting paths...${NORMAL}"
-	PATH="/sbin:/bin:/usr/sbin:/usr/bin:/usr/X11R6/bin:."
+	PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/bin/X11"
 	export PATH
-	
+
 	# Debian weirdness
 	/KNOPPIX/bin/cp -a /KNOPPIX/etc/alternatives /etc/ 2>/dev/null
 	
@@ -847,11 +1067,8 @@ if test -n "$FOUND_KNOPPIX"; then
 		/bin/mount -n --move $REAL_TARGET /cdrom # move it back and go on to normal boot 
 	fi
 	
-	# Clean up /etc/mtab (and - just in case - make a nice entry for looped ISO)
-	egrep " /KNOPPIX | /cdrom " /proc/mounts | sed 's|/dev/loop0 /cdrom \(.*\) 0 0|'$LOOP_SOURCE$ISO_PATH' /cdrom/ \1,loop=/dev/loop0 0 0|g' >> /etc/mtab
-	
 	# Clean up /
-	rm -rf /modules /static
+	/KNOPPIX/bin/rm -rf /modules /static
 	
 	# New in Kernel 2.4.x: tempfs with variable ramdisk size.
 	# We check for available memory anyways and limit the ramdisks
@@ -867,7 +1084,7 @@ if test -n "$FOUND_KNOPPIX"; then
 	# machine due to lack of Ram
 	
 	# Minimum size of additional ram partitions
-	MINSIZE=2000
+	MINSIZE=20000
 
 	# At least this much memory minus 30% should remain when home and var are full.
 	MINLEFT=16000
@@ -877,103 +1094,189 @@ if test -n "$FOUND_KNOPPIX"; then
 
 	# Default ramdisk size for ramdisk
 	RAMSIZE="$(expr $TOTALMEM / 5)"
+
+	# Create additional dynamic ramdisk.
+	test -z "$RAMSIZE" -o "$RAMSIZE" -lt "$MINSIZE" && RAMSIZE="$MINSIZE"
+	mkdir -p /ramdisk
+
+	# We need /bin/mount here for the -o size= option
+	/bin/mount -t tmpfs -o "size=${RAMSIZE}k" /ramdisk /ramdisk
+	mkdir -p /ramdisk/home /ramdisk/var && \
+		ln -s /ramdisk/home /ramdisk/var /
+
+	echo "${BLUE}Done.${NORMAL}"
 	
-	# Check for sufficient memory to mount extra ramdisk for /home + /var
-	if test -n "$TOTALMEM" -a "$TOTALMEM" -gt "$MINLEFT"; then
-		test -z "$RAMSIZE" && RAMSIZE=1000000
-		mkdir -p /ramdisk
+	# tmpfs/varsize version, can use swap
+	RAMSIZE=$(expr $RAMSIZE \* 4)
+	echo -n "${CRE}${BLUE}Creating ${YELLOW}/ramdisk${BLUE} (dynamic size=${RAMSIZE}k) on ${MAGENTA}shared memory${BLUE}...${NORMAL}"
 
-		# tmpfs/varsize version, can use swap
-		RAMSIZE=$(expr $RAMSIZE \* 4)
-		echo -n "${CRE}${BLUE}Creating ${YELLOW}/ramdisk${BLUE} (dynamic size=${RAMSIZE}k) on ${MAGENTA}shared memory${BLUE}...${NORMAL}"
+	# We need /bin/mount here for the -o size= option
+	/bin/mount -t tmpfs -o "size=${RAMSIZE}k" /ramdisk /ramdisk
+	if [ "$?" = 0 ] && [ "$UNIONS" = "yes" ]; then
+		mkdir -p	/ramdisk/tmp \
+				/ramdisk/home/knoppix 
 
-		# We need /bin/mount here for the -o size= option
-		/bin/mount -t tmpfs -o "size=${RAMSIZE}k" /ramdisk /ramdisk && mkdir -p /ramdisk/home /ramdisk/var && ln -s /ramdisk/home /ramdisk/var /
-		echo "${BLUE}Done.${NORMAL}"
+		chmod 1777 /ramdisk/tmp
+		chown knoppix:knoppix /ramdisk/home/knoppix
+
+		ln -snf /ramdisk/home /home
+		mv /tmp /tmp.old
+		ln -s /ramdisk/tmp /tmp
+		rm -rf tmp.old
 	else
-		mkdir -p /home /var
+		mkdir -p	/ramdisk/home \
+				/ramdisk/var
+		ln -s /ramdisk/home /ramdisk/var
 	fi
+
+	echo "${BLUE}Done.${NORMAL}"
+
+	stage=2
+	rundebugshell
+
+        # don't use unionfs unconditionally for now
+        if [ "$UNIONS" = "yes" ]; then
+		#######################
+		## unionfs adventure ##
+		#######################
+
+		echo -n "${CRE}${BLUE}Creating unionfs and symlinks on ramdisk...${NORMAL}"
+		mkdir -p /UNIONFS
+		UNION="/ramdisk=rw"
 	
-	echo -n "${CRE}${BLUE}Creating directories and symlinks on ramdisk...${NORMAL}"
-	# Create common WRITABLE (empty) dirs
-	mkdir -p	/var/run \
-			/var/backups \
-			/var/cache/apache \
-			/var/local \
-			/var/lock/news \
-			/var/nis \
-			/var/preserve \
-			/var/state/misc \
-			/var/tmp \
-			/var/lib \
-			/var/spool/cups/tmp \
-			/var/lib/samba \
-			/home/knoppix \
-			/root \
-			/etc/sysconfig \
-			/etc/X11 \
-			/etc/cups \
-			/etc/dhcpc
-	chown knoppix:knoppix /home/knoppix
+		# Add all KNOPPIX images to the union
+		for c in "" 1 2 3 4 5 6 7; do
+			[ -d "/KNOPPIX$c" ] && UNION="$UNION:/KNOPPIX$c=ro"
+		done
+	
+		# Do the actual mount
+		if /bin/mount -t unionfs -o "dirs=$UNION,delete=whiteout" /UNIONFS /UNIONFS; then
+			# We now have unionfs, copy some data from the initial ramdisk first
+			cp -a	/etc/fstab \
+				/etc/filesystems \
+				/etc/mtab \
+					/UNIONFS/etc/
+	
+			# /dev is a special case, it is now normally handled via udev
+			UNIONDEV=""
+			case "$CMDLINE" in
+				*noudev*)
+					UNIONDEV="dev"
+					;;
+			esac
+			
+			for i in bin boot etc $UNIONDEV sbin var lib opt root usr; do
+				# Move directories to unionfs
+				if test -d /$i; then
+					mv /$i /$i.old && /KNOPPIX/lib/ld-linux.so.2 --library-path /KNOPPIX/lib /KNOPPIX/bin/ln -snf /UNIONFS/$i /$i && rm -rf /$i.old
+				else
+					ln -snf /UNIONFS/$i /$i
+				fi
+			done
+	
+			for i in $(cd /UNIONFS; echo *); do
+				# Create links for new stuff on /UNIONFS
+				test "$i" = "home" -o "$i" = "tmp" && continue
+				test -L "/$i" || test -d "/$i" || test -f "/$i" || ln -snf "/UNIONFS/$i" /$i
+			done
+		else
+			echo -n "${CRE}${RED}ERROR: CANNOT UNITE READ-ONLY MEDIA AND INITIAL RAMDISK!${NORMAL}"
+			/KNOPPIX/sbin/halt -f -n
+		fi
+	
+		echo ""
+		echo "${GREEN}>> Read-only ${MEDIUM} system successfully merged with read-write /ramdisk.${NORMAL}"
+		chown knoppix:knoppix /home/knoppix
+	else
+		###############
+		## link farm ##
+		###############
+
+		echo -n "${CRE}${BLUE}Creating directories and symlinks on ramdisk...${NORMAL}"
+		# Create common WRITABLE (empty) dirs
+		mkdir -p	/home \
+				/var \
+				/var/run \
+				/var/backups \
+				/var/cache/apache \
+				/var/local \
+				/var/lock/news \
+				/var/nis \
+				/var/preserve \
+				/var/state/misc \
+				/var/tmp \
+				/var/lib \
+				/var/spool/cups/tmp \
+				/var/lib/samba \
+				/home/knoppix \
+				/root \
+				/etc/sysconfig \
+				/etc/X11 \
+				/etc/cups \
+				/etc/dhcpc
+		chown knoppix:knoppix /home/knoppix
+	
+		# All files in here should be size zero after Knoppix.clean was run
+		cp -a	/KNOPPIX/var/local \
+			/KNOPPIX/var/games \
+			/KNOPPIX/var/log \
+			/KNOPPIX/var/spool \
+				/var/ 2>/dev/null
+		cp -a	/KNOPPIX/var/lib/games \
+			/KNOPPIX/var/lib/wine \
+			/KNOPPIX/var/lib/nfs \
+			/KNOPPIX/var/lib/xkb \
+			/KNOPPIX/var/lib/isdn \
+			/KNOPPIX/var/lib/kdm \
+			/KNOPPIX/var/lib/pcmcia \
+			/KNOPPIX/var/lib/dhcp* \
+				/var/lib/ 2>/dev/null
+	
+		# Link device files (real device file copies should NOT require more space, but in fact, they do)
+		cp -aus /dev/capi /dev/ 2>/dev/null
+		ln -s /KNOPPIX/dev/* /dev/ 2>/dev/null
+	
+		# Problematic directories in /var/lib (lots and lots of inodes)
+		ln -s	/KNOPPIX/var/lib/dpkg \
+			/KNOPPIX/var/lib/apt \
+			/KNOPPIX/var/lib/doc-base \
+			/KNOPPIX/var/lib/gnome \
+			/KNOPPIX/var/lib/kde \
+			/KNOPPIX/var/lib/scrollkeeper \
+			/KNOPPIX/var/lib/texmf \
+				/var/lib/ 2>/dev/null
+	
+		# Debian-apt
+		ln -s /KNOPPIX/var/cache/apt /var/cache/ 2>/dev/null
+		rm -f /etc/resolv.conf 2>/dev/null
+		ln -s	/KNOPPIX/etc/skel \
+			/KNOPPIX/etc/nessus \
+			/etc/dhcpc/resolv.conf \
+				/etc/ 2>/dev/null
+	
+		# Index files can be HUGE, so better replace cache/man tree by links later
+		# cp -a /KNOPPIX/var/cache/man /var/cache/ 2>/dev/null
+		# Create links from CDROM for UNWRITABLE (remaining) files
+		cp -aus /KNOPPIX/var/* /var/ 2>/dev/null
+		cp -aus /KNOPPIX/etc/* /etc/ 2>/dev/null
+	fi
+
+	# CUPS wants writable files. :-/
+	cp -a /KNOPPIX/etc/cups/*.conf /etc/cups/ 2>/dev/null
+	
+	# resolv.conf must be writable as well
+	cp -a /KNOPPIX/etc/dhcpc/resolv.conf /etc/dhcpc/ 2>/dev/null
+
 
 	# Create empty utmp and wtmp
 	:> /var/run/utmp
 	:> /var/run/wtmp
 
-	# CUPS wants writable files. :-/
-	cp -a /KNOPPIX/etc/cups/*.conf /etc/cups/ 2>/dev/null
-
-	# resolv.conf must be writable as well
-	cp -a /KNOPPIX/etc/dhcpc/resolv.conf /etc/dhcpc/ 2>/dev/null
-
-	# All files in here should be size zero after Knoppix.clean was run
-	cp -a	/KNOPPIX/var/local \
-		/KNOPPIX/var/games \
-		/KNOPPIX/var/log \
-		/KNOPPIX/var/spool \
-			/var/ 2>/dev/null
-	cp -a	/KNOPPIX/var/lib/games \
-		/KNOPPIX/var/lib/wine \
-		/KNOPPIX/var/lib/nfs \
-		/KNOPPIX/var/lib/xkb \
-		/KNOPPIX/var/lib/isdn \
-		/KNOPPIX/var/lib/kdm \
-		/KNOPPIX/var/lib/pcmcia \
-		/KNOPPIX/var/lib/dhcp* \
-			/var/lib/ 2>/dev/null
-
-	# Link device files (real device file copies should NOT require more space, but in fact, they do)
-	cp -aus /dev/capi /dev/ 2>/dev/null
-	ln -s /KNOPPIX/dev/* /dev/ 2>/dev/null
-
-	# Problematic directories in /var/lib (lots and lots of inodes)
-	ln -s	/KNOPPIX/var/lib/dpkg \
-		/KNOPPIX/var/lib/apt \
-		/KNOPPIX/var/lib/doc-base \
-		/KNOPPIX/var/lib/gnome \
-		/KNOPPIX/var/lib/kde \
-		/KNOPPIX/var/lib/scrollkeeper \
-		/KNOPPIX/var/lib/texmf \
-			/var/lib/ 2>/dev/null
-
-	# Debian-apt
-	ln -s /KNOPPIX/var/cache/apt /var/cache/ 2>/dev/null
-	rm -f /etc/resolv.conf 2>/dev/null
-	ln -s	/KNOPPIX/etc/skel \
-		/KNOPPIX/etc/nessus \
-		/etc/dhcpc/resolv.conf \
-			/etc/ 2>/dev/null
-
-	# Index files can be HUGE, so better replace cache/man tree by links later
-	# cp -a /KNOPPIX/var/cache/man /var/cache/ 2>/dev/null
-	# Create links from CDROM for UNWRITABLE (remaining) files
-	cp -aus /KNOPPIX/var/* /var/ 2>/dev/null
-
-	cp -aus /KNOPPIX/etc/* /etc/ 2>/dev/null
 	# Make SURE that these are files, not links!
 	rm -rf	/etc/ftpusers \
 		/etc/passwd \
 		/etc/shadow \
+		/etc/gshadow \
 		/etc/group \
 		/etc/ppp \
 		/etc/isdn \
@@ -990,6 +1293,7 @@ if test -n "$FOUND_KNOPPIX"; then
 	cp -a	/KNOPPIX/etc/ftpusers \
 		/KNOPPIX/etc/passwd \
 		/KNOPPIX/etc/shadow \
+		/KNOPPIX/etc/gshadow \
 		/KNOPPIX/etc/group \
 		/KNOPPIX/etc/ppp \
 		/KNOPPIX/etc/isdn \
@@ -1009,18 +1313,24 @@ if test -n "$FOUND_KNOPPIX"; then
 	[ -d /var/lib/samba ] && :> /var/lib/samba/unexpected.tdb
 
 	# Diet libc bug workaround
-	cp -f /KNOPPIX/etc/localtime /etc/localtime
+	/bin/cp -f /KNOPPIX/etc/localtime /etc/localtime
 
 	# busybox/cloop workaround
-	chmod 777 /var/tmp
+	chmod 1777 /tmp /var/tmp
+	
 	echo "${BLUE}Done.${NORMAL}"
 	
+	# Clean up /etc/mtab (and - just in case - make a nice entry for looped ISO)
+	/bin/egrep " /KNOPPIX[0-9]* | /cdrom " /proc/mounts | sed 's|/dev/loop0 /cdrom \(.*\) 0 0|'$LOOP_SOURCE$ISO_PATH' /cdrom/ \1,loop=/dev/loop0 0 0|g' >> /etc/mtab
+
 	# Now tell kernel where the real modprobe lives
 	echo "/sbin/modprobe" > /proc/sys/kernel/modprobe
 	
 	# Change root device from /dev/fd0 to /dev/ram0
 	echo "0x100" > /proc/sys/kernel/real-root-dev
-	
+
+	stage=3
+	rundebugshell	
 	# Give control to the init process.
 	echo "${CRE}${BLUE}Starting init process.${NORMAL}"
 	rm -f /linuxrc
@@ -1031,12 +1341,10 @@ if test -n "$FOUND_KNOPPIX"; then
 	echo "${RED}Dropping you to a (very limited) shell.${NORMAL}"
 	echo "${RED}Press reset button to quit.${NORMAL}"
 	echo ""
-	#echo "Additional builtin commands avaliable:"
-	#echo "	cat        mount     umount"
-	#echo "	insmod     rmmod     lsmod"
-	#echo ""
+	
 	PS1="sidux# "
 	export PS1
+
 	echo "6" > /proc/sys/kernel/printk
 
 	# Allow signals

@@ -1,8 +1,13 @@
-live-initrd-sidux (0.0.3) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.3) unstable; urgency=low
 
-  * NOT RELEASED YET
+  * synch with knoppix' 5.0.1 linuxrc code.
+    - use knoppix' 5.0.1 SCSI detection.
+    - don't allow multi images yet.
+    - mawk can do it as well as gawk
+  * allow full union XOR classic linkfarm.
+  * a lot of clean up
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Wed,  6 Dec 2006 11:52:06 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Thu,  7 Dec 2006 13:50:18 +0100
 
 live-initrd-sidux (0.0.2) unstable; urgency=low
 

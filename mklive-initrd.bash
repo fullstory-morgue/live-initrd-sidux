@@ -197,36 +197,35 @@ make_initrd_dirs() {
 #
 install_kmod() {
 	# XXX: we should use modprobe, and not use stupid module directories
-	# XXX: the .o suffix is also bullshit, its utter crap
 	local KMOD
 	local KMODS=$(modprobe --set-version=${KVERS} --ignore-install --show-depends $1 2>/dev/null)
 	for kmod in ${KMODS}; do
 		[[ -f ${kmod} ]] || continue
 		unset KMOD
 		KMOD=$(basename ${kmod})
-		if [[ ! -f ${TARGET_INITRD_DIR}/$2/${KMOD/.ko/.o} ]]; then
-			cp ${kmod} ${TARGET_INITRD_DIR}/$2/${KMOD/.ko/.o}
-			[[ ${VERBOSITY} ]] && echo "Adding module: $2/${KMOD/.ko/.o}"
+		if [[ ! -f ${TARGET_INITRD_DIR}/$2/${KMOD} ]]; then
+			cp ${kmod} ${TARGET_INITRD_DIR}/$2/
+			[[ ${VERBOSITY} ]] && echo "Adding module: $2/${KMOD}"
 		fi
 	done
 }
 
-# XXX: this is _*UGLY*_ -> FIXME please
-create_scsi_parse_file() {
-	for s in $(find /lib/modules/${KVERS}/kernel/drivers/scsi -name *.ko); do 
-		DEP=$(modinfo $s|grep ^depends:|echo $(cut -d' ' -f2-))
-		[ -n "$DEP" ] && DEP=$DEP.o
-		case $DEP in
-			*pcmcia*)
-				;;
-			*) 
-				modinfo $s|grep "^alias:"|grep pci|while read a; do
-					echo $a $DEP $(basename $s|sed s/\.ko/\.o/)|cut -f3- -d:
-				done
-				;;
-		esac
-	done|sort|uniq
-}
+## XXX: this is _*UGLY*_ -> FIXME please
+#create_scsi_parse_file() {
+#	for s in $(find /lib/modules/${KVERS}/kernel/drivers/scsi -name *.ko); do 
+#		DEP=$(modinfo $s|grep ^depends:|echo $(cut -d' ' -f2-))
+#		[ -n "$DEP" ] && DEP=$DEP.ko
+#		case $DEP in
+#			*pcmcia*)
+#				;;
+#			*) 
+#				modinfo $s|grep "^alias:"|grep pci|while read a; do
+#					echo $a $DEP $(basename $s)|cut -f3- -d:
+#				done
+#				;;
+#		esac
+#	done|sort|uniq
+#}
 
 #####################################################################
 # main()
@@ -338,3 +337,4 @@ popd >/dev/null
 echo "Compressing ${FINAL_INITRD}"
 
 exit 0
+
