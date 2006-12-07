@@ -10,7 +10,7 @@
 #
 
 # Just informational: This is a CD or DVD edition
-MEDIUM="CD"
+MEDIUM="cd"
 
 # hardcoded configurable options
 # Default maximum size of dynamic ramdisk in kilobytes
@@ -866,16 +866,16 @@ boot_from()
 
 	if [ $? -ne 0 ]; then
 		[ -n "$LOOP_SOURCE" ] && /bin/umount $LOOP_SOURCE
-		echo -n "${CRE} ${RED}Accessing sidux CDROM failed. ${MAGENTA}$TARGET_DEV${RED} is not mountable.${NORMAL}"
+		echo -n "${CRE} ${RED}Accessing sidux cdrom failed. ${MAGENTA}$TARGET_DEV${RED} is not mountable.${NORMAL}"
 		sleep 2
 		
 		return 1
 	fi
   
 	if [ -f $TARGET/$KNOPPIX_DIR/$KNOPPIX_NAME ]; then
-		echo -n "${CRE} ${GREEN}Accessing sidux CDROM at ${MAGENTA}$TARGET_DEV${GREEN}...${NORMAL}"
+		echo -n "${CRE} ${GREEN}Accessing sidux cdrom at ${MAGENTA}$TARGET_DEV${GREEN}...${NORMAL}"
 	else
-		echo -n "${CRE} ${RED}Accessing KNOPPIX CDROM failed. Could not find $KNOPPIX_DIR/$KNOPPIX_NAME on ${MAGENTA}$TARGET_DEV${RED}.${NORMAL}"
+		echo -n "${CRE} ${RED}Accessing sidux cdrom failed. Could not find $KNOPPIX_DIR/$KNOPPIX_NAME on ${MAGENTA}$TARGET_DEV${RED}.${NORMAL}"
 		[ -n "$LOOP_SOURCE" ] && /bin/umount $LOOP_SOURCE
 		umount $TARGET
 		sleep 2
@@ -942,7 +942,7 @@ copy_to()
 	
 	# sanity check
 	if [ $FOUNDSPACE -lt $SIZE ]; then
-		echo -n "${CRE} ${RED}Copying sidux CDROM failed. Not enough free space on ${MAGENTA}${TARGET_DEV_DESC}${RED}. Found: ${MAGENTA}${FOUNDSPACE}k${RED} Need: ${MAGENTA}${SIZE}k${RED} ${NORMAL}"
+		echo -n "${CRE} ${RED}Copying sidux cdrom failed. Not enough free space on ${MAGENTA}${TARGET_DEV_DESC}${RED}. Found: ${MAGENTA}${FOUNDSPACE}k${RED} Need: ${MAGENTA}${SIZE}k${RED} ${NORMAL}"
 		sleep 2
 		umount $TARGET
 
@@ -950,7 +950,7 @@ copy_to()
 	fi
 	
 	# do the real copy
-	echo "${CRE} ${GREEN}Copying sidux CDROM to ${MAGENTA}$TARGET_DEV_DESC${GREEN}... Please be patient. ${NORMAL}"
+	echo "${CRE} ${GREEN}Copying sidux cdrom to ${MAGENTA}$TARGET_DEV_DESC${GREEN}... Please be patient. ${NORMAL}"
 
 	if [ -z "$COPY_COMMAND" ] && [ -x /usr/bin/rsync ]; then
 		# first cp the small files
@@ -963,7 +963,7 @@ copy_to()
 	fi
 
 	if [ $? -ne 0 ]; then
-		echo -n "${CRE} ${RED}Copying sidux CDROM failed. ${MAGENTA}$TARGET_DEV_DESC${RED} possibly has not enough space left.${NORMAL}"
+		echo -n "${CRE} ${RED}Copying sidux cdrom failed. ${MAGENTA}$TARGET_DEV_DESC${RED} possibly has not enough space left.${NORMAL}"
 		sleep 2
 
 		return 1
@@ -1327,6 +1327,19 @@ if test -n "$FOUND_KNOPPIX"; then
 	
 	# Change root device from /dev/fd0 to /dev/ram0
 	echo "0x100" > /proc/sys/kernel/real-root-dev
+
+	# clean up /etc/rc?.d/
+	for i in 0 1 2 3 4 5 6 S; do
+		rm -rf "/etc/rc${i}.d"
+		mkdir -p "/etc/rc${i}.d"
+		ln -fs "/KNOPPIX/etc/rc${i}.d/README" "/etc/rc${i}.d/"
+	done
+	for i in 0 1 2 3 4 6; do
+		ln -fs "/KNOPPIX/etc/init.d/xsession" "/etc/rc${i}.d/K10xsession"
+	done
+	ln -fs "/KNOPPIX/etc/init.d/live-autoconfig" "/etc/rcS.d/S00live-autoconfig"
+	ln -fs "/KNOPPIX/etc/init.d/live-halt" "/etc/rc0.d/S90live-halt"
+	ln -fs "/KNOPPIX/etc/init.d/live-reboot" "/etc/rc6.d/S90live-reboot"
 
 	stage=3
 	rundebugshell	
