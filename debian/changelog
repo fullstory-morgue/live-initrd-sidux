@@ -1,8 +1,9 @@
-live-initrd-sidux (0.0.5) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.5) unstable; urgency=low
 
-  * NOT RELEASED YET
+  * fix /etc/resolv.conf for dhcp3 and other dhcp clients.
+  * remove dead code.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Fri,  8 Dec 2006 00:43:26 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Fri,  8 Dec 2006 23:09:56 +0100
 
 live-initrd-sidux (0.0.4) unstable; urgency=low
 

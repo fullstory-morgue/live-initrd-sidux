@@ -210,22 +210,6 @@ install_kmod() {
 	done
 }
 
-## XXX: this is _*UGLY*_ -> FIXME please
-#create_scsi_parse_file() {
-#	for s in $(find /lib/modules/${KVERS}/kernel/drivers/scsi -name *.ko); do 
-#		DEP=$(modinfo $s|grep ^depends:|echo $(cut -d' ' -f2-))
-#		[ -n "$DEP" ] && DEP=$DEP.ko
-#		case $DEP in
-#			*pcmcia*)
-#				;;
-#			*) 
-#				modinfo $s|grep "^alias:"|grep pci|while read a; do
-#					echo $a $DEP $(basename $s)|cut -f3- -d:
-#				done
-#				;;
-#		esac
-#	done|sort|uniq
-#}
 
 #####################################################################
 # main()

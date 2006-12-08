@@ -526,28 +526,6 @@ for d in /sys/devices/*/*; do
 	fi
 done
 
-## Trying to do kind of /proc/pci hardware detection
-#ISA_SCSI="aha1740.o aha1542.o aha152x.o pas16.o psi240i.o qlogicfas.o qlogicfc.o seagate.o t128.o u14-34f.o wd7000.o"
-#
-## New sysfs based SCSI detection
-##SYS=$(find /sys/devices/ -name modalias|xargs grep pci: -h 2>/dev/null|cut -f2 -d:)
-#SYS=$(for x in $(find /sys/devices/ -name modalias); do grep pci: $x; done|cut -f2 -d:)
-#while read id driver; do
-#	for sysid in $SYS; do
-#		case $sysid in
-#			$id)
-#				if [ -z "$SCSI_PROBE" ]; then
-#					SCSI_PROBE="$driver"
-#				else
-#					SCSI_PROBE="$SCSI_PROBE $driver"
-#				fi
-#				;;
-#		esac
-#	done
-#done <<EOF
-#$(cat /modules/scsi/scsi-modules.txt)
-#EOF
-
 if test -n "$INTERACTIVE"; then
 	# Let the user select interactively
 	askmodules SCSI $(cd /modules/scsi; echo *.ko)
@@ -1185,6 +1163,8 @@ if test -n "$FOUND_KNOPPIX"; then
 		echo ""
 		echo "${GREEN}>> Read-only ${FLL_MEDIUM} system successfully merged with read-write /ramdisk.${NORMAL}"
 		chown ${FLL_LIVE_USER}:${FLL_LIVE_USER} /home/${FLL_LIVE_USER}
+
+		#######################
 	else
 		###############
 		## link farm ##
@@ -1248,15 +1228,16 @@ if test -n "$FOUND_KNOPPIX"; then
 		ln -s /$FLL_MOUNTPOINT/var/cache/apt /var/cache/ 2>/dev/null
 		rm -f /etc/resolv.conf 2>/dev/null
 		ln -s	/$FLL_MOUNTPOINT/etc/skel \
-			/$FLL_MOUNTPOINT/etc/nessus \
-			/etc/dhcpc/resolv.conf \
 				/etc/ 2>/dev/null
+		touch /etc/resolv.conf
 	
 		# Index files can be HUGE, so better replace cache/man tree by links later
 		# cp -a /$FLL_MOUNTPOINT/var/cache/man /var/cache/ 2>/dev/null
 		# Create links from CDROM for UNWRITABLE (remaining) files
 		cp -aus /$FLL_MOUNTPOINT/var/* /var/ 2>/dev/null
 		cp -aus /$FLL_MOUNTPOINT/etc/* /etc/ 2>/dev/null
+
+		###############
 	fi
 
 	# CUPS wants writable files. :-/
