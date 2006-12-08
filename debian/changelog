@@ -1,3 +1,10 @@
+live-initrd-sidux (0.0.6) UNRELEASED; urgency=low
+
+  * NOT RELEASED YET
+  * add myself to uploaders.
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Fri,  8 Dec 2006 23:23:53 +0100
+
 live-initrd-sidux (0.0.5) unstable; urgency=low
 
   * fix /etc/resolv.conf for dhcp3 and other dhcp clients.
