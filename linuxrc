@@ -1226,10 +1226,7 @@ if test -n "$FOUND_KNOPPIX"; then
 	
 		# Debian-apt
 		ln -s /$FLL_MOUNTPOINT/var/cache/apt /var/cache/ 2>/dev/null
-		rm -f /etc/resolv.conf 2>/dev/null
-		ln -s	/$FLL_MOUNTPOINT/etc/skel \
-				/etc/ 2>/dev/null
-		touch /etc/resolv.conf
+		ln -s /$FLL_MOUNTPOINT/etc/skel /etc/ 2>/dev/null
 	
 		# Index files can be HUGE, so better replace cache/man tree by links later
 		# cp -a /$FLL_MOUNTPOINT/var/cache/man /var/cache/ 2>/dev/null
@@ -1244,7 +1241,8 @@ if test -n "$FOUND_KNOPPIX"; then
 	cp -a /$FLL_MOUNTPOINT/etc/cups/*.conf /etc/cups/ 2>/dev/null
 	
 	# resolv.conf must be writable as well
-	cp -a /$FLL_MOUNTPOINT/etc/dhcpc/resolv.conf /etc/dhcpc/ 2>/dev/null
+	rm -f /etc/resolv.conf 2>/dev/null
+	touch /etc/resolv.conf
 
 	# Make SURE that these are files, not links!
 	rm -rf	/etc/ftpusers \
