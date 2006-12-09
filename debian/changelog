@@ -1,13 +1,12 @@
-live-initrd-sidux (0.0.6) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.6) unstable; urgency=low
 
   [ Stefan Lippers-Hollmann ]
-  * NOT RELEASED YET
   * add myself to uploaders.
 
   [ Niall Walsh ]
   * change FLL_IMAGE FLL_ISO and FLL_MOUNTPOINT to SIDUX
 
- -- Niall Walsh <niallwalsh@users.berlios.de>  Sat,  9 Dec 2006 01:33:53 +0000
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sat,  9 Dec 2006 09:44:50 +0100
 
 live-initrd-sidux (0.0.5) unstable; urgency=low
 
