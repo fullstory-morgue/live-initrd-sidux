@@ -1276,6 +1276,7 @@ if test -n "$FOUND_KNOPPIX"; then
 		/$FLL_MOUNTPOINT/sbin/init \
 		/$FLL_MOUNTPOINT/etc/dhcpc \
 			/etc/ 2>/dev/null
+	chmod 440 /etc/sudoers
 
 	# Create empty utmp and wtmp
 	# /etc/ioctl.save and /etc/pnm2ppa.conf are extremly important, init crashes on shutdown if this is only a link
