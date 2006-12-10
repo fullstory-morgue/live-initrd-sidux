@@ -1,8 +1,8 @@
-live-initrd-sidux (0.0.7) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.7) unstable; urgency=low
 
-  * NOT RELEASED YET
+  * ensure correct permissions for /etc/sudoers, thanks to bfree.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sat,  9 Dec 2006 09:45:49 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 10 Dec 2006 19:56:38 +0100
 
 live-initrd-sidux (0.0.6) unstable; urgency=low
 
