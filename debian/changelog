@@ -1,3 +1,11 @@
+live-initrd-sidux (0.0.9) unstable; urgency=low
+
+  * fix /var/, /home/ usage.
+  * depend on busybox-sidux >= 1.2.2.1-2.
+  * show architecture in welcome message.
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Mon, 11 Dec 2006 14:43:53 +0100
+
 live-initrd-sidux (0.0.8) unstable; urgency=low
 
   * use bind mounts for /home/ and /var/.

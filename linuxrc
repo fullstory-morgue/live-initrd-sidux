@@ -93,17 +93,6 @@ CYAN="[1;36m"
 # BOLD WHITE: Hint
 WHITE="[1;37m"
 
-# Clear screen with colormode reset
-# echo "$CLEAR$RESET"
-# echo "$CLEAR"
-# Just go to the top of the screen
-# echo -n "[H[J"
-echo ""
-# Be verbose
-echo "${WHITE}Welcome to $FLL_DISTRO_NAME live linux!${NORMAL}"
-echo ""
-echo ""
-
 # We only need the builtin commands and /static at this point
 PATH=/static
 export PATH
@@ -121,9 +110,21 @@ echo "0" > /proc/sys/kernel/printk
 # Dynamic program loader
 # $FLL_MOUNTPOINT is already mounted when this is used.
 # fallback to i386 defaults.
+ARCHITECTURE="$(uname -m)"
 DYNLOADER="$FLL_MOUNTPOINT/lib/ld-linux.so.2"
-[ "$(uname -m)" = "x86_64" ] && DYNLOADER="$FLL_MOUNTPOINT/lib/ld-linux-x86-64.so.2"
-#[ "$(uname -m)" = "sparc" ] &&  DYNLOADER="$FLL_MOUNTPOINT/lib/ld-linux.so.2"	# default anyways
+[ "$ARCHITECTURE" = "x86_64" ] && DYNLOADER="$FLL_MOUNTPOINT/lib/ld-linux-x86-64.so.2"
+#[ "$ARCHITECTURE" = "sparc" ] &&  DYNLOADER="$FLL_MOUNTPOINT/lib/ld-linux.so.2"	# default anyways
+
+# Clear screen with colormode reset
+# echo "$CLEAR$RESET"
+# echo "$CLEAR"
+# Just go to the top of the screen
+# echo -n "[H[J"
+echo ""
+# Be verbose
+echo "${WHITE}Welcome to $FLL_DISTRO_NAME ($ARCHITECTURE) live linux!${NORMAL}"
+echo ""
+echo ""
 
 # Read boot command line with builtin cat command (shell read function fails in Kernel 2.4.19-rc1)
 CMDLINE="$(cat /proc/cmdline)"
@@ -1097,19 +1098,21 @@ if test -n "$FOUND_KNOPPIX"; then
 				/ramdisk/home/${FLL_LIVE_USER}
 
 		chmod 1777 /ramdisk/tmp
+		chown $FLL_LIVE_USER:$FLL_LIVE_USER /ramdisk/home/${FLL_LIVE_USER}
 
 		ln -snf /ramdisk/home /home
 		mv /tmp /tmp.old
 		ln -s /ramdisk/tmp /tmp
 		rm -rf tmp.old
 	else
-		mkdir -p	/ramdisk/home
+		mkdir -p	/home/ \
+				/var \
+				/ramdisk/home \
+				/ramdisk/var
+
 		/bin/mount --bind /ramdisk/home /home
-		mkdir -p	/ramdisk/var
 		/bin/mount --bind /ramdisk/var /var
 	fi
-
-	chown $FLL_LIVE_USER:$FLL_LIVE_USER /ramdisk/home/${FLL_LIVE_USER}
 
 	echo "${BLUE}Done.${NORMAL}"
 
@@ -1180,9 +1183,7 @@ if test -n "$FOUND_KNOPPIX"; then
 
 		echo -n "${CRE}${BLUE}Creating directories and symlinks on ramdisk...${NORMAL}"
 		# Create common WRITABLE (empty) dirs
-		mkdir -p	/home \
-				/var \
-				/var/run \
+		mkdir -p	/var/run \
 				/var/backups \
 				/var/cache/apache \
 				/var/local \
