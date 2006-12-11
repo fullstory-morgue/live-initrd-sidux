@@ -1,8 +1,9 @@
 live-initrd-sidux (0.0.10) UNRELEASED; urgency=low
 
   * NOT RELEASED YET
+  * don't chmod sudoers, it can act as busybox test.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Mon, 11 Dec 2006 14:46:17 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Mon, 11 Dec 2006 16:12:12 +0100
 
 live-initrd-sidux (0.0.9) unstable; urgency=low
 
