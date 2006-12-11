@@ -118,6 +118,13 @@ mount -t devpts -o noexec,nosuid devpts /dev/pts
 # Disable kernel messages while probing modules in autodetect mode
 echo "0" > /proc/sys/kernel/printk
 
+# Dynamic program loader
+# $FLL_MOUNTPOINT is already mounted when this is used.
+# fallback to i386 defaults.
+DYNLOADER="$FLL_MOUNTPOINT/lib/ld-linux.so.2"
+[ "$(uname -m)" = "x86_64" ] && DYNLOADER="$FLL_MOUNTPOINT/lib/ld-linux-x86-64.so.2"
+#[ "$(uname -m)" = "sparc" ] &&  DYNLOADER="$FLL_MOUNTPOINT/lib/ld-linux.so.2"	# default anyways
+
 # Read boot command line with builtin cat command (shell read function fails in Kernel 2.4.19-rc1)
 CMDLINE="$(cat /proc/cmdline)"
 
@@ -1090,7 +1097,6 @@ if test -n "$FOUND_KNOPPIX"; then
 				/ramdisk/home/${FLL_LIVE_USER}
 
 		chmod 1777 /ramdisk/tmp
-		chown $FLL_LIVE_USER:$FLL_LIVE_USER /ramdisk/home/${FLL_LIVE_USER}
 
 		ln -snf /ramdisk/home /home
 		mv /tmp /tmp.old
@@ -1098,10 +1104,12 @@ if test -n "$FOUND_KNOPPIX"; then
 		rm -rf tmp.old
 	else
 		mkdir -p	/ramdisk/home
-		ln -s /ramdisk/home /home
+		/bin/mount --bind /ramdisk/home /home
 		mkdir -p	/ramdisk/var
-		ln -s /ramdisk/var  /var
+		/bin/mount --bind /ramdisk/var /var
 	fi
+
+	chown $FLL_LIVE_USER:$FLL_LIVE_USER /ramdisk/home/${FLL_LIVE_USER}
 
 	echo "${BLUE}Done.${NORMAL}"
 
@@ -1144,7 +1152,7 @@ if test -n "$FOUND_KNOPPIX"; then
 			for i in bin boot etc $UNIONDEV sbin var lib opt root usr; do
 				# Move directories to unionfs
 				if test -d /$i; then
-					mv /$i /$i.old && /$FLL_MOUNTPOINT/lib/ld-linux.so.2 --library-path /$FLL_MOUNTPOINT/lib /$FLL_MOUNTPOINT/bin/ln -snf /UNIONFS/$i /$i && rm -rf /$i.old
+					mv /$i /$i.old && $DYNLOADER --library-path /$FLL_MOUNTPOINT/lib /$FLL_MOUNTPOINT/bin/ln -snf /UNIONFS/$i /$i && rm -rf /$i.old
 				else
 					ln -snf /UNIONFS/$i /$i
 				fi

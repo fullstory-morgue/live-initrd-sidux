@@ -1,8 +1,9 @@
-live-initrd-sidux (0.0.8) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.8) unstable; urgency=low
 
-  * NOT RELEASED YET
+  * use bind mounts for /home/ and /var/.
+  * fix ld-linux-x86-64.so.2 vs ld-linux.so.2 usage.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 10 Dec 2006 19:58:15 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Mon, 11 Dec 2006 14:26:42 +0100
 
 live-initrd-sidux (0.0.7) unstable; urgency=low
 
