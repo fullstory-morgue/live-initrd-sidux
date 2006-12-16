@@ -998,8 +998,8 @@ if  test -n "$DO_REMOUNT" -a -n "$FOUND_KNOPPIX"; then
 	cat /$FLL_MOUNTPOINT/etc/ld.so.cache > /etc/ld.so.cache 
 	echo "" 
 	
-	SOURCE="/$FLL_MEDIUM"
-	TARGET="/$FLL_MEDIUM2"
+	SOURCE="/${FLL_MEDIUM}"
+	TARGET="/${FLL_MEDIUM}2"
 	
 	# first test for possible hdboot/fromiso (which can be combined with toram / tohd)
 	if [ -n "$BOOTFROM" ]; then
@@ -1008,8 +1008,8 @@ if  test -n "$DO_REMOUNT" -a -n "$FOUND_KNOPPIX"; then
 			# set new source / target paths
 			REAL_TARGET="$TARGET"
 			SOURCE2="$LOOP_SOURCE"
-			SOURCE="/$FLL_MEDIUM2"
-			TARGET="/$FLL_MEDIUM3"
+			SOURCE="/${FLL_MEDIUM}2"
+			TARGET="/${FLL_MEDIUM}3"
 		fi
 	fi
 

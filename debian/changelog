@@ -2,8 +2,9 @@ live-initrd-sidux (0.0.10) UNRELEASED; urgency=low
 
   * NOT RELEASED YET
   * don't chmod sudoers, it can act as busybox test.
+  * cheat code toram was failing. protect the var FLL_MEDIUM on some places
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Mon, 11 Dec 2006 16:12:12 +0100
+ -- Joaquim Boura <x-un-i@sidux.com>  Sat, 16 Dec 2006 09:49:45 +0100
 
 live-initrd-sidux (0.0.9) unstable; urgency=low
 
