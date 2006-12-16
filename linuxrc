@@ -725,11 +725,11 @@ for i in $DEVICES; do
 		fi
 	else
 		if mountit $i /isosrc "-o ro" >/dev/null 2>&1; then
-			if test -f /isosrc/$KNOPPIX_ISO; then
+			if test -f /isosrc/$FLL_ISO; then
 				if mount -o loop,ro /isosrc/$FLL_ISO /$FLL_MEDIUM >/dev/null 2>&1; then
 					if test -f /$FLL_MEDIUM/$FLL_IMAGE; then
 						echo -n "${CRE} ${GREEN}Accessing $FLL_DISTRO_NAME image at ${MAGENTA}$i/$FLL_IMAGE${GREEN}...${NORMAL}"
-						FOUND_KNOPPIX="$i/$KNOPPIX_ISO"
+						FOUND_KNOPPIX="$i/$FLL_ISO"
 						break
 					fi
 			
