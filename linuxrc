@@ -755,13 +755,13 @@ mount_knoppix()
 			"#!/b")
 				COMP=cloop
 				loadmodule cloop file="$1/$FLL_IMAGE"
-				mountit /dev/cloop /$FLL_MOUNTPOINT "-o ro" || FOUND_KNOPPIX=""
+				mountit /dev/cloop $FLL_MOUNTPOINT "-o ro" || FOUND_KNOPPIX=""
 				;;
 			"hsqs")
 				COMP=squashfs
 				loadmodule loop
 				loadmodule squashfs 
-				mount -t squashfs $1/$FLL_IMAGE /$FLL_MOUNTPOINT -o loop,ro || FOUND_KNOPPIX=""
+				mount -t squashfs $1/$FLL_IMAGE $FLL_MOUNTPOINT -o loop,ro || FOUND_KNOPPIX=""
 				;;
 		esac
 	fi
@@ -835,15 +835,15 @@ boot_from()
 	LOOP_SOURCE=""
   
 	# load filesystems
-	/$FLL_MOUNTPOINT/sbin/modprobe reiserfs
-	/$FLL_MOUNTPOINT/sbin/modprobe ntfs
+	$FLL_MOUNTPOINT/sbin/modprobe reiserfs
+	$FLL_MOUNTPOINT/sbin/modprobe ntfs
  
 	if [ -n "$ISO_PATH" ]; then
 		LOOP_SOURCE="$TARGET.loop"
 		LOOP_SOURCE2="$LOOP_SOURCE"
 		TARGET_DEV="$LOOP_SOURCE$ISO_PATH"
 		/bin/mkdir $LOOP_SOURCE
-		/$FLL_MOUNTPOINT/sbin/modprobe loop
+		$FLL_MOUNTPOINT/sbin/modprobe loop
 
 		/bin/mount -o ro $LOOP_DEV $LOOP_SOURCE || LOOP_SOURCE=""
 		/bin/mount -n -o loop $LOOP_SOURCE2$ISO_PATH $TARGET
@@ -897,15 +897,15 @@ copy_to()
 			TARGET_DEV_DESC="$TARGET_DEV"
 
 			# load filesystems
-			/$FLL_MOUNTPOINT/sbin/modprobe reiserfs
-			/$FLL_MOUNTPOINT/sbin/modprobe jbd
-			/$FLL_MOUNTPOINT/sbin/modprobe ext3
-			#/$FLL_MOUNTPOINT/sbin/modprobe fuse	#we don't allow writing to ntfs, sorry
+			$FLL_MOUNTPOINT/sbin/modprobe reiserfs
+			$FLL_MOUNTPOINT/sbin/modprobe jbd
+			$FLL_MOUNTPOINT/sbin/modprobe ext3
+			#$FLL_MOUNTPOINT/sbin/modprobe fuse	#we don't allow writing to ntfs, sorry
 			FS="ext3 ext2 reiserfs vfat"
 			MOUNTED=""
 			
 			for i in $FS; do
-				if /$FLL_MOUNTPOINT/bin/mount -o rw -t "$i" "$TARGET_DEV" "$TARGET"; then
+				if $FLL_MOUNTPOINT/bin/mount -o rw -t "$i" "$TARGET_DEV" "$TARGET"; then
 					MOUNTED="true"
 					break
 				fi
@@ -995,7 +995,7 @@ esac
 # pre-test if everything succeeded
 if  test -n "$DO_REMOUNT" -a -n "$FOUND_KNOPPIX"; then
 	# copy library cache 
-	cat /$FLL_MOUNTPOINT/etc/ld.so.cache > /etc/ld.so.cache 
+	cat $FLL_MOUNTPOINT/etc/ld.so.cache > /etc/ld.so.cache 
 	echo "" 
 	
 	SOURCE="/${FLL_MEDIUM}"
@@ -1021,7 +1021,7 @@ fi
 # Final test if everything succeeded.
 if test -n "$FOUND_KNOPPIX"; then
 	# copy library cache
-	cat /$FLL_MOUNTPOINT/etc/ld.so.cache > /etc/ld.so.cache
+	cat $FLL_MOUNTPOINT/etc/ld.so.cache > /etc/ld.so.cache
 	echo ""
 
 	# don't use unionfs unconditionally for now
@@ -1040,11 +1040,11 @@ if test -n "$FOUND_KNOPPIX"; then
 	export PATH
 
 	# Debian weirdness
-	/$FLL_MOUNTPOINT/bin/cp -a /$FLL_MOUNTPOINT/etc/alternatives /etc/ 2>/dev/null
+	$FLL_MOUNTPOINT/bin/cp -a $FLL_MOUNTPOINT/etc/alternatives /etc/ 2>/dev/null
 	
 	# Replace /sbin
-	/$FLL_MOUNTPOINT/bin/rm -f /sbin
-	/$FLL_MOUNTPOINT/bin/ln -sf /$FLL_MOUNTPOINT/sbin /sbin
+	$FLL_MOUNTPOINT/bin/rm -f /sbin
+	$FLL_MOUNTPOINT/bin/ln -sf $FLL_MOUNTPOINT/sbin /sbin
 	
 	# From here, we should have all essential commands available.
 	hash -r
@@ -1055,7 +1055,7 @@ if test -n "$FOUND_KNOPPIX"; then
 	fi
 	
 	# Clean up /
-	/$FLL_MOUNTPOINT/bin/rm -rf /modules /static
+	$FLL_MOUNTPOINT/bin/rm -rf /modules /static
 	
 	# New in Kernel 2.4.x: tempfs with variable ramdisk size.
 	# We check for available memory anyways and limit the ramdisks
@@ -1135,7 +1135,7 @@ if test -n "$FOUND_KNOPPIX"; then
 #		done
 		# FIXME:Multi-Image
 		# No multi-images in here
-		[ -d "$FLL_MOUNTPOINT" ] && UNION="$UNION:/$FLL_MOUNTPOINT=ro"
+		[ -d "$FLL_MOUNTPOINT" ] && UNION="$UNION:$FLL_MOUNTPOINT=ro"
 		# Do the actual mount
 		if /bin/mount -t unionfs -o "dirs=$UNION,delete=whiteout" /UNIONFS /UNIONFS; then
 			# We now have unionfs, copy some data from the initial ramdisk first
@@ -1155,7 +1155,7 @@ if test -n "$FOUND_KNOPPIX"; then
 			for i in bin boot etc $UNIONDEV sbin var lib opt root usr; do
 				# Move directories to unionfs
 				if test -d /$i; then
-					mv /$i /$i.old && $DYNLOADER --library-path /$FLL_MOUNTPOINT/lib /$FLL_MOUNTPOINT/bin/ln -snf /UNIONFS/$i /$i && rm -rf /$i.old
+					mv /$i /$i.old && $DYNLOADER --library-path $FLL_MOUNTPOINT/lib $FLL_MOUNTPOINT/bin/ln -snf /UNIONFS/$i /$i && rm -rf /$i.old
 				else
 					ln -snf /UNIONFS/$i /$i
 				fi
@@ -1168,7 +1168,7 @@ if test -n "$FOUND_KNOPPIX"; then
 			done
 		else
 			echo -n "${CRE}${RED}ERROR: CANNOT UNITE READ-ONLY MEDIA AND INITIAL RAMDISK!${NORMAL}"
-			/$FLL_MOUNTPOINT/sbin/halt -f -n
+			$FLL_MOUNTPOINT/sbin/halt -f -n
 		fi
 	
 		echo ""
@@ -1204,50 +1204,50 @@ if test -n "$FOUND_KNOPPIX"; then
 		chown ${FLL_LIVE_USER}:${FLL_LIVE_USER} /home/${FLL_LIVE_USER}
 
 		# All files in here should be size zero after Knoppix.clean was run
-		cp -a	/$FLL_MOUNTPOINT/var/local \
-			/$FLL_MOUNTPOINT/var/games \
-			/$FLL_MOUNTPOINT/var/log \
-			/$FLL_MOUNTPOINT/var/spool \
+		cp -a	$FLL_MOUNTPOINT/var/local \
+			$FLL_MOUNTPOINT/var/games \
+			$FLL_MOUNTPOINT/var/log \
+			$FLL_MOUNTPOINT/var/spool \
 				/var/ 2>/dev/null
-		cp -a	/$FLL_MOUNTPOINT/var/lib/games \
-			/$FLL_MOUNTPOINT/var/lib/wine \
-			/$FLL_MOUNTPOINT/var/lib/nfs \
-			/$FLL_MOUNTPOINT/var/lib/xkb \
-			/$FLL_MOUNTPOINT/var/lib/isdn \
-			/$FLL_MOUNTPOINT/var/lib/kdm \
-			/$FLL_MOUNTPOINT/var/lib/pcmcia \
-			/$FLL_MOUNTPOINT/var/lib/dhcp* \
+		cp -a	$FLL_MOUNTPOINT/var/lib/games \
+			$FLL_MOUNTPOINT/var/lib/wine \
+			$FLL_MOUNTPOINT/var/lib/nfs \
+			$FLL_MOUNTPOINT/var/lib/xkb \
+			$FLL_MOUNTPOINT/var/lib/isdn \
+			$FLL_MOUNTPOINT/var/lib/kdm \
+			$FLL_MOUNTPOINT/var/lib/pcmcia \
+			$FLL_MOUNTPOINT/var/lib/dhcp* \
 				/var/lib/ 2>/dev/null
 	
 		# Link device files (real device file copies should NOT require more space, but in fact, they do)
 		cp -aus /dev/capi /dev/ 2>/dev/null
-		ln -s /$FLL_MOUNTPOINT/dev/* /dev/ 2>/dev/null
+		ln -s $FLL_MOUNTPOINT/dev/* /dev/ 2>/dev/null
 	
 		# Problematic directories in /var/lib (lots and lots of inodes)
-		ln -s	/$FLL_MOUNTPOINT/var/lib/dpkg \
-			/$FLL_MOUNTPOINT/var/lib/apt \
-			/$FLL_MOUNTPOINT/var/lib/doc-base \
-			/$FLL_MOUNTPOINT/var/lib/gnome \
-			/$FLL_MOUNTPOINT/var/lib/kde \
-			/$FLL_MOUNTPOINT/var/lib/scrollkeeper \
-			/$FLL_MOUNTPOINT/var/lib/texmf \
+		ln -s	$FLL_MOUNTPOINT/var/lib/dpkg \
+			$FLL_MOUNTPOINT/var/lib/apt \
+			$FLL_MOUNTPOINT/var/lib/doc-base \
+			$FLL_MOUNTPOINT/var/lib/gnome \
+			$FLL_MOUNTPOINT/var/lib/kde \
+			$FLL_MOUNTPOINT/var/lib/scrollkeeper \
+			$FLL_MOUNTPOINT/var/lib/texmf \
 				/var/lib/ 2>/dev/null
 	
 		# Debian-apt
-		ln -s /$FLL_MOUNTPOINT/var/cache/apt /var/cache/ 2>/dev/null
-		ln -s /$FLL_MOUNTPOINT/etc/skel /etc/ 2>/dev/null
+		ln -s $FLL_MOUNTPOINT/var/cache/apt /var/cache/ 2>/dev/null
+		ln -s $FLL_MOUNTPOINT/etc/skel /etc/ 2>/dev/null
 	
 		# Index files can be HUGE, so better replace cache/man tree by links later
-		# cp -a /$FLL_MOUNTPOINT/var/cache/man /var/cache/ 2>/dev/null
+		# cp -a $FLL_MOUNTPOINT/var/cache/man /var/cache/ 2>/dev/null
 		# Create links from CDROM for UNWRITABLE (remaining) files
-		cp -aus /$FLL_MOUNTPOINT/var/* /var/ 2>/dev/null
-		cp -aus /$FLL_MOUNTPOINT/etc/* /etc/ 2>/dev/null
+		cp -aus $FLL_MOUNTPOINT/var/* /var/ 2>/dev/null
+		cp -aus $FLL_MOUNTPOINT/etc/* /etc/ 2>/dev/null
 
 		###############
 	fi
 
 	# CUPS wants writable files. :-/
-	cp -a /$FLL_MOUNTPOINT/etc/cups/*.conf /etc/cups/ 2>/dev/null
+	cp -a $FLL_MOUNTPOINT/etc/cups/*.conf /etc/cups/ 2>/dev/null
 	
 	# resolv.conf must be writable as well
 	rm -f /etc/resolv.conf 2>/dev/null
@@ -1271,19 +1271,19 @@ if test -n "$FOUND_KNOPPIX"; then
 		/etc/dhcpc \
 		/etc/pnm2ppa.conf 2>/dev/null
 
-	cp -a	/$FLL_MOUNTPOINT/etc/ftpusers \
-		/$FLL_MOUNTPOINT/etc/passwd \
-		/$FLL_MOUNTPOINT/etc/shadow \
-		/$FLL_MOUNTPOINT/etc/gshadow \
-		/$FLL_MOUNTPOINT/etc/group \
-		/$FLL_MOUNTPOINT/etc/ppp \
-		/$FLL_MOUNTPOINT/etc/isdn \
-		/$FLL_MOUNTPOINT/etc/ssh \
-		/$FLL_MOUNTPOINT/etc/inittab \
-		/$FLL_MOUNTPOINT/etc/network \
-		/$FLL_MOUNTPOINT/etc/sudoers \
-		/$FLL_MOUNTPOINT/sbin/init \
-		/$FLL_MOUNTPOINT/etc/dhcpc \
+	cp -a	$FLL_MOUNTPOINT/etc/ftpusers \
+		$FLL_MOUNTPOINT/etc/passwd \
+		$FLL_MOUNTPOINT/etc/shadow \
+		$FLL_MOUNTPOINT/etc/gshadow \
+		$FLL_MOUNTPOINT/etc/group \
+		$FLL_MOUNTPOINT/etc/ppp \
+		$FLL_MOUNTPOINT/etc/isdn \
+		$FLL_MOUNTPOINT/etc/ssh \
+		$FLL_MOUNTPOINT/etc/inittab \
+		$FLL_MOUNTPOINT/etc/network \
+		$FLL_MOUNTPOINT/etc/sudoers \
+		$FLL_MOUNTPOINT/sbin/init \
+		$FLL_MOUNTPOINT/etc/dhcpc \
 			/etc/ 2>/dev/null
 
 	# Create empty utmp and wtmp
@@ -1304,7 +1304,7 @@ if test -n "$FOUND_KNOPPIX"; then
 	[ -d /var/lib/samba ] && :> /var/lib/samba/unexpected.tdb
 
 	# Diet libc bug workaround
-	/bin/cp -f /$FLL_MOUNTPOINT/etc/localtime /etc/localtime
+	/bin/cp -f $FLL_MOUNTPOINT/etc/localtime /etc/localtime
 
 	# busybox/cloop workaround
 	chmod 1777 /tmp /var/tmp
@@ -1313,7 +1313,7 @@ if test -n "$FOUND_KNOPPIX"; then
 
 	# Clean up /etc/mtab (and - just in case - make a nice entry for looped ISO)
 	# FIXME Multi-Image
-	/bin/egrep " /$FLL_MOUNTPOINT | /$FLL_MEDIUM " /proc/mounts | sed 's|/dev/loop0 /$FLL_MEDIUM \(.*\) 0 0|'$LOOP_SOURCE$ISO_PATH' /$FLL_MEDIUM/ \1,loop=/dev/loop0 0 0|g' >> /etc/mtab
+	/bin/egrep " $FLL_MOUNTPOINT | /$FLL_MEDIUM " /proc/mounts | sed 's|/dev/loop0 /$FLL_MEDIUM \(.*\) 0 0|'$LOOP_SOURCE$ISO_PATH' /$FLL_MEDIUM/ \1,loop=/dev/loop0 0 0|g' >> /etc/mtab
 
 	# Now tell kernel where the real modprobe lives
 	echo "/sbin/modprobe" > /proc/sys/kernel/modprobe
@@ -1325,14 +1325,14 @@ if test -n "$FOUND_KNOPPIX"; then
 	for i in 0 1 2 3 4 5 6 S; do
 		rm -rf "/etc/rc${i}.d"
 		mkdir -p "/etc/rc${i}.d"
-		ln -fs "/$FLL_MOUNTPOINT/etc/rc${i}.d/README" "/etc/rc${i}.d/"
+		ln -fs "$FLL_MOUNTPOINT/etc/rc${i}.d/README" "/etc/rc${i}.d/"
 	done
 	for i in 0 1 2 3 4 6; do
-		ln -fs "/$FLL_MOUNTPOINT/etc/init.d/xsession" "/etc/rc${i}.d/K10xsession"
+		ln -fs "$FLL_MOUNTPOINT/etc/init.d/xsession" "/etc/rc${i}.d/K10xsession"
 	done
-	ln -fs "/$FLL_MOUNTPOINT/etc/init.d/live-autoconfig" "/etc/rcS.d/S00live-autoconfig"
-	ln -fs "/$FLL_MOUNTPOINT/etc/init.d/live-halt" "/etc/rc0.d/S90live-halt"
-	ln -fs "/$FLL_MOUNTPOINT/etc/init.d/live-reboot" "/etc/rc6.d/S90live-reboot"
+	ln -fs "$FLL_MOUNTPOINT/etc/init.d/live-autoconfig" "/etc/rcS.d/S00live-autoconfig"
+	ln -fs "$FLL_MOUNTPOINT/etc/init.d/live-halt" "/etc/rc0.d/S90live-halt"
+	ln -fs "$FLL_MOUNTPOINT/etc/init.d/live-reboot" "/etc/rc6.d/S90live-reboot"
 
 	stage=3
 	rundebugshell	
