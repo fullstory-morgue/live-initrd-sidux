@@ -1,3 +1,9 @@
+live-initrd-sidux (0.0.13) UNRELEASED; urgency=low
+
+  * NOT RELEASED YET
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 17 Dec 2006 11:17:54 +0100
+
 live-initrd-sidux (0.0.12) unstable; urgency=low
 
   * removed extra / before FLL_MOUNTPOINT
