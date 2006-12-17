@@ -1,6 +1,5 @@
-live-initrd-sidux (0.0.12) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.12) unstable; urgency=low
 
-  * NOT RELEASED YET
   * removed extra / before FLL_MOUNTPOINT
 
  -- Joaquim Boura <x-un-i@sidux.com>  Sun, 17 Dec 2006 01:06:54 +0100
