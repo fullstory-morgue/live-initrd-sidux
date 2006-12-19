@@ -1093,7 +1093,7 @@ if test -n "$FOUND_KNOPPIX"; then
 	# We need /bin/mount here for the -o size= option
 	/bin/mount -t tmpfs -o "size=${RAMSIZE}k" /ramdisk /ramdisk || echo "creating the ramdisk failed"
 
-	if [ "$UNIONS" = "yes" ]; then
+	if [ "$UNIONFS" = "yes" ]; then
 		mkdir -p	/ramdisk/tmp \
 				/ramdisk/home/${FLL_LIVE_USER}
 
@@ -1120,7 +1120,7 @@ if test -n "$FOUND_KNOPPIX"; then
 	rundebugshell
 
         # don't use unionfs unconditionally for now
-        if [ "$UNIONS" = "yes" ]; then
+        if [ "$UNIONFS" = "yes" ]; then
 		#######################
 		## unionfs adventure ##
 		#######################
