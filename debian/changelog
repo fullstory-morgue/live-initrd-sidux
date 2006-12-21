@@ -1,9 +1,5 @@
-live-initrd-sidux (0.0.13) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.13) unstable; urgency=low
 
-  [ Stefan Lippers-Hollmann ]
-  * NOT RELEASED YET
-
-  [ Niall Walsh ]
   * new unionfs cheat by slh now usable
 
  -- Niall Walsh <niallwalsh@users.berlios.de>  Tue, 19 Dec 2006 11:58:28 +0000
