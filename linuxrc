@@ -37,6 +37,11 @@ MODULE_DIRS="/$FLL_MEDIUM/$FLL_IMAGE_DIR/modules /modules /modules/scsi"
 # Builtin fielsystems
 BUILTIN_FS="iso9660 ext2 ext3 reiserfs vfat reiser"
 
+# Load loop and squashfs
+[ -f /modules/loop.*o ] && $INSMOD /modules/loop.*o >/dev/null 2>&1
+[ -f /modules/squashfs.*o ] && $INSMOD /modules/squashfs.*o >/dev/null 2>&1
+
+
 # Don't allow interrupt signals
 trap "" 1 2 3 15
 
@@ -234,14 +239,14 @@ case "$CMDLINE" in
 		;;
 esac
 
+FLL_IMAGE="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
+FLL_ISO="$FLL_ISO_DIR/$FLL_ISO_NAME"
+
 case "$CMDLINE" in
 	*fromiso=*)
 		FLL_ISO="$fromiso"
 		;;
 esac
-
-FLL_IMAGE="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
-FLL_ISO="$FLL_ISO_DIR/$FLL_ISO_NAME"
 
 # Run a shell if in debug mode
 stage=1

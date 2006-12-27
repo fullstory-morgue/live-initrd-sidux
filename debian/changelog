@@ -1,8 +1,8 @@
 live-initrd-sidux (0.0.14) UNRELEASED; urgency=low
 
   * NOT RELEASED YET
-
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Thu, 21 Dec 2006 22:12:50 +0100
+  * load loop and squashfs modules.
+ -- Joaquim Boura <x-un-i@sidux.com>  Wed, 27 Dec 2006 13:07:15 +0100
 
 live-initrd-sidux (0.0.13) unstable; urgency=low
 
