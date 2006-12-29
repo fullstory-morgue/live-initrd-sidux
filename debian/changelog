@@ -1,7 +1,6 @@
-live-initrd-sidux (0.0.14) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.14) unstable; urgency=low
 
   [ Joaquim Boura ]
-  * NOT RELEASED YET
   * load loop and squashfs modules.
 
   [ Kel Modderman ]
