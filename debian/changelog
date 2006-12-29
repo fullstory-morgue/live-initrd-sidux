@@ -1,8 +1,8 @@
 live-initrd-sidux (0.0.15) UNRELEASED; urgency=low
 
-  * NOT RELEASED YET
+  * Quick hack to ensure linuxrc is never symlinked to busybox.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Fri, 29 Dec 2006 23:55:25 +0100
+ -- Kel Modderman <kel@otaku42.de>  Sat, 30 Dec 2006 08:57:32 +1000
 
 live-initrd-sidux (0.0.14) unstable; urgency=low
 
@@ -11,9 +11,8 @@ live-initrd-sidux (0.0.14) unstable; urgency=low
 
   [ Kel Modderman ]
   * Print kernel version to stdout.
-  * Quick hack to ensure linuxrc is never symlinked to busybox.
 
- -- Kel Modderman <kel@otaku42.de>  Sat, 30 Dec 2006 08:57:32 +1000
+ -- Kel Modderman <kel@otaku42.de>  Sat, 30 Dec 2006 08:45:34 +1000
 
 live-initrd-sidux (0.0.13) unstable; urgency=low
 
