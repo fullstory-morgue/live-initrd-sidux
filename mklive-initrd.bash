@@ -269,6 +269,11 @@ install -m 0755 ${BUSYBOX_BIN} ${TARGET_INITRD_DIR}/static/busybox
 
 # Create busybox softlinks
 for bb in $(< ${BUSYBOX_LINKS}); do
+	case "$bb" in
+		*linuxrc)
+			continue
+			;;
+	esac
 	make_initrd_symlinks busybox static/${bb/*\//}
 done
 
