@@ -1,8 +1,13 @@
 live-initrd-sidux (0.0.14) UNRELEASED; urgency=low
 
+  [ Joaquim Boura ]
   * NOT RELEASED YET
   * load loop and squashfs modules.
- -- Joaquim Boura <x-un-i@sidux.com>  Wed, 27 Dec 2006 13:07:15 +0100
+
+  [ Kel Modderman ]
+  * Print kernel version to stdout.
+
+ -- Kel Modderman <kel@otaku42.de>  Sat, 30 Dec 2006 08:45:34 +1000
 
 live-initrd-sidux (0.0.13) unstable; urgency=low
 

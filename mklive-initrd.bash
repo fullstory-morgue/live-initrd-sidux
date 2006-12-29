@@ -216,7 +216,7 @@ install_kmod() {
 
 trap "{ make_miniroot_and_cleanup; }" SIGINT SIGTERM EXIT
 
-echo "Creating live initrd for ${FLL_DISTRO_NAME}"
+echo "Creating live initrd for ${FLL_DISTRO_NAME} (${KVERS})."
 
 # Initialise miniroot ramdisk
 dd if=/dev/zero of=${TARGET_INITRD} bs=1k count=${TARGET_INITRD_SIZE} >/dev/null 2>&1
