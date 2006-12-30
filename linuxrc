@@ -239,14 +239,14 @@ case "$CMDLINE" in
 		;;
 esac
 
-FLL_IMAGE="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
-FLL_ISO="$FLL_ISO_DIR/$FLL_ISO_NAME"
-
 case "$CMDLINE" in
 	*fromiso=*)
 		FLL_ISO="$fromiso"
 		;;
 esac
+
+FLL_IMAGE="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
+FLL_ISO="$FLL_ISO_DIR/$FLL_ISO_NAME"
 
 # Run a shell if in debug mode
 stage=1
