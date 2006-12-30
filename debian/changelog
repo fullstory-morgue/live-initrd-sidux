@@ -1,7 +1,6 @@
-live-initrd-sidux (0.0.16) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.16) unstable; urgency=low
 
   [ Joaquim Boura ]
-  * NOT RELEASED YET
   * misplaced lines... (really one should parse the grub line)
 
   [ Kel Modderman ]
