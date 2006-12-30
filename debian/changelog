@@ -1,3 +1,9 @@
+live-initrd-sidux (0.0.16) UNRELEASED; urgency=low
+
+  * NOT RELEASED YET
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sat, 30 Dec 2006 01:14:25 +0100
+
 live-initrd-sidux (0.0.15) unstable; urgency=low
 
   * Quick hack to ensure linuxrc is never symlinked to busybox.
