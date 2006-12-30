@@ -1,9 +1,14 @@
 live-initrd-sidux (0.0.16) UNRELEASED; urgency=low
 
+  [ Joaquim Boura ]
   * NOT RELEASED YET
   * misplaced lines... (really one should parse the grub line)
 
- -- Joaquim Boura <x-un-i@sidux.com>  Sat, 30 Dec 2006 13:58:12 +0100
+  [ Kel Modderman ]
+  * Really honor --output option.
+  * Clean up trap usage.
+
+ -- Kel Modderman <kel@otaku42.de>  Sat, 30 Dec 2006 23:30:47 +1000
 
 live-initrd-sidux (0.0.15) unstable; urgency=low
 

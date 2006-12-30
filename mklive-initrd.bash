@@ -74,7 +74,7 @@ TARGET_INITRD="${TARGET_INITRD_TMPDIR}/${TARGET_INITRD_NAME}"
 TARGET_INITRD_SIZE="10000"
 TARGET_INITRD_DIR=$(mktemp -d)
 
-FINAL_INITRD="/boot/live-miniroot-${KVERS}.gz"
+: ${FINAL_INITRD:="/boot/live-miniroot-${KVERS}.gz"}
 
 # Static shell binary provided by busybox-sidux
 BUSYBOX_BIN="/usr/lib/busybox-sidux/busybox.static"
@@ -214,7 +214,7 @@ install_kmod() {
 #####################################################################
 # main()
 
-trap "{ make_miniroot_and_cleanup; }" SIGINT SIGTERM EXIT
+trap make_miniroot_and_cleanup exit
 
 echo "Creating live initrd for ${FLL_DISTRO_NAME} (${KVERS})."
 
