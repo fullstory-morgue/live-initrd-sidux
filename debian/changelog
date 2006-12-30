@@ -1,4 +1,4 @@
-live-initrd-sidux (0.0.15) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.15) unstable; urgency=low
 
   * Quick hack to ensure linuxrc is never symlinked to busybox.
 
