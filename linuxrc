@@ -4,6 +4,7 @@
 # (C) Klaus Knopper <knoppix@knopper.net>
 # (C) 2003-2006 Joerg Schirottke <master@kanotix.com>
 # (C) 2006 Stefan Lippers-Hollmann <s.l-h@gmx.de>
+# License: GPL V2.
 #
 # This script needs some of the builtin busybox commands (if, test, ...)
 # mount/umount, insmod/rmmod are also a builtin in busybox.

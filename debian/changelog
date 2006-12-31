@@ -1,3 +1,11 @@
+live-initrd-sidux (0.0.17) unstable; urgency=low
+
+  * NOT RELEASED YET
+  * add knoppix 5.1.0 linuxrc to contrib.
+  * import license clarification from Klaus Knopper.
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 31 Dec 2006 01:00:04 +0100
+
 live-initrd-sidux (0.0.16) unstable; urgency=low
 
   [ Joaquim Boura ]
