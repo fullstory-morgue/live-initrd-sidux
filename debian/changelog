@@ -1,3 +1,9 @@
+live-initrd-sidux (0.0.19) UNRELEASED; urgency=low
+
+  * NOT RELEASED YET
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 31 Dec 2006 14:46:31 +0100
+
 live-initrd-sidux (0.0.18) unstable; urgency=low
 
   * bindmount /home/ for unionfs as well.
