@@ -1,8 +1,9 @@
 live-initrd-sidux (0.0.20) UNRELEASED; urgency=low
 
   * NOT RELEASED YET
+  * use loadmodule to load the loop and squashfs modules
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 31 Dec 2006 14:55:48 +0100
+ -- Joaquim Boura <x-un-i@sidux.com>  Sun, 31 Dec 2006 17:43:22 +0100
 
 live-initrd-sidux (0.0.19) unstable; urgency=low
 
