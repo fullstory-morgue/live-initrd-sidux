@@ -38,10 +38,6 @@ MODULE_DIRS="/$FLL_MEDIUM/$FLL_IMAGE_DIR/modules /modules"
 # Builtin fielsystems
 BUILTIN_FS="iso9660 ext2"
 
-# Load loop and squashfs
-loadmodule loop
-loadmodule squashfs
-
 # Don't allow interrupt signals
 trap "" 1 2 3 11 15
 
@@ -135,10 +131,10 @@ DYNLOADER="$FLL_MOUNTPOINT/lib/ld-linux.so.2"
 #[ "$ARCHITECTURE" = "sparc" ] &&  DYNLOADER="$FLL_MOUNTPOINT/lib/ld-linux.so.2"	# default anyways
 
 # Clear screen with colormode reset
-# echo "$CLEAR$RESET"
-# echo "$CLEAR"
+echo "$CLEAR$RESET"
+echo "$CLEAR"
 # Just go to the top of the screen
-# echo -n "[H[J"
+echo -n "[H[J"
 echo ""
 # Be verbose
 echo "${WHITE}Welcome to $FLL_DISTRO_NAME ($ARCHITECTURE) live linux!${NORMAL}"
@@ -263,8 +259,7 @@ FLL_IMAGE="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
 FLL_ISO="$FLL_ISO_DIR/$FLL_ISO_NAME"
 
 # Print kernel info
-read a b KERNEL relax >/dev/null 2>&1 </proc/version
-echo "${GREEN}Running Linux Kernel ${YELLOW}$KERNEL${GREEN}.${NORMAL}"
+echo "${GREEN}Running Linux Kernel ${YELLOW}$(uname -r)${GREEN}.${NORMAL}"
 
 # Get total ramsize, and available real ram in kB. We need this later.
 # Note that FREEMEM is incorrect, we should add MemCached,
@@ -281,7 +276,7 @@ while read info amount kb; do
 done </proc/meminfo
 
 # Print meminfo.
-echo "${CRE}${BLUE}Total Memory available: ${YELLOW}${TOTALMEM}kB${BLUE}, Memory free: ${YELLOW}${FREEMEM}kB${BLUE}.${NORMAL}"
+echo "${BLUE}Total Memory available: ${YELLOW}${TOTALMEM}kB${BLUE}, Memory free: ${YELLOW}${FREEMEM}kB${BLUE}.${NORMAL}"
 
 # New in Knoppix 5.1: cloop preload cache
 # Default values
@@ -1222,25 +1217,22 @@ if test -n "$FOUND_KNOPPIX"; then
 	/bin/mount -t tmpfs -o "size=${RAMSIZE}k,mode=755" /ramdisk /ramdisk || echo "creating the ramdisk failed"
 
 	if [ "$UNIONFS" = "yes" ] || [ "$AUFS" = "yes" ]; then
-		mkdir -p	/ramdisk/tmp \
-				/ramdisk/home/${FLL_LIVE_USER}
-
+		mkdir -p	/ramdisk/tmp
 		chmod 1777 /ramdisk/tmp
-		/bin/mount --bind /ramdisk/home /home
-		chown $FLL_LIVE_USER:$FLL_LIVE_USER /ramdisk/home/${FLL_LIVE_USER}
-
 		mv /tmp /tmp.old
 		ln -s /ramdisk/tmp /tmp
 		rm -rf tmp.old
 	else
-		mkdir -p	/home/ \
-				/var \
-				/ramdisk/home \
+		mkdir -p	/var \
 				/ramdisk/var
 
-		/bin/mount --bind /ramdisk/home /home
-		/bin/mount --bind /ramdisk/var /var
+		ln -s /ramdisk/var /var
 	fi
+
+	mkdir -p	/home \
+			/ramdisk/home/${FLL_LIVE_USER}
+	/bin/mount --bind /ramdisk/home /home
+	chown $FLL_LIVE_USER:$FLL_LIVE_USER /home/${FLL_LIVE_USER}
 
 	echo "${BLUE}Done.${NORMAL}"
 

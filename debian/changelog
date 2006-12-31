@@ -1,8 +1,9 @@
-live-initrd-sidux (0.0.21) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.21) unstable; urgency=low
 
-  * NOT RELEASED YET
+  * really fix unionfs cheatcode.
+  * don't load loop and squashfs unconditionally.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 31 Dec 2006 18:03:55 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 31 Dec 2006 21:11:08 +0100
 
 live-initrd-sidux (0.0.20) unstable; urgency=low
 
