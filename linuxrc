@@ -33,10 +33,10 @@ RAMSIZE=1000000
 # End of options
 
 # look for kernel modules in these directories
-MODULE_DIRS="/$FLL_MEDIUM/$FLL_IMAGE_DIR/modules /modules /modules/scsi"
+MODULE_DIRS="/$FLL_MEDIUM/$FLL_IMAGE_DIR/modules /modules"
 
 # Builtin fielsystems
-BUILTIN_FS="iso9660 ext2 ext3 reiserfs vfat reiser"
+BUILTIN_FS="iso9660 ext2"
 
 # Load loop and squashfs
 [ -f /modules/loop.*o ] && $INSMOD /modules/loop.*o >/dev/null 2>&1
@@ -44,25 +44,39 @@ BUILTIN_FS="iso9660 ext2 ext3 reiserfs vfat reiser"
 
 
 # Don't allow interrupt signals
-trap "" 1 2 3 15
+trap "" 1 2 3 11 15
 
 # Misc functions
 mountit()
 {
 	# Usage: mountit src dst "options"
 	# Uses builtin mount of busybox
-	for fs in $BUILTIN_FS; do
-		case "$fs" in
-			ntfs)
-				MOUNTIT_OPT=" -o uid=1000,gid=1000 "
-				;;
-			*)
-				MOUNTIT_OPT=""
-				;;
-		esac
+	 if test -b $1; then
+		MOUNTIT_OPT="$3"
+
+		for fs in $BUILTIN_FS; do
+			case "$fs" in
+				vfat)
+					# We REALLY need this for FLL_IMAGE on DOS-filesystems
+					[ -n "$MOUNTIT_OPT" ] && MOUNTIT_OPT="$MOUNTIT_OPT,shortname=winnt" || MOUNTIT_OPT="-o shortname=winnt"
+					;;
+				ntfs)
+					#if [ -n "$MOUNTIT_OPT" ]; then
+					#	MOUNTIT_OPT="$MOUNTIT_OPT,force,silent,umask=0,no_def_opts,allow_other,streams_interface=windows"
+					#else
+					#	MOUNTIT_OPT="-o force,silent,umask=0,no_def_opts,allow_other,streams_interface=windows"
+					#fi
+					#test -x /static/ntfs-3g && /static/ntfs-3g $1 $2 $MOUNTIT_OPT >/dev/null 2>&1 && return 0
+					MOUNTIT_OPT="-o uid=1000,gid=1000 "
+					;;
+				*)
+					MOUNTIT_OPT=""
+					;;
+			esac
 		
-		test -b $1 && mount -t $fs $3 $MOUNTIT_OPT $1 $2 >/dev/null 2>&1 && return 0
-	done
+			test -b $1 && mount -t $fs $MOUNTIT_OPT $1 $2 >/dev/null 2>&1 && return 0
+		done
+	fi
 
 	return 1
 }
@@ -151,7 +165,7 @@ esac
 
 # enable debugging?
 case "$CMDLINE" in
-	*BOOT_IMAGE=debug\ *|*\ debug\ *)
+	*BOOT_IMAGE=debug\ *|*\ debug*)
 		DEBUG="yes"
 		;;
 esac
@@ -249,6 +263,70 @@ esac
 FLL_IMAGE="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
 FLL_ISO="$FLL_ISO_DIR/$FLL_ISO_NAME"
 
+# Print kernel info
+read a b KERNEL relax >/dev/null 2>&1 </proc/version
+echo "${GREEN}Running Linux Kernel ${YELLOW}$KERNEL${GREEN}.${NORMAL}"
+
+# Get total ramsize, and available real ram in kB. We need this later.
+# Note that FREEMEM is incorrect, we should add MemCached,
+# but the difference should be minimal at this point.
+TOTALMEM=64000
+FREEMEM=32000
+while read info amount kb; do
+	case "$info" in
+		MemTotal:)
+			test "$amount" -gt "0" >/dev/null 2>&1 && TOTALMEM="$amount";;
+		MemFree:)
+			test "$amount" -gt "0" >/dev/null 2>&1 && FREEMEM="$amount";;
+	esac
+done </proc/meminfo
+
+# Print meminfo.
+echo "${CRE}${BLUE}Total Memory available: ${YELLOW}${TOTALMEM}kB${BLUE}, Memory free: ${YELLOW}${FREEMEM}kB${BLUE}.${NORMAL}"
+
+# New in Knoppix 5.1: cloop preload cache
+# Default values
+case "$MEDIUM" in
+	*[Cc][Dd]*)
+		CLOOP_PRELOAD="preload=64"
+		 ;;
+	*[Dd][Vv][Dd]*)
+		CLOOP_PRELOAD="preload=128"
+		;;
+	*)
+		CLOOP_PRELOAD="preload=32"
+		;;
+esac
+
+# cloop improves seek performance when caching the directory index
+# (first few MB) of each cloop file.
+# Default values depending on ramsize, override with cloop_preload=numblocks at boot.
+if test "$TOTALMEM" -lt 128000; then
+	# up to 128MB: No preload.
+	CLOOP_PRELOAD=""
+elif test "$TOTALMEM" -lt 256000; then
+	# less than 256MB: About 4MB preload w/ blocksize 128k
+	CLOOP_PRELOAD="preload=32"
+elif test "$TOTALMEM" -lt 512000; then
+	# less than 512MB: About 8MB preload w/ blocksize 128k
+	CLOOP_PRELOAD="preload=64"
+elif test "$TOTALMEM" -lt 1024000; then
+	# less than 1GB: About 16MB preload w/ blocksize 128k
+	CLOOP_PRELOAD="preload=128"
+else
+	# 1GB Ram or more
+	# About 32MB w/ blocksize 128k
+	CLOOP_PRELOAD="preload=256"
+fi
+
+case "$CMDLINE" in 
+	*\ nocache*|*\ nocloop_preload*|*\ nopreload*)
+		CLOOP_PRELOAD=""
+		;;
+esac
+
+[ -n "$cloop_preload" ] && CLOOP_PRELOAD="preload=$cloop_preload"
+
 # Run a shell if in debug mode
 stage=1
 rundebugshell()
@@ -270,8 +348,8 @@ mountmodules()
 	read a
 	echo -n "${CRE}${BLUE}Mounting ${TYPE} modules disk... ${NORMAL}"
 	
-	# We always mount over /modules/scsi (because it's there ;-)
-	if mountit /dev/fd0 /modules/scsi "-o ro"; then
+	# We always mount over /modules (because it's there ;-)
+	if mountit /dev/fd0 /modules "-o ro"; then
 		echo "${GREEN}OK.${NORMAL}"
 		return 0
 	fi
@@ -288,7 +366,7 @@ umountmodules()
 	shift
 
 	echo -n "${CRE}${BLUE}Unmounting ${TYPE} modules disk... ${NORMAL}"
-	umount /modules/scsi 2>/dev/null
+	umount /modules 2>/dev/null
 	echo "${GREEN}DONE.${NORMAL}"
 }
 
@@ -301,7 +379,7 @@ askmodules()
 	echo "${BLUE}${TYPE} modules available:${WHITE}"
 	c=""
 	for m in "$@"; do
-		if test -r "/modules/scsi/$m"; then
+		if test -r "/modules/$m"; then
 			test -z "$c"  && { echo -n "	$m"; c="1"; } || { echo "		$m"; c=""; }
 		fi
 	done
@@ -356,7 +434,7 @@ loadmodule()
 	done
 	test -n "$LOAD" || return 1
 
-	# For a new process to avoid crashing our main shell
+	# Fork a new process to avoid crashing our main shell
 	echo "$INSMOD $LOAD" "$@" | /static/ash
 	return "$?"
 }
@@ -389,7 +467,7 @@ unloadmodule()
 	MODULE="$1"
 	RMMOD=""
 
-	# Find insmod in CURRENT file system configuration
+	# Find rmmod in CURRENT file system configuration
 	for p in $MODULE_DIRS /static; do
 		checkfor="$p/rmmod"
 		if test -x "$checkfor"; then
@@ -397,7 +475,7 @@ unloadmodule()
 		fi
 	done
 
-	# At last resort, try builtin insmod
+	# At last resort, try builtin rmmod
 	test -z "$RMMOD" && RMMOD="rmmod" # builtin rmmod
 
 	# For a new process to avoid crashing our main shell
@@ -540,9 +618,12 @@ for d in /sys/devices/*/*; do
 	fi
 done
 
+# Load fuse, we may need it to access ntfs filesystems
+#loadmodule fuse >/dev/null 2>&1
+
 if test -n "$INTERACTIVE"; then
 	# Let the user select interactively
-	askmodules SCSI $(cd /modules/scsi; echo *.ko)
+	askmodules SCSI $(cd /modules; echo *.ko)
 else
 	# these are the autoprobe-safe modules
 	MODULES="$SCSI_PROBE"
@@ -554,7 +635,7 @@ test -z "$NOSCSI" && test -n "$MODULES" && loadmodules SCSI $MODULES
 # Check for IDE-Raid devices
 if test -z "$NOIDERAID"; then
 	(
-		cd /modules/scsi
+		cd /modules
 		{
 			loadmodule ataraid >/dev/null 2>&1 && \
 			loadmodule silraid >/dev/null 2>&1
@@ -567,7 +648,7 @@ fi
 
 # Check for USB, use modules on bootfloppy first
 if test -z "$NOUSB"; then
-	echo -n "${CRE}${BLUE}Checking for for USB...${NORMAL}"
+	echo -n "${CRE}${BLUE}Checking for USB...${NORMAL}"
 	if loadmodule usbcore >/dev/null 2>&1; then
 		FOUNDUSB=""
 
@@ -576,9 +657,10 @@ if test -z "$NOUSB"; then
 		done
 
 		if test -n "$FOUNDUSB"; then
-			if ! loadmodule libusual >/dev/null 2>&1 && usb-storage >/dev/null 2>&1; then
-				loadmodule ub >/dev/null 2>&1
-			fi
+			loadmodule libusual.ko >/dev/null 2>&1
+			loadmodule ff-memless.ko >/dev/null 2>&1
+			loadmodule usbhid.ko >/dev/null 2>&1
+			loadmodule usb-storage.ko >/dev/null 2>&1 || loadmodule ub.ko >/dev/null 2>&1
 		else
 			# For an unknown reason, unloading usbcore hangs sometimes
 			# rmmod usbcore >/dev/null 2>&1
@@ -659,7 +741,7 @@ if test -n "$INTERACTIVE"; then
 		esac
 
 		if mountmodules new; then
-			askmodules new $(cd /modules/scsi; echo *.ko)
+			askmodules new $(cd /modules; echo *.ko)
 			test -n "$MODULES" && loadmodules new $MODULES
 			umountmodules current
 		fi
@@ -706,7 +788,7 @@ test -n "$FOUNDUSB$FOUNDFIREWIRE" && test -z "$NOCD" && DEVICES="/dev/sr? $DEVIC
 DEVICES="$DEVICES /dev/pcd?"
 
 # New: also check HD partitions for a KNOPPIX/KNOPPIX image
-test -n "$FOUND_SCSI" -a -z "$NOSCSI" && DEVICES="$DEVICES /dev/sd?[1-9] /dev/sd?[1-9][0-9]"
+test -n "$FOUND_SCSI" -a -z "$NOSCSI" && DEVICES="$DEVICES /dev/sd?[1-9] /dev/sd?[1-9][0-9] /dev/sd?[1-9][0-9]"
 
 # Look for CDROMs first
 CDROM=$(awk '/name/{for (i=NF;i>=3;i--) {print "/dev/" $i}}' /proc/sys/dev/cdrom/info)
@@ -760,7 +842,8 @@ mount_knoppix()
 		case $(dd if=$1/$FLL_IMAGE bs=4 count=1 2>/dev/null) in
 			"#!/b")
 				COMP=cloop
-				loadmodule cloop file="$1/$FLL_IMAGE"
+				loadmodule cloop file="$1/$FLL_IMAGE" $CLOOP_PRELOAD || \
+					loadmodule cloop file="$1/$FLL_IMAGE"
 				mountit /dev/cloop $FLL_MOUNTPOINT "-o ro" || FOUND_KNOPPIX=""
 				;;
 			"hsqs")
@@ -781,7 +864,7 @@ mount_knoppix()
 	#	for c in 1 2 3 4 5 6 7; do
 	#		if test -r "$1/$KNOPPIX_DIR/$KNOPPIX_NAME$c"; then
 	#			if "$DYNLOADER" --library-path /KNOPPIX/lib /KNOPPIX/sbin/losetup "/dev/cloop$c" "$1/$KNOPPIX_DIR/$KNOPPIX_NAME$c"; then
-	#				if "$DYNLOADER" --library-path /KNOPPIX/lib /KNOPPIX/bin/mkdir -p "/KNOPPIX$c"; then
+	#				if "$DYNLOADER" --library-path /KNOPPIX/lib /KNOPPIX/bin/mkdir -m 755 -p "/KNOPPIX$c"; then
 	#					if mountit "/dev/cloop$c" "/KNOPPIX$c" "-o ro"; then
 	#						echo ""
 	#						echo -n "${CRE} ${GREEN}Found additional KNOPPIX compressed image at ${MAGENTA}$1/$KNOPPIX_DIR/$KNOPPIX_NAME$c${GREEN}.${NORMAL}"
@@ -794,6 +877,7 @@ mount_knoppix()
 	#			fi
 	#		fi
 	#	done
+	#	$FLL_MOUNTPOINT/bin/ln -snf /KNOPPIX/sbin /sbin && hash -r
 	#fi
 }
 
@@ -841,8 +925,10 @@ boot_from()
 	LOOP_SOURCE=""
   
 	# load filesystems
-	$FLL_MOUNTPOINT/sbin/modprobe reiserfs
-	$FLL_MOUNTPOINT/sbin/modprobe ntfs
+	for i in reiserfs jbd ext3 ntfs; do
+		"$FLL_MOUNTPOINT/sbin/modprobe" $i >/dev/null 2>&1
+	done
+	FS="reiserfs ext3 ntfs"
  
 	if [ -n "$ISO_PATH" ]; then
 		LOOP_SOURCE="$TARGET.loop"
@@ -851,15 +937,45 @@ boot_from()
 		/bin/mkdir $LOOP_SOURCE
 		$FLL_MOUNTPOINT/sbin/modprobe loop
 
-		/bin/mount -o ro $LOOP_DEV $LOOP_SOURCE || LOOP_SOURCE=""
-		/bin/mount -n -o loop $LOOP_SOURCE2$ISO_PATH $TARGET
+		# Try out own mount first.
+		mountit $LOOP_DEV $LOOP_SOURCE "-o ro"
+
+		if [ "$?" != "0" ]; then
+			for i in $FS; do
+				case "$i" in
+					#ntfs)
+					#	PLAIN="-i"
+					#	;;
+					*)
+						PLAIN=""
+						;;
+				esac
+				/bin/mount $PLAIN -o ro -t $i $LOOP_DEV $LOOP_SOURCE >/dev/null 2>&1 && break
+			done
+		fi
+		test "$?" = "0" || LOOP_SOURCE=""
+		/bin/mount -n -o loop $LOOP_SOURCE2$ISO_PATH $TARGET >/dev/null 2>&1
 	else
 		TARGET_DEV="$SOURCE_DEV"
-		/bin/mount -n -o ro $SOURCE_DEV $TARGET
+		mountit $SOURCE_DEV $TARGET "-o ro"
+
+		if [ "$?" != "0" ]; then
+			for i in $FS; do
+				case "$i" in
+					#ntfs)
+					#	PLAIN="-i"
+					#	;;
+					*)
+						PLAIN=""
+						;;
+					esac
+				/bin/mount $PLAIN -n -o ro -t $i $SOURCE_DEV $TARGET >/dev/null 2>&1
+			done
+		fi
 	fi
 
 	if [ $? -ne 0 ]; then
-		[ -n "$LOOP_SOURCE" ] && /bin/umount $LOOP_SOURCE
+		[ -n "$LOOP_SOURCE" ] && { /bin/umount "$LOOP_SOURCE" || umount -l "$LOOP_SOURCE"; } >/dev/null 2>&1
 		echo -n "${CRE} ${RED}Accessing $FLL_DISTRO_NAME $FLL_MEDIUM failed. ${MAGENTA}$TARGET_DEV${RED} is not mountable.${NORMAL}"
 		sleep 2
 		
@@ -870,7 +986,7 @@ boot_from()
 		echo -n "${CRE} ${GREEN}Accessing $FLL_DISTRO_NAME $FLL_MEDIUM at ${MAGENTA}$TARGET_DEV${GREEN}...${NORMAL}"
 	else
 		echo -n "${CRE} ${RED}Accessing $FLL_DISTRO_NAME $FLL_MEDIUM failed. Could not find $FLL_IMAGE on ${MAGENTA}$TARGET_DEV${RED}.${NORMAL}"
-		[ -n "$LOOP_SOURCE" ] && /bin/umount $LOOP_SOURCE
+		[ -n "$LOOP_SOURCE" ] && { /bin/umount "$LOOP_SOURCE" || umount -l "$LOOP_SOURCE"; } >/dev/null 2>&1
 		umount $TARGET
 		sleep 2
 	
@@ -902,12 +1018,12 @@ copy_to()
 			TARGET_DEV=$(echo $CMDLINE | /usr/bin/tr ' ' '\n' | /bin/sed -n '/tohd=/s/.*=//p' | /usr/bin/tail -1)
 			TARGET_DEV_DESC="$TARGET_DEV"
 
-			# load filesystems
-			$FLL_MOUNTPOINT/sbin/modprobe reiserfs
-			$FLL_MOUNTPOINT/sbin/modprobe jbd
-			$FLL_MOUNTPOINT/sbin/modprobe ext3
-			#$FLL_MOUNTPOINT/sbin/modprobe fuse	#we don't allow writing to ntfs, sorry
-			FS="ext3 ext2 reiserfs vfat"
+		        # load filesystems
+			for i in reiserfs jbd ext3 ntfs vfat; do
+				"$FLL_MOUNTPOINT/sbin/modprobe" $i >/dev/null 2>&1
+			done
+			FS="ext3 ext2 reiserfs vfat ntfs"
+			#$FLL_MOUNTPOINT/bin/cp -au /KNOPPIX/dev/fuse /dev/ >/dev/null 2>&1
 			MOUNTED=""
 			
 			for i in $FS; do
@@ -964,7 +1080,16 @@ copy_to()
 	fi
 
 	# remount r/o
-	/bin/mount -n -o remount,ro $TARGET
+	case "$filesystem" in
+		#ntfs)
+		#	umount "$TARGET"
+		#	sleep 2
+		#	mountit "$TARGET_DEV" "$TARGET" "-o ro" || $FLL_MOUNTPOINT/bin/mount -i -t ntfs -o ro "$TARGET_DEV" "$TARGET"
+		#	;;
+		*)
+			/KNOPPIX/bin/mount -n -o remount,ro "$TARGET"
+			;;
+	esac
 	remount_knoppix
 }
 
@@ -975,6 +1100,7 @@ BOOTFROM=""
 DO_REMOUNT=""
 REAL_TARGET=""
 UNIONFS=""
+AUFS=""
 
 case "$CMDLINE" in
 	 *toram*)
@@ -1030,10 +1156,13 @@ if test -n "$FOUND_KNOPPIX"; then
 	cat $FLL_MOUNTPOINT/etc/ld.so.cache > /etc/ld.so.cache
 	echo ""
 
-	# don't use unionfs unconditionally for now
+	# don't use unified filesystems unconditionally for now
 	case "$CMDLINE" in
 		*unionfs*)
 			loadmodule unionfs 2>/dev/null && UNIONFS="yes"
+			;;
+		*aufs*)
+			loadmodule aufs 2>/dev/null && AUFS="yes"
 			;;
 	esac
 	
@@ -1066,12 +1195,6 @@ if test -n "$FOUND_KNOPPIX"; then
 	# New in Kernel 2.4.x: tempfs with variable ramdisk size.
 	# We check for available memory anyways and limit the ramdisks
 	# to a reasonable size.
-	FOUNDMEM="$(awk '/MemTotal/{print $2}' /proc/meminfo)"
-	TOTALMEM="$(awk 'BEGIN{m=0};/MemFree|Cached/{m+=$2};END{print m}' /proc/meminfo)"
-	
-	# Be verbose
-	echo "${CRE}${BLUE}Total memory found: ${YELLOW}${FOUNDMEM}${BLUE} kB${NORMAL}"
-	
 	# Now we need to use a little intuition for finding a ramdisk size
 	# that keeps us from running out of space, but still doesn't crash the
 	# machine due to lack of Ram
@@ -1097,16 +1220,15 @@ if test -n "$FOUND_KNOPPIX"; then
 	echo -n "${CRE}${BLUE}Creating ${YELLOW}/ramdisk${BLUE} (dynamic size=${RAMSIZE}k) on ${MAGENTA}shared memory${BLUE}...${NORMAL}"
 
 	# We need /bin/mount here for the -o size= option
-	/bin/mount -t tmpfs -o "size=${RAMSIZE}k" /ramdisk /ramdisk || echo "creating the ramdisk failed"
+	/bin/mount -t tmpfs -o "size=${RAMSIZE}k,mode=755" /ramdisk /ramdisk || echo "creating the ramdisk failed"
 
-	if [ "$UNIONFS" = "yes" ]; then
+	if [ "$UNIONFS" = "yes" ] || [ "$AUFS" = "yes" ]; then
 		mkdir -p	/ramdisk/tmp \
 				/ramdisk/home/${FLL_LIVE_USER}
 
 		chmod 1777 /ramdisk/tmp
 		chown $FLL_LIVE_USER:$FLL_LIVE_USER /ramdisk/home/${FLL_LIVE_USER}
 
-		ln -snf /ramdisk/home /home
 		mv /tmp /tmp.old
 		ln -s /ramdisk/tmp /tmp
 		rm -rf tmp.old
@@ -1116,9 +1238,9 @@ if test -n "$FOUND_KNOPPIX"; then
 				/ramdisk/home \
 				/ramdisk/var
 
-		/bin/mount --bind /ramdisk/home /home
 		/bin/mount --bind /ramdisk/var /var
 	fi
+	/bin/mount --bind /ramdisk/home /home
 
 	echo "${BLUE}Done.${NORMAL}"
 
@@ -1126,24 +1248,30 @@ if test -n "$FOUND_KNOPPIX"; then
 	rundebugshell
 
         # don't use unionfs unconditionally for now
-        if [ "$UNIONFS" = "yes" ]; then
+        if [ "$UNIONFS" = "yes" ] || [ "$AUFS" = "yes" ]; then
 		#######################
 		## unionfs adventure ##
 		#######################
 
-		echo -n "${CRE}${BLUE}Creating unionfs and symlinks on ramdisk...${NORMAL}"
+		echo -n "${CRE}${BLUE}Creating unified filesystem and symlinks on ramdisk...${NORMAL}"
 		mkdir -p /UNIONFS
-		UNION="/ramdisk=rw"
+		[ "$UNIONFS" = "yes" ] && UNION="/ramdisk=rw"
+		[ "$AUFS" = "yes" ] && UNION="/ramdisk"
 	
 		# Add all KNOPPIX images to the union
 #		for c in "" 1 2 3 4 5 6 7; do
-#			[ -d "/KNOPPIX$c" ] && UNION="$UNION:/KNOPPIX$c=ro"
+#			[ -d "/KNOPPIX$c" ] && [ "$UNIONFS" = "yes" ] && UNION="$UNION:/KNOPPIX$c=ro"
+#			[ -d "/KNOPPIX$c" ] && [ "$AUFS" = "yes" ] && UNION="$UNION:/KNOPPIX$c"
 #		done
+
 		# FIXME:Multi-Image
 		# No multi-images in here
 		[ -d "$FLL_MOUNTPOINT" ] && UNION="$UNION:$FLL_MOUNTPOINT=ro"
+
 		# Do the actual mount
-		if /bin/mount -t unionfs -o "dirs=$UNION,delete=whiteout" /UNIONFS /UNIONFS; then
+		[ "$UNIONFS" = "yes" ] && /bin/mount -t unionfs -o "dirs=$UNION,delete=whiteout" /UNIONFS /UNIONFS
+		[ "$AUFS" = "yes" ] && /bin/mount -t aufs -o "br:$UNION" /UNIONFS /UNIONFS
+		if grep -q \\/UNIONFS\ \\/UNIONFS /proc/mounts; then
 			# We now have unionfs, copy some data from the initial ramdisk first
 			cp -a	/etc/fstab \
 				/etc/filesystems \
@@ -1159,7 +1287,7 @@ if test -n "$FOUND_KNOPPIX"; then
 			esac
 			
 			for i in bin boot etc $UNIONDEV sbin var lib opt root usr; do
-				# Move directories to unionfs
+				# Move directories to union
 				if test -d /$i; then
 					mv /$i /$i.old && $DYNLOADER --library-path $FLL_MOUNTPOINT/lib $FLL_MOUNTPOINT/bin/ln -snf /UNIONFS/$i /$i && rm -rf /$i.old
 				else
@@ -1359,7 +1487,7 @@ else
 	echo "6" > /proc/sys/kernel/printk
 
 	# Allow signals
-	trap 1 2 3 15
+	trap 1 2 3 11 15
 	exec /static/ash
 fi
 

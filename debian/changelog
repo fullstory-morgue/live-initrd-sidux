@@ -1,8 +1,9 @@
-live-initrd-sidux (0.0.18) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.18) unstable; urgency=low
 
-  * NOT RELEASED YET
+  * bindmount /home/ for unionfs as well.
+  * synchronize linuxrc with Knoppix 5.1.0.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 31 Dec 2006 10:43:42 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 31 Dec 2006 14:45:06 +0100
 
 live-initrd-sidux (0.0.17) unstable; urgency=low
 
