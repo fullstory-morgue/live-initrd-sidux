@@ -1226,6 +1226,7 @@ if test -n "$FOUND_KNOPPIX"; then
 				/ramdisk/home/${FLL_LIVE_USER}
 
 		chmod 1777 /ramdisk/tmp
+		/bin/mount --bind /ramdisk/home /home
 		chown $FLL_LIVE_USER:$FLL_LIVE_USER /ramdisk/home/${FLL_LIVE_USER}
 
 		mv /tmp /tmp.old
@@ -1237,9 +1238,9 @@ if test -n "$FOUND_KNOPPIX"; then
 				/ramdisk/home \
 				/ramdisk/var
 
+		/bin/mount --bind /ramdisk/home /home
 		/bin/mount --bind /ramdisk/var /var
 	fi
-	/bin/mount --bind /ramdisk/home /home
 
 	echo "${BLUE}Done.${NORMAL}"
 

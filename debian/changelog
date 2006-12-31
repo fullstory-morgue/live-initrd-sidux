@@ -1,9 +1,12 @@
-live-initrd-sidux (0.0.20) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.20) unstable; urgency=low
 
-  * NOT RELEASED YET
+  [ Joaquim Boura ]
   * use loadmodule to load the loop and squashfs modules
 
- -- Joaquim Boura <x-un-i@sidux.com>  Sun, 31 Dec 2006 17:43:22 +0100
+  [ Stefan Lippers-Hollmann ]
+  * fix bind-mount for /home/.
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 31 Dec 2006 18:02:18 +0100
 
 live-initrd-sidux (0.0.19) unstable; urgency=low
 
