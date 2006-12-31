@@ -8,8 +8,11 @@ live-initrd-sidux (0.0.17) unstable; urgency=low
   [ Kel Modderman ]
   * Make cli options compat. as possible with mkinitrd.
   * Update maintainer address.
+  * Return value of 0 for --supported-host-version|--supported-target-version.
+    This is a bit of a hack, but has desired effect for our purposes.
+  * If given module dir as argument, use basename to determine kernel name.
 
- -- Kel Modderman <kel@otaku42.de>  Sun, 31 Dec 2006 12:19:58 +1000
+ -- Kel Modderman <kel@otaku42.de>  Sun, 31 Dec 2006 13:50:50 +1000
 
 live-initrd-sidux (0.0.16) unstable; urgency=low
 

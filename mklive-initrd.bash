@@ -18,6 +18,10 @@
 #####################################################################
 # Sanity checks
 
+#FILE=/tmp/mklive-initrd
+#exec > $FILE 2>&1
+#echo $@
+
 if [[ $UID != "0" ]]; then
 	echo "Must be run by root user."
 	exit 1
@@ -31,17 +35,23 @@ else
 	exit 1
 fi
 
+# verbose by default
+VERBOSITY=1
+
 #####################################################################
 # Process arguments
 ARGS=$(
-	getopt -o o:dv \
-		--long output:,debug,verbose,supported-host-version:,supported-target-version: \
+	getopt -o o:q \
+		--long output:,quiet,supported-host-version:,supported-target-version: \
 		-n "$0" \
 		-- "$@"
 )
 
 # Check for non-GNU getopt
-if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+if [ $? != 0 ]; then
+	echo "Terminating..." >&2
+	exit 1
+fi
 
 eval set -- "$ARGS"
 
@@ -51,19 +61,11 @@ while true; do
 			shift
 			FINAL_INITRD=$1
 			;;
-#		-k|--keep)
-#			# XXX: TODO
-#			;;
-		-v|--verbose|-d|--debug)
-			VERBOSITY=1
+		-q|--quiet)
+			VERBOSITY=0
 			;;
-		--supported-host-version)
-			shift
-			# XXX: TODO
-			;;
-		--supported-target-version)
-			shift
-			# XXX: TODO
+		--supported-host-version|--supported-target-version)
+			exit 0
 			;;
 		--)
 			shift
@@ -82,7 +84,12 @@ done
 
 # Kernel version
 if [[ $1 ]]; then
-	KVERS=$1
+	if [[ -d $1 ]]; then
+		# /lib/modules/$KVERS - kernel-img.conf ramdisk creation compat
+		KVERS=$(basename $1)
+	else
+		KVERS=$1
+	fi
 else
 	KVERS=$(uname -r)
 fi
