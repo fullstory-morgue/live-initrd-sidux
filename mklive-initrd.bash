@@ -33,24 +33,45 @@ fi
 
 #####################################################################
 # Process arguments
+ARGS=$(
+	getopt -o o:dv \
+		--long output:,debug,verbose,supported-host-version:,supported-target-version: \
+		-n "$0" \
+		-- "$@"
+)
 
-while (($#)); do
-	case $1 in
-#		-k|--keep)
-#			XXX: make 1:1 of working directory for investigation
-#			;;
-		-v|--version)
-			shift
-			KVERS=$1
-			;;
-		-d|--debug)
-			VERBOSITY=1
-			;;
+# Check for non-GNU getopt
+if [ $? != 0 ] ; then echo "Terminating..." >&2 ; exit 1 ; fi
+
+eval set -- "$ARGS"
+
+while true; do
+	case "$1" in
 		-o|--output)
 			shift
 			FINAL_INITRD=$1
 			;;
+#		-k|--keep)
+#			# XXX: TODO
+#			;;
+		-v|--verbose|-d|--debug)
+			VERBOSITY=1
+			;;
+		--supported-host-version)
+			shift
+			# XXX: TODO
+			;;
+		--supported-target-version)
+			shift
+			# XXX: TODO
+			;;
+		--)
+			shift
+			break
+			;;
 		*)
+			echo "Internal error!" >&2
+			exit 1
 			;;
 	esac
 	shift
@@ -60,7 +81,11 @@ done
 # Initialize variables
 
 # Kernel version
-[[ $KVERS ]] || KVERS=$(uname -r)
+if [[ $1 ]]; then
+	KVERS=$1
+else
+	KVERS=$(uname -r)
+fi
 
 if ! modprobe --set-version=${KVERS} --ignore-install --list >/dev/null 2>&1; then
 	echo "Invalid kernel version: ${KVERS}, aborting"
