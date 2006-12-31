@@ -259,7 +259,7 @@ FLL_IMAGE="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
 FLL_ISO="$FLL_ISO_DIR/$FLL_ISO_NAME"
 
 # Print kernel info
-echo "${GREEN}Running Linux Kernel ${YELLOW}$(uname -r)${GREEN}.${NORMAL}"
+echo "${BLUE}Running Linux Kernel: ${YELLOW}$(uname -r)${BLUE}.${NORMAL}"
 
 # Get total ramsize, and available real ram in kB. We need this later.
 # Note that FREEMEM is incorrect, we should add MemCached,
