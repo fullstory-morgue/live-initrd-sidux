@@ -1217,20 +1217,19 @@ if test -n "$FOUND_KNOPPIX"; then
 	/bin/mount -t tmpfs -o "size=${RAMSIZE}k,mode=755" /ramdisk /ramdisk || echo "creating the ramdisk failed"
 
 	if [ "$UNIONFS" = "yes" ] || [ "$AUFS" = "yes" ]; then
-		mkdir -p	/ramdisk/tmp
+		mkdir -p /ramdisk/tmp
 		chmod 1777 /ramdisk/tmp
 		mv /tmp /tmp.old
 		ln -s /ramdisk/tmp /tmp
 		rm -rf tmp.old
 	else
-		mkdir -p	/var \
-				/ramdisk/var
-
+		mkdir -p /ramdisk/var
 		ln -s /ramdisk/var /var
 	fi
 
 	mkdir -p	/home \
-			/ramdisk/home/${FLL_LIVE_USER}
+			/ramdisk/home/${FLL_LIVE_USER} \
+			/var
 	/bin/mount --bind /ramdisk/home /home
 	chown $FLL_LIVE_USER:$FLL_LIVE_USER /home/${FLL_LIVE_USER}
 
@@ -1266,7 +1265,6 @@ if test -n "$FOUND_KNOPPIX"; then
 		if grep -q \\/UNIONFS\ \\/UNIONFS /proc/mounts; then
 			# We now have unionfs, copy some data from the initial ramdisk first
 			cp -a	/etc/fstab \
-				/etc/filesystems \
 				/etc/mtab \
 					/UNIONFS/etc/
 	
@@ -1434,6 +1432,19 @@ if test -n "$FOUND_KNOPPIX"; then
 
 	# busybox/cloop workaround
 	chmod 1777 /tmp /var/tmp
+
+	# populate /root/.profile and /root/.bashrc
+	cp -f /usr/share/base-files/dot.profile	/root/.profile	>/dev/null 2>&1
+	cp -f /usr/share/base-files/dot.bashrc	/root/.bashrc	>/dev/null 2>&1
+
+	if ! grep -q bash_completion /root/.bashrc; then
+		cat >> /root/.bashrc << EOF
+# changed by $FLL_DISTRO_NAME
+# enable bash completion in interactive shells
+if [ -f /etc/bash_completion ]; then
+        . /etc/bash_completion
+fi
+EOF
 	
 	echo "${BLUE}Done.${NORMAL}"
 

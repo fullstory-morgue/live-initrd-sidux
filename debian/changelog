@@ -1,8 +1,10 @@
-live-initrd-sidux (0.0.22) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.22) unstable; urgency=low
 
-  * NOT RELEASED YET
+  * clean up /var/ handling.
+  * /etc/filesystems doesn't exist anymore.
+  * populate /root/.profile and /root/.bashrc.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 31 Dec 2006 21:12:56 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 31 Dec 2006 21:56:11 +0100
 
 live-initrd-sidux (0.0.21) unstable; urgency=low
 
