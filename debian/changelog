@@ -1,3 +1,9 @@
+live-initrd-sidux (0.0.22) UNRELEASED; urgency=low
+
+  * NOT RELEASED YET
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 31 Dec 2006 21:12:56 +0100
+
 live-initrd-sidux (0.0.21) unstable; urgency=low
 
   * really fix unionfs cheatcode.
