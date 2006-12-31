@@ -1,8 +1,8 @@
-live-initrd-sidux (0.0.23) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.23) unstable; urgency=low
 
-  * NOT RELEASED YET
+  * brown paper bag release, fix if clause.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 31 Dec 2006 21:58:06 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 31 Dec 2006 22:02:55 +0100
 
 live-initrd-sidux (0.0.22) unstable; urgency=low
 
