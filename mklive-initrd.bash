@@ -180,6 +180,7 @@ MODULES="
 	jfs
 	vfat
 	isofs
+	fuse
 "
 
 #####################################################################
@@ -267,7 +268,7 @@ make_initrd_dirs \
 	dev			\
 	etc			\
 	mnt			\
-	modules/scsi		\
+	modules			\
 	proc			\
 	static			\
 	sys			\
@@ -341,12 +342,9 @@ for module in ${MODULES}; do
 done
 
 # Add scsi modules
-# XXX: create scsi parse txt file
 for module in ${SCSI_MODULES}; do
-	install_kmod ${module} modules/scsi
+	install_kmod ${module} modules
 done
-
-#create_scsi_parse_file > ${TARGET_INITRD_DIR}/modules/scsi/scsi-modules.txt
 
 # Populate /dev with MAKEDEV
 pushd ${TARGET_INITRD_DIR}/dev >/dev/null

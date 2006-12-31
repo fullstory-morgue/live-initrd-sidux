@@ -1,8 +1,10 @@
-live-initrd-sidux (0.0.19) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.19) unstable; urgency=low
 
-  * NOT RELEASED YET
+  * fix adapt mklive-initrd to install scsi modules directly to /modules/.
+  * add fuse.
+  * small clean up.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 31 Dec 2006 14:46:31 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 31 Dec 2006 14:52:36 +0100
 
 live-initrd-sidux (0.0.18) unstable; urgency=low
 
