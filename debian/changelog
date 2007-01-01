@@ -1,11 +1,10 @@
-live-initrd-sidux (0.0.24) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.24) unstable; urgency=low
 
-  * NOT RELEASED YET
   * print kernel in blue.
   * take care that aufs and unionfs can't be used at the same time, unionfs
     preferred.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Mon,  1 Jan 2007 01:58:32 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Mon,  1 Jan 2007 14:54:20 +0100
 
 live-initrd-sidux (0.0.23) unstable; urgency=low
 
