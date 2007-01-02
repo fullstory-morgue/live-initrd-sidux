@@ -16,24 +16,20 @@ FLL_DISTRO_MODE="live"
 FLL_LIVE_USER="sidux"
 FLL_IMAGE_DIR="SIDUX"
 FLL_IMAGE_FILE="SIDUX"
-FLL_IMAGE="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
 FLL_MOUNTPOINT="/SIDUX"
 FLL_UNION_SOURCE="/ramdisk/var/tmp/union"
 FLL_UNION_TARGET="$FLL_MOUNTPOINT"
 FLL_UNION_OPTIONS="rw"
 FLL_PERSISTENT_HOME="sidux.img"
-FLL_ISO_DIR="SIDUX"
-FLL_ISO_NAME="SIDUX.ISO"
-FLL_ISO="$FLL_ISO_DIR/$FLL_ISO_NAME"
+FLL_MEDIA_DIR="SIDUX"
+FLL_MEDIA_NAME="SIDUX.ISO"
 FLL_MEDIUM="cdrom"
+FLL_MEDIA_MOUNTPOINT="/isosrc"
 
 # hardcoded configurable options
 # Default maximum size of dynamic ramdisk in kilobytes
 RAMSIZE=1000000
 # End of options
-
-# look for kernel modules in these directories
-MODULE_DIRS="/$FLL_MEDIUM/$FLL_IMAGE_DIR/modules /modules"
 
 # Builtin fielsystems
 BUILTIN_FS="iso9660 ext2"
@@ -122,13 +118,7 @@ mount -t devpts -o noexec,nosuid devpts /dev/pts
 # Disable kernel messages while probing modules in autodetect mode
 echo "0" > /proc/sys/kernel/printk
 
-# Dynamic program loader
-# $FLL_MOUNTPOINT is already mounted when this is used.
-# fallback to i386 defaults.
 ARCHITECTURE="$(uname -m)"
-DYNLOADER="$FLL_MOUNTPOINT/lib/ld-linux.so.2"
-[ "$ARCHITECTURE" = "x86_64" ] && DYNLOADER="$FLL_MOUNTPOINT/lib/ld-linux-x86-64.so.2"
-#[ "$ARCHITECTURE" = "sparc" ] &&  DYNLOADER="$FLL_MOUNTPOINT/lib/ld-linux.so.2"	# default anyways
 
 # Clear screen with colormode reset
 echo "$CLEAR$RESET"
@@ -206,7 +196,7 @@ esac
 case "$CMDLINE" in
 	*fromiso*)
 		FROMISO="yes"
-		mkdir /isosrc
+		mkdir $FLL_MEDIA_MOUNTPOINT
 		;;
 esac
 case "$CMDLINE" in
@@ -237,26 +227,36 @@ case "$CMDLINE" in
 		FLL_IMAGE_FILE="$image_name"
 		;;
 esac
-FLL_IMAGE="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
+FLL_IMAGE_LOCATION="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
 case "$CMDLINE" in
 	*iso_dir=*)
-		FLL_ISO_DIR="$iso_dir"
+		FLL_MEDIA_DIR="$media_dir"
 		;;
 esac
 case "$CMDLINE" in
 	*iso_name=*)
-		FLL_ISO_NAME="$iso_name"
+		FLL_MEDIA_NAME="$media_name"
 		;;
 esac
-FLL_ISO="$FLL_ISO_DIR/$FLL_ISO_NAME"
+FLL_MEDIA="$FLL_MEDIA_DIR/$FLL_MEDIA_NAME"
 case "$CMDLINE" in
 	*fromiso=*)
-		FLL_ISO="$fromiso"
+		FLL_MEDIA="$fromiso"
 		;;
 esac
 
 # Print kernel info
 echo "${BLUE}Running Linux Kernel: ${YELLOW}$(uname -r)${BLUE}.${NORMAL}"
+
+# look for kernel modules in these directories
+MODULE_DIRS="/$FLL_MEDIUM/$FLL_IMAGE_DIR/modules /modules"
+
+# Dynamic program loader
+# $FLL_MOUNTPOINT is already mounted when this is used.
+# fallback to i386 defaults.
+DYNLOADER="$FLL_MOUNTPOINT/lib/ld-linux.so.2"
+[ "$ARCHITECTURE" = "x86_64" ] && DYNLOADER="$FLL_MOUNTPOINT/lib/ld-linux-x86-64.so.2"
+#[ "$ARCHITECTURE" = "sparc" ] &&  DYNLOADER="$FLL_MOUNTPOINT/lib/ld-linux.so.2"        # default anyways
 
 # Get total ramsize, and available real ram in kB. We need this later.
 # Note that FREEMEM is incorrect, we should add MemCached,
@@ -794,7 +794,7 @@ for i in $DEVICES; do
 	echo -n "${CRE}${BLUE}Looking for ${FLL_MEDIUM} in: ${MAGENTA}$i${NORMAL}   "
 	if test -z "$FROMISO"; then
 		if mountit $i /$FLL_MEDIUM "-o ro" >/dev/null 2>&1; then
-			if test -r /$FLL_MEDIUM/$FLL_IMAGE; then
+			if test -r /$FLL_MEDIUM/$FLL_IMAGE_LOCATION; then
 				echo -n "${CRE}${GREEN}Accessing $FLL_DISTRO_NAME ${FLL_MEDIUM} at ${MAGENTA}$i${GREEN}...${NORMAL}"
 				FOUND_KNOPPIX="$i"
 				break
@@ -803,12 +803,14 @@ for i in $DEVICES; do
 			umount /$FLL_MEDIUM
 		fi
 	else
-		if mountit $i /isosrc "-o ro" >/dev/null 2>&1; then
-			if test -f /isosrc/$FLL_ISO; then
-				if mount -o loop,ro /isosrc/$FLL_ISO /$FLL_MEDIUM >/dev/null 2>&1; then
-					if test -f /$FLL_MEDIUM/$FLL_IMAGE; then
-						echo -n "${CRE} ${GREEN}Accessing $FLL_DISTRO_NAME image at ${MAGENTA}$i/$FLL_IMAGE${GREEN}...${NORMAL}"
-						FOUND_KNOPPIX="$i/$FLL_ISO"
+		if mountit $i $FLL_MEDIA_MOUNTPOINT "-o ro" >/dev/null 2>&1; then
+			if test -f $FLL_MEDIA_MOUNTPOINT/$FLL_MEDIA
+				echo "found $FLL_MEDIA in $i   "
+				if mount -o loop,ro $FLL_MEDIA_MOUNTPOINT/$FLL_MEDIA /$FLL_MEDIUM >/dev/null 2>&1; then
+					echo "loop mounted   "
+					if test -f /$FLL_MEDIUM/$FLL_IMAGE_LOCATION; then
+						echo -n "${CRE} ${GREEN}Accessing $FLL_DISTRO_NAME image at ${MAGENTA}$i/$FLL_IMAGE_LOCATION${GREEN}...${NORMAL}"
+						FOUND_KNOPPIX="$i/$FLL_MEDIA"
 						break
 					fi
 			
@@ -816,7 +818,7 @@ for i in $DEVICES; do
 				fi
 			fi
 		
-			umount /isosrc
+			umount $FLL_MEDIA_MOUNTPOINT
 		fi
 	fi
 done
@@ -825,15 +827,15 @@ done
 # (KNOPPIX can be booted directly from HD now).
 mount_knoppix()
 {
-	if test -n "$FOUND_KNOPPIX" && test -f $1/$FLL_IMAGE; then
+	if test -n "$FOUND_KNOPPIX" && test -f $1/$FLL_IMAGE_LOCATION; then
 		# DEBUG
 		# echo "6" > /proc/sys/kernel/printk
 		# detect compression
 		COMP=""
-		case $(dd if=$1/$FLL_IMAGE bs=4 count=1 2>/dev/null) in
+		case $(dd if=$1/$FLL_IMAGE_LOCATION bs=4 count=1 2>/dev/null) in
 			"#!/b")
 				COMP=cloop
-				loadmodule cloop file="$1/$FLL_IMAGE" $CLOOP_PRELOAD || \
+				loadmodule cloop file="$1/$FLL_IMAGE_LOCATION" $CLOOP_PRELOAD || \
 					loadmodule cloop file="$1/$FLL_IMAGE"
 				mountit /dev/cloop $FLL_MOUNTPOINT "-o ro" || FOUND_KNOPPIX=""
 				;;
@@ -841,7 +843,7 @@ mount_knoppix()
 				COMP=squashfs
 				loadmodule loop
 				loadmodule squashfs 
-				mount -t squashfs $1/$FLL_IMAGE $FLL_MOUNTPOINT -o loop,ro || FOUND_KNOPPIX=""
+				mount -t squashfs $1/$FLL_IMAGE_LOCATION $FLL_MOUNTPOINT -o loop,ro || FOUND_KNOPPIX=""
 				;;
 		esac
 	fi
@@ -874,7 +876,7 @@ mount_knoppix()
 
 remount_knoppix()
 {
-	if test -f $TARGET/$FLL_IMAGE; then
+	if test -f $TARGET/$FLL_IMAGE_LOCATION; then
 		umount $FLL_MOUNTPOINT
 # FIXME
 # as multi-image mounts are commented out of mount_knoppix
@@ -973,10 +975,10 @@ boot_from()
 		return 1
 	fi
   
-	if [ -f $TARGET/$FLL_IMAGE ]; then
+	if [ -f $TARGET/$FLL_IMAGE_LOCATION ]; then
 		echo -n "${CRE} ${GREEN}Accessing $FLL_DISTRO_NAME $FLL_MEDIUM at ${MAGENTA}$TARGET_DEV${GREEN}...${NORMAL}"
 	else
-		echo -n "${CRE} ${RED}Accessing $FLL_DISTRO_NAME $FLL_MEDIUM failed. Could not find $FLL_IMAGE on ${MAGENTA}$TARGET_DEV${RED}.${NORMAL}"
+		echo -n "${CRE} ${RED}Accessing $FLL_DISTRO_NAME $FLL_MEDIUM failed. Could not find $FLL_IMAGE_LOCATION on ${MAGENTA}$TARGET_DEV${RED}.${NORMAL}"
 		[ -n "$LOOP_SOURCE" ] && { /bin/umount "$LOOP_SOURCE" || umount -l "$LOOP_SOURCE"; } >/dev/null 2>&1
 		umount $TARGET
 		sleep 2
@@ -1033,7 +1035,7 @@ copy_to()
 			
 			# check for enough free space
 			USED_SPACE=0
-			test -r $TARGET/$FLL_IMAGE && USED_SPACE=$(/usr/bin/du -s $TARGET/$FLL_IMAGE | /usr/bin/gawk '{ print $1 }')
+			test -r $TARGET/$FLL_IMAGE_LOCATION && USED_SPACE=$(/usr/bin/du -s $TARGET/$FLL_IMAGE_LOCATION | /usr/bin/gawk '{ print $1 }')
 			FOUNDSPACE="$(/bin/df -k $TARGET | /usr/bin/tail -1 | /usr/bin/gawk '{ print $4+int('$USED_SPACE') }')"
 			;;
 		*)
@@ -1055,10 +1057,10 @@ copy_to()
 
 	if [ -z "$COPY_COMMAND" ] && [ -x /usr/bin/rsync ]; then
 		# first cp the small files
-		/usr/bin/rsync -a --exclude="$FLL_IMAGE*" $COPY $TARGET # Copy Knoppix to $TARGET
+		/usr/bin/rsync -a --exclude="$FLL_IMAGE_LOCATION*" $COPY $TARGET # Copy Knoppix to $TARGET
 
 		# then the big file with nice progress meter
-		/usr/bin/rsync -a --progress --include="$FLL_IMAGE*" --include="$FLL_IMAGE_DIR/" --exclude="*" $COPY $TARGET
+		/usr/bin/rsync -a --progress --include="$FLL_IMAGE_LOCATION*" --include="$FLL_IMAGE_DIR/" --exclude="*" $COPY $TARGET
 	else
 		"$COPY_COMMAND" $COPY $TARGET
 	fi
