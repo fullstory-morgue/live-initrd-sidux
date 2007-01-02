@@ -228,35 +228,32 @@ case "$CMDLINE" in
 esac
 
 case "$CMDLINE" in
-	*knoppix_dir=*)
-		FLL_IMAGE_DIR="$knoppix_dir"
+	*image_dir=*)
+		FLL_IMAGE_DIR="$image_dir"
 		;;
 esac
 case "$CMDLINE" in
-	*knoppix_name=*)
-		FLL_IMAGE_FILE="$knoppix_name"
+	*image_name=*)
+		FLL_IMAGE_FILE="$image_name"
 		;;
 esac
-
+FLL_IMAGE="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
 case "$CMDLINE" in
-	*knoppix_iso_dir=*)
-		FLL_ISO_DIR="$knoppix_iso_dir"
+	*iso_dir=*)
+		FLL_ISO_DIR="$iso_dir"
 		;;
 esac
 case "$CMDLINE" in
-	*knoppix_iso_name=*)
-		FLL_ISO_NAME="$knoppix_iso_name"
+	*iso_name=*)
+		FLL_ISO_NAME="$iso_name"
 		;;
 esac
-
+FLL_ISO="$FLL_ISO_DIR/$FLL_ISO_NAME"
 case "$CMDLINE" in
 	*fromiso=*)
 		FLL_ISO="$fromiso"
 		;;
 esac
-
-FLL_IMAGE="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
-FLL_ISO="$FLL_ISO_DIR/$FLL_ISO_NAME"
 
 # Print kernel info
 echo "${BLUE}Running Linux Kernel: ${YELLOW}$(uname -r)${BLUE}.${NORMAL}"
