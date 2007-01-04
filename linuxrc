@@ -247,7 +247,7 @@ esac
 
 # Print CPU info
 echo -n "${GREEN}"
-awk -F: '/^processor/{printf " Processor"$2" is "};/^model name/{printf $2};/^vendor_id/{printf vendor};/^cpu MHz/{printf " %dMHz",int($2)};/^cache size/{printf ","$2" Cache"};/^$/{print ""}' /proc/cpuinfo 2>/dev/null
+awk -F: '/^processor/{printf "Processor"$2" is "};/^model name/{printf $2};/^vendor_id/{printf vendor};/^cpu MHz/{printf " %dMHz",int($2)};/^cache size/{printf ","$2" Cache"};/^$/{print ""}' /proc/cpuinfo 2>/dev/null
 echo -n "${NORMAL}"
 
 # Print kernel info
@@ -809,7 +809,7 @@ for i in $DEVICES; do
 		fi
 	else
 		if mountit $i $FLL_MEDIA_MOUNTPOINT "-o ro" >/dev/null 2>&1; then
-			if test -f $FLL_MEDIA_MOUNTPOINT/$FLL_MEDIA
+			if test -f $FLL_MEDIA_MOUNTPOINT/$FLL_MEDIA; then
 				echo "found $FLL_MEDIA in $i   "
 				if mount -o loop,ro $FLL_MEDIA_MOUNTPOINT/$FLL_MEDIA /$FLL_MEDIUM >/dev/null 2>&1; then
 					echo "loop mounted   "
