@@ -1,8 +1,12 @@
 live-initrd-sidux (0.0.28) UNRELEASED; urgency=low
 
+  [ Stefan Lippers-Hollmann ]
   * NOT RELEASED YET
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Thu,  4 Jan 2007 16:49:34 +0100
+  [ Andreas Weber ]
+  * fixed fromiso (s/FROMISO/fromiso/) 
+
+ -- Andreas Weber <andreas@it-weber.com>  Thu,  4 Jan 2007 23:05:12 +0100
 
 live-initrd-sidux (0.0.27) unstable; urgency=low
 
