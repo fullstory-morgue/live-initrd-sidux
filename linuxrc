@@ -797,7 +797,7 @@ esac
 
 for i in $DEVICES; do
 	echo -n "${CRE}${BLUE}Looking for ${FLL_MEDIUM} in: ${MAGENTA}$i${NORMAL}   "
-	if test -z "$fromiso"; then
+	if test -z "$FROMISO"; then
 		if mountit $i /$FLL_MEDIUM "-o ro" >/dev/null 2>&1; then
 			if test -r /$FLL_MEDIUM/$FLL_IMAGE_LOCATION; then
 				echo -n "${CRE}${GREEN}Accessing $FLL_DISTRO_NAME ${FLL_MEDIUM} at ${MAGENTA}$i${GREEN}...${NORMAL}"
