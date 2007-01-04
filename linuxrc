@@ -121,10 +121,10 @@ echo "0" > /proc/sys/kernel/printk
 ARCHITECTURE="$(uname -m)"
 
 # Clear screen with colormode reset
-echo "$CLEAR$RESET"
-echo "$CLEAR"
+#echo "$CLEAR$RESET"
+#echo "$CLEAR"
 # Just go to the top of the screen
-echo -n "[H[J"
+#echo -n "[H[J"
 echo ""
 # Be verbose
 echo "${WHITE}Welcome to $FLL_DISTRO_NAME ($ARCHITECTURE) live linux!${NORMAL}"
@@ -244,6 +244,11 @@ case "$CMDLINE" in
 		FLL_MEDIA="$fromiso"
 		;;
 esac
+
+# Print CPU info
+echo -n "${GREEN}"
+awk -F: '/^processor/{printf " Processor"$2" is "};/^model name/{printf $2};/^vendor_id/{printf vendor};/^cpu MHz/{printf " %dMHz",int($2)};/^cache size/{printf ","$2" Cache"};/^$/{print ""}' /proc/cpuinfo 2>/dev/null
+echo -n "${NORMAL}"
 
 # Print kernel info
 echo "${BLUE}Running Linux Kernel: ${YELLOW}$(uname -r)${BLUE}.${NORMAL}"
