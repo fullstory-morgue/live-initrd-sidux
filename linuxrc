@@ -795,6 +795,9 @@ case "$CMDLINE" in
 		;;
 esac
 
+# this is needed now for fromiso
+loadmodule loop
+
 for i in $DEVICES; do
 	echo -n "${CRE}${BLUE}Looking for ${FLL_MEDIUM} in: ${MAGENTA}$i${NORMAL}   "
 	if test -z "$FROMISO"; then
@@ -846,7 +849,6 @@ mount_knoppix()
 				;;
 			"hsqs")
 				COMP=squashfs
-				loadmodule loop
 				loadmodule squashfs 
 				mount -t squashfs $1/$FLL_IMAGE_LOCATION $FLL_MOUNTPOINT -o loop,ro || FOUND_KNOPPIX=""
 				;;
