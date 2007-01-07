@@ -1159,12 +1159,12 @@ if test -n "$FOUND_KNOPPIX"; then
 	# don't use unified filesystems unconditionally for now
 	case "$CMDLINE" in
 		*unionfs*)
-			loadmodule unionfs 2>/dev/null && UNIONFS="yes"
+			"${FLL_MOUNTPOINT}/sbin/modprobe" unionfs 2>/dev/null && UNIONFS="yes"
 			AUFS=""
 			;;
 		*aufs*)
 			if [ -z "$UNIONFS" ]; then
-				loadmodule aufs 2>/dev/null && AUFS="yes"
+				"${FLL_MOUNTPOINT}/sbin/modprobe" aufs 2>/dev/null && AUFS="yes"
 			fi
 			;;
 	esac
@@ -1437,7 +1437,9 @@ if test -n "$FOUND_KNOPPIX"; then
 	[ -d /var/lib/samba ] && :> /var/lib/samba/unexpected.tdb
 
 	# Diet libc bug workaround
-	/bin/cp -f $FLL_MOUNTPOINT/etc/localtime /etc/localtime
+	/bin/cp -f "${FLL_MOUNTPOINT}/etc/localtime" /etc/localtime
+	
+	/bin/cp -f "${FLL_MOUNTPOINT}/etc/default/distro" /etc/default/distro
 
 	# busybox/cloop workaround
 	chmod 1777 /tmp /var/tmp

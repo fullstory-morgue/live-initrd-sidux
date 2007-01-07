@@ -1,8 +1,8 @@
-live-initrd-sidux (0.0.29) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.29) unstable; urgency=low
 
-  * NOT RELEASED YET
+  * fix unionfs handling.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Fri,  5 Jan 2007 17:20:16 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun,  7 Jan 2007 18:12:15 +0100
 
 live-initrd-sidux (0.0.28) unstable; urgency=low
 
