@@ -1,3 +1,9 @@
+live-initrd-sidux (0.0.32) UNRELEASED; urgency=low
+
+  * NOT RELEASED YET
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 14 Jan 2007 15:14:33 +0100
+
 live-initrd-sidux (0.0.31) unstable; urgency=low
 
   * handle boottime.kmap.gz as well.
