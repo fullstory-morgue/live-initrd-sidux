@@ -1441,7 +1441,8 @@ if test -n "$FOUND_KNOPPIX"; then
 	
 	# localization
 	/bin/cp --remove-destination "${FLL_MOUNTPOINT}/etc/default/distro" /etc/default/distro
-	/bin/cp --remove-destination "${FLL_MOUNTPOINT}/etc/console/*" /etc/console/
+	rm -f /etc/console/boottime.old.kmap.gz
+	/bin/cp --remove-destination "${FLL_MOUNTPOINT}/etc/console/*" /etc/console/ >/dev/null 2>&1
 
 	# busybox/cloop workaround
 	chmod 1777 /tmp /var/tmp
