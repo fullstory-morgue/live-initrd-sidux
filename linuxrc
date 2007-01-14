@@ -1437,16 +1437,16 @@ if test -n "$FOUND_KNOPPIX"; then
 	[ -d /var/lib/samba ] && :> /var/lib/samba/unexpected.tdb
 
 	# Diet libc bug workaround
-	/bin/cp -f "${FLL_MOUNTPOINT}/etc/localtime" /etc/localtime
+	/bin/cp --remove-destination "${FLL_MOUNTPOINT}/etc/localtime" /etc/localtime
 	
-	/bin/cp -f "${FLL_MOUNTPOINT}/etc/default/distro" /etc/default/distro
+	/bin/cp --remove-destination "${FLL_MOUNTPOINT}/etc/default/distro" /etc/default/distro
 
 	# busybox/cloop workaround
 	chmod 1777 /tmp /var/tmp
 
 	# populate /root/.profile and /root/.bashrc
-	cp -f /usr/share/base-files/dot.profile	/root/.profile	>/dev/null 2>&1
-	cp -f /usr/share/base-files/dot.bashrc	/root/.bashrc	>/dev/null 2>&1
+	cp --remove-destination /usr/share/base-files/dot.profile	/root/.profile
+	cp --remove-destination /usr/share/base-files/dot.bashrc	/root/.bashrc
 
 	if ! grep -q bash_completion /root/.bashrc; then
 		cat >> /root/.bashrc << EOF

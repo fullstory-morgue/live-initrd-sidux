@@ -1,8 +1,8 @@
-live-initrd-sidux (0.0.30) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.30) unstable; urgency=low
 
-  * NOT RELEASED YET
+  * use --remove-destination to copy over links.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun,  7 Jan 2007 18:13:48 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 14 Jan 2007 15:04:32 +0100
 
 live-initrd-sidux (0.0.29) unstable; urgency=low
 
