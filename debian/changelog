@@ -1,8 +1,8 @@
-live-initrd-sidux (0.0.31) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.31) unstable; urgency=low
 
-  * NOT RELEASED YET
+  * handle boottime.kmap.gz as well.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 14 Jan 2007 15:06:09 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 14 Jan 2007 15:12:47 +0100
 
 live-initrd-sidux (0.0.30) unstable; urgency=low
 

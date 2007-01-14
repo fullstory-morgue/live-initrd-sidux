@@ -1439,7 +1439,10 @@ if test -n "$FOUND_KNOPPIX"; then
 	# Diet libc bug workaround
 	/bin/cp --remove-destination "${FLL_MOUNTPOINT}/etc/localtime" /etc/localtime
 	
+	# localization
 	/bin/cp --remove-destination "${FLL_MOUNTPOINT}/etc/default/distro" /etc/default/distro
+	rm -f   /etc/console/boottime.old.kmap.gz \
+	/bin/cp --remove-destination "${FLL_MOUNTPOINT}/etc/console/*" /etc/console/
 
 	# busybox/cloop workaround
 	chmod 1777 /tmp /var/tmp
