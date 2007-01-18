@@ -161,6 +161,8 @@ SCSI_MODULES="
 	iswraid
 	sym53c8xx
 	ohci1394
+	sd
+	sr_mod
 	sbp2
 	ehci-hcd
 	ohci-hcd
@@ -169,6 +171,7 @@ SCSI_MODULES="
 
 MODULES="
 	cloop
+	cdrom
 	loop
 	ntfs
 	squashfs
