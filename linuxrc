@@ -495,118 +495,118 @@ for d in /sys/devices/*/*; do
 				
 				case "$VENDOR:$DEVICE" in
 					*1000:*00[0-2]?)
-						SCSI_PROBE="$SCSI_PROBE sym53c8xx"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod scsi_transport_spi sym53c8xx"
 						;;
 					*1000:*040?|*1000:*196?|*101e:*196?|*1028:*000[ef]|*1028:*0013)
-						SCSI_PROBE="$SCSI_PROBE megaraid_mbox"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod megaraid_mm megaraid_mbox"
 						;;
 					*1000:*04[1-9]?|*1028:*0015)
-						SCSI_PROBE="$SCSI_PROBE megaraid_sas"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod megaraid_sas"
 						;;
 					*1001:*9100|*1101:*)
-						SCSI_PROBE="$SCSI_PROBE initio"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod initio"
 						;;
 					*9004:*|*9005:*00??)
-						SCSI_PROBE="$SCSI_PROBE aic7xxx"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod scsi_transport_spi aic7xxx"
 						;;
 					*1011:*|*1028:*000[1-9a]|*9005:*02[08]?)
-						SCSI_PROBE="$SCSI_PROBE aacraid"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod aacraid"
 						;;
 					*1014:*002e|*1014:*01bd|*9005:*0250)
-						SCSI_PROBE="$SCSI_PROBE ips"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod ips"
 						;;
 					*1014:*0[1-2]8?|*1069:*|*9005:*0503)
-						SCSI_PROBE="$SCSI_PROBE ipr"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod libata ipr"
 						;;
 					*1022:*)
-						SCSI_PROBE="$SCSI_PROBE tmscsim"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod tmscsim"
 						;;
 					*1044:*)
-						SCSI_PROBE="$SCSI_PROBE dpt_i2o"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod dpt_i2o"
 						;;
 					*1077:*1???)
-						SCSI_PROBE="$SCSI_PROBE qla1280"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod qla1280"
 						;;
 					*1077:*21??)
-						SCSI_PROBE="$SCSI_PROBE qla2xxx qla2100"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod scsi_transport_fc qla2xxx qla2100"
 						;;
 					*1077:*22??)
-						SCSI_PROBE="$SCSI_PROBE qla2xxx qla2200"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod scsi_transport_fc qla2xxx qla2200"
 						;;
 					*1077:*23[0-1]?)
-						SCSI_PROBE="$SCSI_PROBE qla2xxx qla2300"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod scsi_transport_fc qla2xxx qla2300"
 						;;
 					*1077:*232?)
-						SCSI_PROBE="$SCSI_PROBE qla2xxx qla2322"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod scsi_transport_fc qla2xxx qla2322"
 						;;
 					*1077:*24??)
-						SCSI_PROBE="$SCSI_PROBE qla2xxx"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod scsi_transport_fc qla2xxx"
 						;;
 					*1077:*63??)
-						SCSI_PROBE="$SCSI_PROBE qla2xxx qla6312"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod scsi_transport_fc qla2xxx qla6312"
 						;;
 					*10df:*)
-						SCSI_PROBE="$SCSI_PROBE lpfc"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod scsi_transport_fc lpfc"
 						;;
 					*10fc:*|*1145:*)
-						SCSI_PROBE="$SCSI_PROBE nsp32"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod nsp32"
 						;;
 					*1101:*)
-						SCSI_PROBE="$SCSI_PROBE a100u2w"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod a100u2w"
 						;;
 					*1119:*|*8086:*)
-						SCSI_PROBE="$SCSI_PROBE gdth"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod gdth"
 						;;
 					*1191:*)
-						SCSI_PROBE="$SCSI_PROBE atp870u"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod atp870u"
 						;;
 					*134a:*)
-						SCSI_PROBE="$SCSI_PROBE dmx3191d"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod scsi_transport_spi dmx3191d"
 						;;
 					*1de1:*)
-						SCSI_PROBE="$SCSI_PROBE dc395x"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod dc395x"
 						;;
 					*9005:*8???)
-						SCSI_PROBE="$SCSI_PROBE aic79xx"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod scsi_transport_spi aic79xx"
 						;;
 					*104b:*)
-						SCSI_PROBE="$SCSI_PROBE BusLogic"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod BusLogic"
 						;;
 					*1[0d]e1:*)
-						SCSI_PROBE="$SCSI_PROBE dc395x"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod dc395x"
 						;;
 					*1000:*00[34]?)
-						SCSI_PROBE="$SCSI_PROBE mptscsih"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod mptbase mptscsih"
 						;;
 					*10cd:*)
-						SCSI_PROBE="$SCSI_PROBE advansys"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod advansys"
 						;;
 					*1191:*)
-						SCSI_PROBE="$SCSI_PROBE atp870u"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod atp870u"
 						;;
 					*134a:*)
-						SCSI_PROBE="$SCSI_PROBE dtc"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod dtc"
 						;;
 					*1d44:*)
-						SCSI_PROBE="$SCSI_PROBE eata"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod eata"
 						;;
 					*1036:*)
-						SCSI_PROBE="$SCSI_PROBE fdomain"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod fdomain"
 						;;
 					*1256:*4201)
-						SCSI_PROBE="$SCSI_PROBE pci2220i"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod pci2220i"
 						;;
 					*1256:*5201)
-						SCSI_PROBE="$SCSI_PROBE pci2000"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod pci2000"
 						;;
 					*1022:*)
-						SCSI_PROBE="$SCSI_PROBE tmscsim"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod tmscsim"
 						;;
 					*6356:*)
-						SCSI_PROBE="$SCSI_PROBE ultrastor"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod ultrastor"
 						;;
 					*13c1:*)
-						SCSI_PROBE="$SCSI_PROBE 3w-xxxx"
+						SCSI_PROBE="$SCSI_PROBE scsi_mod 3w-xxxx"
 						;;
 				esac
 				;;
