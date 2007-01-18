@@ -625,7 +625,11 @@ else
 	MODULES="$SCSI_PROBE"
 fi
 
-test -z "$NOSCSI" && test -n "$MODULES" && loadmodules SCSI $MODULES
+if [ -z "$NOSCSI" ] && [ -n "$MODULES" ]; then
+	loadmodules SCSI $MODULES
+	loadmodule sr_mod >/dev/null 2>&1
+	loadmodule sd_mod >/dev/null 2>&1
+fi
 # End of SCSI check
 
 # Check for IDE-Raid devices

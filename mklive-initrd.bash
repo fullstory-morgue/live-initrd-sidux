@@ -161,7 +161,7 @@ SCSI_MODULES="
 	iswraid
 	sym53c8xx
 	ohci1394
-	sd
+	sd_mod
 	sr_mod
 	sbp2
 	ehci-hcd

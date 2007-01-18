@@ -1,8 +1,8 @@
-live-initrd-sidux (0.0.38) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.38) unstable; urgency=low
 
-  * NOT RELEASED YET
+  * fix SCSI module dependencies part III.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Thu, 18 Jan 2007 20:00:56 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Thu, 18 Jan 2007 20:41:37 +0100
 
 live-initrd-sidux (0.0.37) unstable; urgency=low
 
