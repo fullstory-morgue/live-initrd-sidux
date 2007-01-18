@@ -1087,7 +1087,7 @@ copy_to()
 		#	mountit "$TARGET_DEV" "$TARGET" "-o ro" || $FLL_MOUNTPOINT/bin/mount -i -t ntfs -o ro "$TARGET_DEV" "$TARGET"
 		#	;;
 		*)
-			/KNOPPIX/bin/mount -n -o remount,ro "$TARGET"
+			$FLL_MOUNTPOINT/bin/mount -n -o remount,ro "$TARGET"
 			;;
 	esac
 	remount_knoppix
