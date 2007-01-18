@@ -1,9 +1,5 @@
-live-initrd-sidux (0.0.35) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.35) unstable; urgency=low
 
-  [ Stefan Lippers-Hollmann ]
-  * NOT RELEASED YET
-
-  [ Kel Modderman ]
   * Fix hardcoded /KNOPPIX
   * Fix wrong mount command in copy_to().
 
