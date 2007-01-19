@@ -110,15 +110,15 @@ export PATH
 
 umask 022
 
-# Load Modules for SATA/PATA
-insmod /modules/eata.ko 2> /dev/null
-insmod /modules/sd_mod.ko 2> /dev/null
-insmod /modules/sr_mod.ko 2> /dev/null
-
 # Mount /proc, /sys and /dev/pts
 mount -t proc /proc /proc
 mount -t sysfs /sys /sys
 mount -t devpts -o noexec,nosuid devpts /dev/pts
+
+# Load Modules for SATA/PATA
+insmod /modules/eata.ko 2> /dev/null
+insmod /modules/sd_mod.ko 2> /dev/null
+insmod /modules/sr_mod.ko 2> /dev/null
 
 # Disable kernel messages while probing modules in autodetect mode
 echo "0" > /proc/sys/kernel/printk
@@ -904,7 +904,8 @@ remount_knoppix()
 			unloadmodule cloop # release CD
 		fi
 
-		umount $SOURCE  # unmount CD
+		# TODO: Figure out why -l was/is needed?
+		umount -l $SOURCE  # unmount CD
 		[ -n "$SOURCE2" ] && umount $SOURCE2  # umount possible loop-device
 
 		mount_knoppix $TARGET
