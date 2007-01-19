@@ -1,8 +1,12 @@
 live-initrd-sidux (0.0.39) UNRELEASED; urgency=low
 
+  [ Stefan Lippers-Hollmann ]
   * NOT RELEASED YET
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Thu, 18 Jan 2007 20:43:19 +0100
+  [ Niall Walsh ]
+  * Do lazy umount of /cdrom in remount_knoppix but (why) is this needed?
+
+ -- Niall Walsh <niallwalsh@users.berlios.de>  Fri, 19 Jan 2007 07:33:32 +0000
 
 live-initrd-sidux (0.0.38) unstable; urgency=low
 
