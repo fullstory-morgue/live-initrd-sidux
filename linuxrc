@@ -110,6 +110,11 @@ export PATH
 
 umask 022
 
+# Load Modules for SATA/PATA
+insmod /modules/eata.ko 2> /dev/null
+insmod /modules/sd_mod.ko 2> /dev/null
+insmod /modules/sr_mod.ko 2> /dev/null
+
 # Mount /proc, /sys and /dev/pts
 mount -t proc /proc /proc
 mount -t sysfs /sys /sys
@@ -899,8 +904,7 @@ remount_knoppix()
 			unloadmodule cloop # release CD
 		fi
 
-		# TODO: Figure out why -l was/is needed?
-		umount -l $SOURCE  # unmount CD
+		umount $SOURCE  # unmount CD
 		[ -n "$SOURCE2" ] && umount $SOURCE2  # umount possible loop-device
 
 		mount_knoppix $TARGET
