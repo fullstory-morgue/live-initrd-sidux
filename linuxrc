@@ -115,11 +115,6 @@ mount -t proc /proc /proc
 mount -t sysfs /sys /sys
 mount -t devpts -o noexec,nosuid devpts /dev/pts
 
-# Load Modules for SATA/PATA
-insmod /modules/eata.ko 2> /dev/null
-insmod /modules/sd_mod.ko 2> /dev/null
-insmod /modules/sr_mod.ko 2> /dev/null
-
 # Disable kernel messages while probing modules in autodetect mode
 echo "0" > /proc/sys/kernel/printk
 

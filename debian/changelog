@@ -1,13 +1,8 @@
 live-initrd-sidux (0.0.41) UNRELEASED; urgency=low
 
-  [ Stefan Lippers-Hollmann ]
   * NOT RELEASED YET
 
-  [ Andreas Weber ]
-  * loading modules for SATA (very simple for now)
-  * fixed messed code
-
- -- Andreas Weber <andreas@it-weber.com>  Fri, 19 Jan 2007 23:01:08 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Fri, 19 Jan 2007 13:35:42 +0100
 
 live-initrd-sidux (0.0.40) UNRELEASED; urgency=low
 
