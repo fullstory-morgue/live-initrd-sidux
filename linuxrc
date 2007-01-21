@@ -899,8 +899,7 @@ remount_knoppix()
 			unloadmodule cloop # release CD
 		fi
 
-		# TODO: Figure out why -l was/is needed?
-		umount -l $SOURCE  # unmount CD
+		umount $SOURCE  # unmount CD
 		[ -n "$SOURCE2" ] && umount $SOURCE2  # umount possible loop-device
 
 		mount_knoppix $TARGET
