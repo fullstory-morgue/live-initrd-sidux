@@ -1234,35 +1234,35 @@ if test -n "$FOUND_KNOPPIX"; then
 	fi
 
 	if ! grep ramdisk /etc/mtab >/dev/null ; then
-	# New in Kernel 2.4.x: tempfs with variable ramdisk size.
-	# We check for available memory anyways and limit the ramdisks
-	# to a reasonable size.
-	# Now we need to use a little intuition for finding a ramdisk size
-	# that keeps us from running out of space, but still doesn't crash the
-	# machine due to lack of Ram
-	
-	# Minimum size of additional ram partitions
-	MINSIZE=20000
+		# New in Kernel 2.4.x: tempfs with variable ramdisk size.
+		# We check for available memory anyways and limit the ramdisks
+		# to a reasonable size.
+		# Now we need to use a little intuition for finding a ramdisk size
+		# that keeps us from running out of space, but still doesn't crash the
+		# machine due to lack of Ram
 
-	# At least this much memory minus 30% should remain when home and var are full.
-	MINLEFT=16000
+		# Minimum size of additional ram partitions
+		MINSIZE=20000
 
-	# Maximum ramdisk size
-	MAXSIZE="$(expr $TOTALMEM - $MINLEFT)"
+		# At least this much memory minus 30% should remain when home and var are full.
+		MINLEFT=16000
 
-	# Default ramdisk size for ramdisk
-	RAMSIZE="$(expr $TOTALMEM / 5)"
+		# Maximum ramdisk size
+		MAXSIZE="$(expr $TOTALMEM - $MINLEFT)"
 
-	# Create additional dynamic ramdisk.
-	test -z "$RAMSIZE" -o "$RAMSIZE" -lt "$MINSIZE" && RAMSIZE="$MINSIZE"
-	mkdir -p /ramdisk
+		# Default ramdisk size for ramdisk
+		RAMSIZE="$(expr $TOTALMEM / 5)"
 
-	# tmpfs/varsize version, can use swap
-	RAMSIZE=$(expr $RAMSIZE \* 4)
-	echo -n "${CRE}${BLUE}Creating ${YELLOW}/ramdisk${BLUE} (dynamic size=${RAMSIZE}k) on ${MAGENTA}shared memory${BLUE}...${NORMAL}"
+		# Create additional dynamic ramdisk.
+		test -z "$RAMSIZE" -o "$RAMSIZE" -lt "$MINSIZE" && RAMSIZE="$MINSIZE"
+		mkdir -p /ramdisk
 
-	# We need /bin/mount here for the -o size= option
-	/bin/mount -t tmpfs -o "size=${RAMSIZE}k,mode=755" /ramdisk /ramdisk || echo "creating the ramdisk failed"
+		# tmpfs/varsize version, can use swap
+		RAMSIZE=$(expr $RAMSIZE \* 4)
+		echo -n "${CRE}${BLUE}Creating ${YELLOW}/ramdisk${BLUE} (dynamic size=${RAMSIZE}k) on ${MAGENTA}shared memory${BLUE}...${NORMAL}"
+
+		# We need /bin/mount here for the -o size= option
+		/bin/mount -t tmpfs -o "size=${RAMSIZE}k,mode=755" /ramdisk /ramdisk || echo "creating the ramdisk failed"
 	fi
 
 	if [ "$UNIONFS" = "yes" ] || [ "$AUFS" = "yes" ]; then
@@ -1281,7 +1281,7 @@ if test -n "$FOUND_KNOPPIX"; then
 			/var
 
 	if ! grep home /etc/mtab > /dev/null ; then
-	/bin/mount --bind /ramdisk/home /home
+		/bin/mount --bind /ramdisk/home /home
 	fi
 
 	echo "${BLUE}Done.${NORMAL}"
@@ -1289,8 +1289,8 @@ if test -n "$FOUND_KNOPPIX"; then
 	stage=2
 	rundebugshell
 
-        # don't use unionfs unconditionally for now
-        if [ "$UNIONFS" = "yes" ] || [ "$AUFS" = "yes" ]; then
+	# don't use unionfs unconditionally for now
+	if [ "$UNIONFS" = "yes" ] || [ "$AUFS" = "yes" ]; then
 		#######################
 		## unionfs adventure ##
 		#######################
