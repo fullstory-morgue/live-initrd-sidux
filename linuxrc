@@ -1244,7 +1244,6 @@ if test -n "$FOUND_KNOPPIX"; then
 			/ramdisk/home/${FLL_LIVE_USER} \
 			/var
 	/bin/mount --bind /ramdisk/home /home
-	chown $FLL_LIVE_USER:$FLL_LIVE_USER /home/${FLL_LIVE_USER}
 
 	echo "${BLUE}Done.${NORMAL}"
 
@@ -1310,7 +1309,6 @@ if test -n "$FOUND_KNOPPIX"; then
 	
 		echo ""
 		echo "${GREEN}>> Read-only ${FLL_MEDIUM} system successfully merged with read-write /ramdisk.${NORMAL}"
-		chown ${FLL_LIVE_USER}:${FLL_LIVE_USER} /home/${FLL_LIVE_USER}
 
 		#######################
 	else
@@ -1338,7 +1336,6 @@ if test -n "$FOUND_KNOPPIX"; then
 				/etc/X11 \
 				/etc/cups \
 				/etc/dhcpc
-		chown ${FLL_LIVE_USER}:${FLL_LIVE_USER} /home/${FLL_LIVE_USER}
 
 		# All files in here should be size zero after Knoppix.clean was run
 		cp -a	$FLL_MOUNTPOINT/var/local \
