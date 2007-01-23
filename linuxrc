@@ -815,8 +815,6 @@ esac
 # this is needed now for fromiso
 loadmodule loop
 
-# /scan is used to mount devices we are checking, and removed afterwards
-mkdir /scan
 for i in $DEVICES; do
 	# unless TESTMNT is set we won't look here for KNOPPIX/chroot
 	TESTMNT=""
@@ -833,19 +831,19 @@ for i in $DEVICES; do
 	else
 		TESTMNT="$i"
 	fi
-	# mount the device (or iso) on /scan to check it
-	if mountit $i /scan "-o ro" >/dev/null 2>&1; then
+	# mount the device (or iso) on /mnt to check it
+	if mountit $i /mnt "-o ro" >/dev/null 2>&1; then
 		# check and load fstab if required
-		if test -n "$FSTAB" && test -z "$FOUND_FSTAB" && test -r /scan/$FSTABFILE; then
+		if test -n "$FSTAB" && test -z "$FOUND_FSTAB" && test -r /mnt/$FSTABFILE; then
 			echo "# LINUXRC_FSTAB_START" >> /etc/fstab
-			cat /scan/$FSTABFILE >> /etc/fstab && echo "# LINUXRC_FSTAB_END" >> /etc/fstab && echo -n "${CRE}${GREEN}Found fstab ${FSTABFILE} at ${MAGENTA}$i${GREEN}...${NORMAL}" && FOUND_FSTAB="$i"
+			cat /mnt/$FSTABFILE >> /etc/fstab && echo "# LINUXRC_FSTAB_END" >> /etc/fstab && echo -n "${CRE}${GREEN}Found fstab ${FSTABFILE} at ${MAGENTA}$i${GREEN}...${NORMAL}" && FOUND_FSTAB="$i"
 		fi
-		if test -n "$TESTMNT" && test -r /scan/$FLL_IMAGE_LOCATION; then
+		if test -n "$TESTMNT" && test -r /mnt/$FLL_IMAGE_LOCATION; then
 			echo -n "${CRE}${GREEN}Accessing $FLL_DISTRO_NAME ${FLL_MEDIUM} at ${MAGENTA}$i${GREEN}...${NORMAL}"
 			FOUND_KNOPPIX="$i"
 		fi
 		# umount scan and mount the FLL_MEDIUM if we FOUND_KNOPPIX
-		umount /scan >/dev/null
+		umount /mnt >/dev/null
 		test -n "$FOUND_KNOPPIX" && test -z "$SCAN_MOUNTED" && mountit $i $FLL_MEDIUM "-o ro" && SCAN_MOUNTED="1" >/dev/null
 	fi
 	# umount FLL_MEDIA_MOUNTPOINT if we haven't just mounted FLL_MEDIUM
@@ -857,7 +855,6 @@ for i in $DEVICES; do
 		break
 	fi
 done
-rmdir /scan
 
 if test -n "$FSTAB" && test -z "$FOUND_FSTAB"; then
 	echo "${CRE}${RED}Failed to find requested fstab file ${GREEN}${FSTABFILE}${NORMAL}"
