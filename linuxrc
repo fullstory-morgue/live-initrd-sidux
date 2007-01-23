@@ -245,6 +245,19 @@ case "$CMDLINE" in
 		;;
 esac
 
+FSTAB=""
+FSTABFILE="${FLL_DISTRO_NAME_EC}.FSTAB"
+case "$CMDLINE" in
+	*fstab*)
+		FSTAB="1"
+		;;
+esac
+case "$CMDLINE" in
+	*fstab=*)
+		FSTABFILE="$fstab"
+		;;
+esac
+
 # Print CPU info
 echo -n "${GREEN}"
 awk -F: '/^processor/{printf "Processor"$2" is "};/^model name/{printf $2};/^vendor_id/{printf vendor};/^cpu MHz/{printf " %dMHz",int($2)};/^cache size/{printf ","$2" Cache"};/^$/{print ""}' /proc/cpuinfo 2>/dev/null
@@ -802,38 +815,53 @@ esac
 # this is needed now for fromiso
 loadmodule loop
 
+# /scan is used to mount devices we are checking, and removed afterwards
+mkdir /scan
 for i in $DEVICES; do
-	echo -n "${CRE}${BLUE}Looking for ${FLL_MEDIUM} in: ${MAGENTA}$i${NORMAL}   "
-	if test -z "$FROMISO"; then
-		if mountit $i /$FLL_MEDIUM "-o ro" >/dev/null 2>&1; then
-			if test -r /$FLL_MEDIUM/$FLL_IMAGE_LOCATION; then
-				echo -n "${CRE}${GREEN}Accessing $FLL_DISTRO_NAME ${FLL_MEDIUM} at ${MAGENTA}$i${GREEN}...${NORMAL}"
-				FOUND_KNOPPIX="$i"
-				break
-			fi
-			
-			umount /$FLL_MEDIUM
-		fi
-	else
+	# unless TESTMNT is set we won't look here for KNOPPIX/chroot
+	TESTMNT=""
+	test -z "$FOUND_KNOPPIX" && echo -n "${CRE}${BLUE}Looking for ${FLL_MEDIUM} in: ${MAGENTA}$i${NORMAL}   "
+	# check if we are still looking for the iso
+	if test -n "$FROMISO" && test -z "$SCAN_MOUNTED"; then
 		if mountit $i $FLL_MEDIA_MOUNTPOINT "-o ro" >/dev/null 2>&1; then
 			if test -f $FLL_MEDIA_MOUNTPOINT/$FLL_MEDIA; then
-				echo "found $FLL_MEDIA in $i   "
-				if mount -o loop,ro $FLL_MEDIA_MOUNTPOINT/$FLL_MEDIA /$FLL_MEDIUM >/dev/null 2>&1; then
-					echo "loop mounted   "
-					if test -f /$FLL_MEDIUM/$FLL_IMAGE_LOCATION; then
-						echo -n "${CRE} ${GREEN}Accessing $FLL_DISTRO_NAME image at ${MAGENTA}$i/$FLL_IMAGE_LOCATION${GREEN}...${NORMAL}"
-						FOUND_KNOPPIX="$i/$FLL_MEDIA"
-						break
-					fi
-			
-				umount /$FLL_MEDIUM
-				fi
+				# we found the iso
+				TESTMNT="$FLL_MEDIA_MOUNTPOINT/$FLL_MEDIA"
+				i="$TESTMNT"
 			fi
-		
-			umount $FLL_MEDIA_MOUNTPOINT
 		fi
+	else
+		TESTMNT="$i"
+	fi
+	# mount the device (or iso) on /scan to check it
+	if mountit $i /scan "-o ro" >/dev/null 2>&1; then
+		# check and load fstab if required
+		if test -n "$FSTAB" && test -z "$FOUND_FSTAB" && test -r /scan/$FSTABFILE; then
+			echo "# LINUXRC_FSTAB_START" >> /etc/fstab
+			cat /scan/$FSTABFILE >> /etc/fstab && echo "# LINUXRC_FSTAB_END" >> /etc/fstab && echo -n "${CRE}${GREEN}Found fstab ${FSTABFILE} at ${MAGENTA}$i${GREEN}...${NORMAL}" && FOUND_FSTAB="$i"
+		fi
+		if test -n "$TESTMNT" && test -r /scan/$FLL_IMAGE_LOCATION; then
+			echo -n "${CRE}${GREEN}Accessing $FLL_DISTRO_NAME ${FLL_MEDIUM} at ${MAGENTA}$i${GREEN}...${NORMAL}"
+			FOUND_KNOPPIX="$i"
+		fi
+		# umount scan and mount the FLL_MEDIUM if we FOUND_KNOPPIX
+		umount /scan >/dev/null
+		test -n "$FOUND_KNOPPIX" && test -z "$SCAN_MOUNTED" && mountit $i $FLL_MEDIUM "-o ro" && SCAN_MOUNTED="1" >/dev/null
+	fi
+	# umount FLL_MEDIA_MOUNTPOINT if we haven't just mounted FLL_MEDIUM
+	if test -n "$FROMISO" && test -z "$SCAN_MOUNTED"; then
+		umount $FLL_MEDIA_MOUNTPOINT > /dev/null 2>&1
+	fi
+	if test -n "$FOUND_KNOPPIX" && ( test -z "$FSTAB" || test -n "$FOUND_FSTAB" ); then
+		# everything is found so we are finished scanning
+		break
 	fi
 done
+rmdir /scan
+
+if test -n "$FSTAB" && test -z "$FOUND_FSTAB"; then
+	echo "${CRE}${RED}Failed to find requested fstab file ${GREEN}${FSTABFILE}${NORMAL}"
+fi
 
 # Harddisk-installed script part version has been removed
 # (KNOPPIX can be booted directly from HD now).
@@ -1198,7 +1226,14 @@ if test -n "$FOUND_KNOPPIX"; then
 	
 	# Clean up /
 	$FLL_MOUNTPOINT/bin/rm -rf /modules /static
-	
+
+	if test -n "$FOUND_FSTAB"; then
+		cat /etc/fstab | awk '!/^#/{if ($6=="1"){print $2}}' | xargs mkdir -p
+		echo "${CRE}${GREEN}Mounting from fstab${NORMAL}"
+		/bin/mount -a
+	fi
+
+	if ! grep ramdisk /etc/mtab >/dev/null ; then
 	# New in Kernel 2.4.x: tempfs with variable ramdisk size.
 	# We check for available memory anyways and limit the ramdisks
 	# to a reasonable size.
@@ -1228,6 +1263,7 @@ if test -n "$FOUND_KNOPPIX"; then
 
 	# We need /bin/mount here for the -o size= option
 	/bin/mount -t tmpfs -o "size=${RAMSIZE}k,mode=755" /ramdisk /ramdisk || echo "creating the ramdisk failed"
+	fi
 
 	if [ "$UNIONFS" = "yes" ] || [ "$AUFS" = "yes" ]; then
 		mkdir -p /ramdisk/tmp
@@ -1243,7 +1279,10 @@ if test -n "$FOUND_KNOPPIX"; then
 	mkdir -p	/home \
 			/ramdisk/home/${FLL_LIVE_USER} \
 			/var
+
+	if ! grep home /etc/mtab > /dev/null ; then
 	/bin/mount --bind /ramdisk/home /home
+	fi
 
 	echo "${BLUE}Done.${NORMAL}"
 
