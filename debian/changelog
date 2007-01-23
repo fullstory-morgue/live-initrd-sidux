@@ -16,8 +16,10 @@ live-initrd-sidux (0.0.42) UNRELEASED; urgency=low
   * Add fstab cheatcode which will search (as for the cd) for
     a ${FLL_DISTRO_NAME_UC}.FSTAB, append it's content to the miniroot fstab
     and later mount all pass 1 devices (before ramdisk and home are mounted)
+  * Load the ide-disk module if there is one and fstab or fromiso cheats are
+    in effect.
 
- -- Niall Walsh <niallwalsh@users.berlios.de>  Tue, 23 Jan 2007 06:05:04 +0000
+ -- Niall Walsh <niallwalsh@users.berlios.de>  Tue, 23 Jan 2007 06:52:09 +0000
 
 live-initrd-sidux (0.0.41) unstable; urgency=low
 
