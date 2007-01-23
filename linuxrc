@@ -772,10 +772,7 @@ fi
 # Check for ide-scsi supported CD-Roms et al.
 test -r /proc/scsi/scsi && FOUND_SCSI="yes"
 
-# FROMISO and FSTAB are likely to need ide-disk
-if test -n "$FROMISO" || test -n "$FSTAB"; then
-	test -r /modules/ide-disk && loadmodule ide-disk
-fi
+test -r /modules/ide-disk && loadmodule ide-disk
 
 # Disable kernel messages again
 echo "0" > /proc/sys/kernel/printk
