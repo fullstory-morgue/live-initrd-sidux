@@ -317,19 +317,7 @@ done
 touch ${TARGET_INITRD_DIR}/etc/exports
 
 # Copy /etc templates to staging area
-#
-# Substitute special @TAGS@ with correct names from distro-defaults
-pushd ${TEMPLATE_DIR}/etc >/dev/null
-	for tmpl in *; do
-		[[ -f ${tmpl} ]] || continue
-		# sed hack in distro-defaults support
-		sed \
-			-e "s/@FLL_LIVE_USER@/${FLL_LIVE_USER}/g" 	\
-			-e "s/@FLL_DISTRO_NAME@/${FLL_DISTRO_NAME}/g"	\
-			${tmpl} > ${TARGET_INITRD_DIR}/etc/${tmpl}
-	done
-popd >/dev/null
-
+cp ${TEMPLATE_DIR}/etc/* ${TARGET_INITRD_DIR}/etc/
 chmod 0644 ${TARGET_INITRD_DIR}/etc/*
 chmod 0755 ${TARGET_INITRD_DIR}/etc/init
 
