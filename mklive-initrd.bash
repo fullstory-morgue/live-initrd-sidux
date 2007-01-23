@@ -341,7 +341,7 @@ done
 pushd ${TARGET_INITRD_DIR}/dev >/dev/null
 	# XXX: pick correct device node groups for creation
 	echo "Creating device nodes..."
-	./MAKEDEV generic hd sd sr sg loop md input pty usb
+	./MAKEDEV generic hd sd sr sg loop md usb
 	mkdir -p pts
 popd >/dev/null
 
