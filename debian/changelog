@@ -7,8 +7,10 @@ live-initrd-sidux (0.0.42) UNRELEASED; urgency=low
   * Remove bogus templates from initrd.
   * Don't set live-user ownerships until we have a filesystem mounted that
     knows about them (do it in live-autoconfig).
+  * Tweak order in which devices are scanned for, giving priority to
+    /dev/hd?[1-9].
 
- -- Kel Modderman <kel@otaku42.de>  Tue, 23 Jan 2007 13:59:47 +1000
+ -- Kel Modderman <kel@otaku42.de>  Tue, 23 Jan 2007 14:19:46 +1000
 
 live-initrd-sidux (0.0.41) unstable; urgency=low
 
