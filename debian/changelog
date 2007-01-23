@@ -1,7 +1,4 @@
-live-initrd-sidux (0.0.42) UNRELEASED; urgency=low
-
-  [ Stefan Lippers-Hollmann ]
-  * NOT RELEASED YET
+live-initrd-sidux (0.0.42) unstable; urgency=low
 
   [ Kel Modderman ]
   * Remove bogus templates from initrd.
