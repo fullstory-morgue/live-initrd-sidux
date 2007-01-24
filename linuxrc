@@ -772,6 +772,7 @@ fi
 # Check for ide-scsi supported CD-Roms et al.
 test -r /proc/scsi/scsi && FOUND_SCSI="yes"
 
+test -r /modules/ide-generic.ko && loadmodule ide-generic
 test -r /modules/ide-disk.ko && loadmodule ide-disk
 
 # Disable kernel messages again

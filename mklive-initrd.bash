@@ -170,6 +170,7 @@ SCSI_MODULES="
 "
 
 MODULES="
+	ide-generic
 	ide-disk
 	cloop
 	cdrom
