@@ -1,14 +1,14 @@
-live-initrd-sidux (0.0.45) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.45) unstable; urgency=low
 
   [ Stefan Lippers-Hollmann ]
-  * NOT RELEASED YET
+  * TARGET_INITRD_SIZE="20000".
 
   [ Niall Walsh ]
   * Don't check if a /mnt is a chroot and update FOUND_KNOPPIX if we already
     have it.   Cleans junk output and keeps the (unused) contents of
     FOUND_KNOPPIX intact.
 
- -- Niall Walsh <niallwalsh@users.berlios.de>  Wed, 24 Jan 2007 16:44:04 +0000
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Wed, 24 Jan 2007 19:44:12 +0100
 
 live-initrd-sidux (0.0.44) unstable; urgency=low
 
