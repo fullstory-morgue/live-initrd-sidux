@@ -1,9 +1,5 @@
-live-initrd-sidux (0.0.43) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.43) unstable; urgency=low
 
-  [ Stefan Lippers-Hollmann ]
-  * NOT RELEASED YET
-
-  [ Niall Walsh ]
   * Add ide-generic to the modules added to the initrd and update linuxrc to
     load it if present.
   * Fix fromiso (and in the process make mountit sane) by letting mountit loop
