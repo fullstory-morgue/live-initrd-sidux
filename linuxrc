@@ -850,7 +850,7 @@ for i in $DEVICES; do
 	# mount the device (or iso) on /mnt to check it
 	if mountit $i /mnt "$MNTOPTIONS" >/dev/null 2>&1; then
 		findfstab /mnt
-		if test -n "$TESTMNT" && test -r /mnt/$FLL_IMAGE_LOCATION; then
+		if test -z "$FOUND_KNOPPIX" && test -n "$TESTMNT" && test -r /mnt/$FLL_IMAGE_LOCATION; then
 			echo -n "${CRE}${GREEN}Accessing $FLL_DISTRO_NAME ${FLL_MEDIUM} at ${MAGENTA}$i${GREEN}...${NORMAL}"
 			FOUND_KNOPPIX="$i"
 		fi
