@@ -42,30 +42,28 @@ mountit()
 {
 	# Usage: mountit src dst "options"
 	# Uses builtin mount of busybox
-	 if test -b $1; then
-		MOUNTIT_OPT="$3"
-
+	LOOPM=""
+	case $3 in
+		*loop*)
+			LOOPM="1"
+			;;
+	esac
+	if test -b $1 || ( test -r $1 && test -n "$LOOPM" ); then
 		for fs in $BUILTIN_FS; do
 			case "$fs" in
 				vfat)
 					# We REALLY need this for FLL_IMAGE on DOS-filesystems
-					[ -n "$MOUNTIT_OPT" ] && MOUNTIT_OPT="$MOUNTIT_OPT,shortname=winnt" || MOUNTIT_OPT="-o shortname=winnt"
+					[ -n "$3" ] && MOUNTIT_OPT="$3,shortname=winnt" || MOUNTIT_OPT="-o shortname=winnt"
 					;;
 				ntfs)
-					#if [ -n "$MOUNTIT_OPT" ]; then
-					#	MOUNTIT_OPT="$MOUNTIT_OPT,force,silent,umask=0,no_def_opts,allow_other,streams_interface=windows"
-					#else
-					#	MOUNTIT_OPT="-o force,silent,umask=0,no_def_opts,allow_other,streams_interface=windows"
-					#fi
-					#test -x /static/ntfs-3g && /static/ntfs-3g $1 $2 $MOUNTIT_OPT >/dev/null 2>&1 && return 0
-					MOUNTIT_OPT="-o uid=1000,gid=1000 "
+					[ -n "$3" ] && MOUNTIT_OPT="$3,uid=1000,gid=1000 " || MOUNTIT_OPT="-o uid=1000,gid=1000 "
 					;;
 				*)
-					MOUNTIT_OPT=""
+					MOUNTIT_OPT="$3"
 					;;
 			esac
 		
-			test -b $1 && mount -t $fs $MOUNTIT_OPT $1 $2 >/dev/null 2>&1 && return 0
+			mount -t $fs $MOUNTIT_OPT $1 $2 >/dev/null 2>&1 && return 0
 		done
 	fi
 
@@ -818,29 +816,40 @@ esac
 # this is needed now for fromiso
 loadmodule loop
 
+findstab()
+{
+	# check and load fstab if required
+	# takes one argument, the mount fs to look in
+	# records the current $i as where it found it in FOUND_FSTAB
+	if test -n "$FSTAB" && test -z "$FOUND_FSTAB" && test -r $1/$FSTABFILE; then
+		echo "# LINUXRC_FSTAB_START" >> /etc/fstab
+		cat $1/$FSTABFILE >> /etc/fstab && echo "# LINUXRC_FSTAB_END" >> /etc/fstab && echo -n "${CRE}${GREEN}Found fstab ${FSTABFILE} at ${MAGENTA}$i${GREEN}...${NORMAL}" && FOUND_FSTAB="$i"
+	fi
+}
+
 for i in $DEVICES; do
 	# unless TESTMNT is set we won't look here for KNOPPIX/chroot
 	TESTMNT=""
+	MNTOPTIONS="-o ro"
 	test -z "$FOUND_KNOPPIX" && echo -n "${CRE}${BLUE}Looking for ${FLL_MEDIUM} in: ${MAGENTA}$i${NORMAL}   "
 	# check if we are still looking for the iso
 	if test -n "$FROMISO" && test -z "$SCAN_MOUNTED"; then
 		if mountit $i $FLL_MEDIA_MOUNTPOINT "-o ro" >/dev/null 2>&1; then
+			findfstab $FLL_MEDIA_MOUNTPOINT
 			if test -f $FLL_MEDIA_MOUNTPOINT/$FLL_MEDIA; then
 				# we found the iso
+				echo -n "Found iso   "
 				TESTMNT="$FLL_MEDIA_MOUNTPOINT/$FLL_MEDIA"
 				i="$TESTMNT"
+				MNTOPTIONS="${MNTOPTIONS},loop"
 			fi
 		fi
 	else
 		TESTMNT="$i"
 	fi
 	# mount the device (or iso) on /mnt to check it
-	if mountit $i /mnt "-o ro" >/dev/null 2>&1; then
-		# check and load fstab if required
-		if test -n "$FSTAB" && test -z "$FOUND_FSTAB" && test -r /mnt/$FSTABFILE; then
-			echo "# LINUXRC_FSTAB_START" >> /etc/fstab
-			cat /mnt/$FSTABFILE >> /etc/fstab && echo "# LINUXRC_FSTAB_END" >> /etc/fstab && echo -n "${CRE}${GREEN}Found fstab ${FSTABFILE} at ${MAGENTA}$i${GREEN}...${NORMAL}" && FOUND_FSTAB="$i"
-		fi
+	if mountit $i /mnt "$MNTOPTIONS" >/dev/null 2>&1; then
+		findfstab /mnt
 		if test -n "$TESTMNT" && test -r /mnt/$FLL_IMAGE_LOCATION; then
 			echo -n "${CRE}${GREEN}Accessing $FLL_DISTRO_NAME ${FLL_MEDIUM} at ${MAGENTA}$i${GREEN}...${NORMAL}"
 			FOUND_KNOPPIX="$i"
