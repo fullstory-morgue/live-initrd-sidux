@@ -816,7 +816,7 @@ esac
 # this is needed now for fromiso
 loadmodule loop
 
-findstab()
+findfstab()
 {
 	# check and load fstab if required
 	# takes one argument, the mount fs to look in
@@ -854,9 +854,9 @@ for i in $DEVICES; do
 			echo -n "${CRE}${GREEN}Accessing $FLL_DISTRO_NAME ${FLL_MEDIUM} at ${MAGENTA}$i${GREEN}...${NORMAL}"
 			FOUND_KNOPPIX="$i"
 		fi
-		# umount scan and mount the FLL_MEDIUM if we FOUND_KNOPPIX
+		# umount mnt and mount the FLL_MEDIUM if we FOUND_KNOPPIX
 		umount /mnt >/dev/null
-		test -n "$FOUND_KNOPPIX" && test -z "$SCAN_MOUNTED" && mountit $i $FLL_MEDIUM "-o ro" && SCAN_MOUNTED="1" >/dev/null
+		test -n "$FOUND_KNOPPIX" && test -z "$SCAN_MOUNTED" && mountit $i $FLL_MEDIUM "$MNTOPTIONS" && SCAN_MOUNTED="1"
 	fi
 	# umount FLL_MEDIA_MOUNTPOINT if we haven't just mounted FLL_MEDIUM
 	if test -n "$FROMISO" && test -z "$SCAN_MOUNTED"; then
