@@ -1,8 +1,13 @@
 live-initrd-sidux (0.0.44) UNRELEASED; urgency=low
 
+  [ Stefan Lippers-Hollmann ]
   * NOT RELEASED YET
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Wed, 24 Jan 2007 10:00:15 +0100
+  [ Niall Walsh ]
+  * Fixup the mount options when remounting scan as /$FLL_MEDIUM
+  * Fix typo in the name of findfstab which spewed errors and stopped it working
+
+ -- Niall Walsh <niallwalsh@users.berlios.de>  Wed, 24 Jan 2007 10:02:24 +0000
 
 live-initrd-sidux (0.0.43) unstable; urgency=low
 
