@@ -932,7 +932,7 @@ remount_knoppix()
 #			umount "/$KNOPPIX_NAME$c" >/dev/null 2>&1
 #		done
 	
-		if [ "$COMP" == "cloop" ]; then
+		if [ "$COMP" = "cloop" ]; then
 			unloadmodule cloop # release CD
 		fi
 
@@ -1168,7 +1168,7 @@ esac
 # pre-test if everything succeeded
 if  test -n "$DO_REMOUNT" -a -n "$FOUND_KNOPPIX"; then
 	# copy library cache 
-	cat $FLL_MOUNTPOINT/etc/ld.so.cache > /etc/ld.so.cache 
+	#cat $FLL_MOUNTPOINT/etc/ld.so.cache > /etc/ld.so.cache 
 	echo "" 
 	
 	SOURCE="/${FLL_MEDIUM}"
