@@ -1168,7 +1168,7 @@ esac
 # pre-test if everything succeeded
 if  test -n "$DO_REMOUNT" -a -n "$FOUND_KNOPPIX"; then
 	# copy library cache 
-	#cat $FLL_MOUNTPOINT/etc/ld.so.cache > /etc/ld.so.cache 
+	cat $FLL_MOUNTPOINT/etc/ld.so.cache > /etc/ld.so.cache 
 	echo "" 
 	
 	SOURCE="/${FLL_MEDIUM}"
