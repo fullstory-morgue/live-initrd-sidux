@@ -163,6 +163,7 @@ SCSI_MODULES="
 	ohci1394
 	sd_mod
 	sr_mod
+	sg
 	sbp2
 	ehci-hcd
 	ohci-hcd

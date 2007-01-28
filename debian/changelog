@@ -1,12 +1,12 @@
-live-initrd-sidux (0.0.46) UNRELEASED; urgency=low
-
-  [ Stefan Lippers-Hollmann ]
-  * NOT RELEASED YET
+live-initrd-sidux (0.0.46) unstable; urgency=low
 
   [ Niall Walsh ]
   * Change == to = in cloop test in remount_knoppix
 
- -- Niall Walsh <niallwalsh@users.berlios.de>  Thu, 25 Jan 2007 15:22:31 +0000
+  [ Stefan Lippers-Hollmann ]
+  * add sg to the initrd.
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 28 Jan 2007 22:05:53 +0100
 
 live-initrd-sidux (0.0.45) unstable; urgency=low
 
