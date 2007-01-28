@@ -211,7 +211,7 @@ case "$CMDLINE" in
 esac
 case "$CMDLINE" in
 	*bootusb2*)
-	USB2="ehci-hcd.o"
+	USB2="ehci-hcd.ko"
 	;;
 esac
 
@@ -668,6 +668,8 @@ if test -z "$NOUSB"; then
 		done
 
 		if test -n "$FOUNDUSB"; then
+			loadmodule scsi_mod.ko >/dev/null 2>&1
+			loadmodule sg.ko >/dev/null 2>&1
 			loadmodule libusual.ko >/dev/null 2>&1
 			loadmodule ff-memless.ko >/dev/null 2>&1
 			loadmodule usbhid.ko >/dev/null 2>&1
