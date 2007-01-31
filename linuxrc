@@ -31,8 +31,13 @@ FLL_MEDIA_MOUNTPOINT="/isosrc"
 RAMSIZE=1000000
 # End of options
 
-# Builtin fielsystems
+# Builtin filesystems
 BUILTIN_FS="iso9660 ext2"
+# Modular filesystems
+# ext3 is also modular but we'll want to try it before ext2
+MODULAR_FS="reiserfs xfs jfs vfat ntfs"
+# What filesystem types to try and mount as when using mount_it
+MOUNTIT_FS="$BUILTIN_FS"
 
 # Don't allow interrupt signals
 trap "" 1 2 3 11 15
@@ -49,20 +54,30 @@ mountit()
 			;;
 	esac
 	if test -b $1 || ( test -r $1 && test -n "$LOOPM" ); then
-		for fs in $BUILTIN_FS; do
+		for fs in $MOUNTIT_FS; do
 			case "$fs" in
 				vfat)
 					# We REALLY need this for FLL_IMAGE on DOS-filesystems
 					[ -n "$3" ] && MOUNTIT_OPT="$3,shortname=winnt" || MOUNTIT_OPT="-o shortname=winnt"
 					;;
 				ntfs)
-					[ -n "$3" ] && MOUNTIT_OPT="$3,uid=1000,gid=1000 " || MOUNTIT_OPT="-o uid=1000,gid=1000 "
+					[ -n "$3" ] && MOUNTIT_OPT="$3,ro,uid=1000,gid=1000 " || MOUNTIT_OPT="-o ro,uid=1000,gid=1000 "
 					;;
 				*)
 					MOUNTIT_OPT="$3"
 					;;
 			esac
-		
+
+			case $FS_MODULES_LOADED in
+				*$fs*)
+					;;
+				*)
+					[ "$fs" = "ext3" ] && loadmodule jbd
+					loadmodule $fs
+					FS_MODULES_LOADED="$FS_MODULES_LOADED $fs"
+					;;
+			esac
+
 			mount -t $fs $MOUNTIT_OPT $1 $2 >/dev/null 2>&1 && return 0
 		done
 	fi
@@ -170,6 +185,7 @@ NOUSB="yes"
 case "$CMDLINE" in
 	*bootusb*)
 		NOUSB=""
+		MODFS="yes"
 		;;
 esac
 
@@ -177,6 +193,7 @@ NOFIREWIRE="yes"
 case "$CMDLINE" in
 	*bootfirewire*)
 		NOFIREWIRE=""
+		MODFS="yes"
 		;;
 esac
 
@@ -184,6 +201,7 @@ NOCD=""
 case "$CMDLINE" in
 	*fromhd*)
 		NOCD="yes"
+		MODFS="yes"
 		;;
 esac
 case "$CMDLINE" in
@@ -195,6 +213,7 @@ case "$CMDLINE" in
 	*fromiso*)
 		FROMISO="yes"
 		mkdir $FLL_MEDIA_MOUNTPOINT
+		MODFS="yes"
 		;;
 esac
 case "$CMDLINE" in
@@ -207,11 +226,13 @@ NOIDERAID="yes"
 case "$CMDLINE" in
 	*ideraid*)
 		NOIDERAID=""
+		MODFS="yes"
 		;;
 esac
 case "$CMDLINE" in
 	*bootusb2*)
 	USB2="ehci-hcd.ko"
+	MODFS="yes"
 	;;
 esac
 
@@ -248,6 +269,7 @@ FSTABFILE="${FLL_DISTRO_NAME_EC}.FSTAB"
 case "$CMDLINE" in
 	*fstab*)
 		FSTAB="1"
+		MODFS="yes"
 		;;
 esac
 case "$CMDLINE" in
@@ -255,6 +277,10 @@ case "$CMDLINE" in
 		FSTABFILE="$fstab"
 		;;
 esac
+
+if [ -n "$MODFS" ]; then
+	MOUNTIT_FS="ext3 $BUILTIN_FS $MODULAR_FS"
+fi
 
 # Print CPU info
 echo -n "${GREEN}"
@@ -354,15 +380,22 @@ mountmodules()
 	echo -n "${CRE}${CYAN}Please insert ${TYPE} modules disk and hit Return. ${NORMAL}"
 	read a
 	echo -n "${CRE}${BLUE}Mounting ${TYPE} modules disk... ${NORMAL}"
-	
+
+	# Store our MOUNTIT_FS
+	MOUNTIT_FS_GENERAL="$MOUNTIT_FS"
+	# Only these filesystems are sane on a floppy
+	MOUNTIT_FS="ext2 vfat"
+
 	# We always mount over /modules (because it's there ;-)
 	if mountit /dev/fd0 /modules "-o ro"; then
 		echo "${GREEN}OK.${NORMAL}"
+		MOUNTIT_FS="$MOUNTIT_FS_GENERAL"
 		return 0
 	fi
 	
 	echo "${RED}NOT FOUND.${NORMAL}"
-	
+
+	MOUNTIT_FS="$MOUNTIT_FS_GENERAL"
 	return 1
 }
 
@@ -892,8 +925,12 @@ mount_knoppix()
 				;;
 			"hsqs")
 				COMP=squashfs
-				loadmodule squashfs 
-				mount -t squashfs $1/$FLL_IMAGE_LOCATION $FLL_MOUNTPOINT -o loop,ro || FOUND_KNOPPIX=""
+				#loadmodule squashfs 
+				#mount -t squashfs $1/$FLL_IMAGE_LOCATION $FLL_MOUNTPOINT -o loop,ro || FOUND_KNOPPIX=""
+				MOUNTIT_FS_GENERAL="$MOUNTIT_FS"
+				MOUNTIT_FS="squashfs"
+				mountit $1/$FLL_IMAGE_LOCATION $FLL_MOUNTPOINT "-o loop,ro" || FOUND_KNOPPIX=""
+				MOUNTIT_FS="$MOUNTIT_FS_GENERAL"
 				;;
 		esac
 	fi
@@ -938,7 +975,7 @@ remount_knoppix()
 			unloadmodule cloop # release CD
 		fi
 
-		umount $SOURCE  # unmount CD
+		umount $SOURCE # unmount CD
 		[ -n "$SOURCE2" ] && umount $SOURCE2  # umount possible loop-device
 
 		mount_knoppix $TARGET
@@ -969,7 +1006,7 @@ boot_from()
   
 	# load filesystems
 	for i in reiserfs jbd ext3 ntfs; do
-		"$FLL_MOUNTPOINT/sbin/modprobe" $i >/dev/null 2>&1
+		"$FLL_MOUNTPOINT/sbin/modprobe" $i >/dev/null 2>&1 && FS_MODULES_LOADED="$FS_MODULES_LOADED $i"
 	done
 	FS="reiserfs ext3 ntfs"
  
@@ -1068,9 +1105,8 @@ copy_to()
 			FS="ext3 ext2 reiserfs vfat ntfs"
 			#$FLL_MOUNTPOINT/bin/cp -au /KNOPPIX/dev/fuse /dev/ >/dev/null 2>&1
 			MOUNTED=""
-			
 			for i in $FS; do
-				if $FLL_MOUNTPOINT/bin/mount -o rw -t "$i" "$TARGET_DEV" "$TARGET"; then
+				if $FLL_MOUNTPOINT/bin/mount -o rw -t "$i" "$TARGET_DEV" "$TARGET" > /dev/null 2>&1; then
 					MOUNTED="true"
 					break
 				fi
@@ -1092,7 +1128,7 @@ copy_to()
 			return 1
 			;;
 	esac
-	
+
 	# sanity check
 	if [ $FOUNDSPACE -lt $SIZE ]; then
 		echo -n "${CRE} ${RED}Copying $FLL_DISTRO_NAME $FLL_MEDIUM failed. Not enough free space on ${MAGENTA}${TARGET_DEV_DESC}${RED}. Found: ${MAGENTA}${FOUNDSPACE}k${RED} Need: ${MAGENTA}${SIZE}k${RED} ${NORMAL}"
