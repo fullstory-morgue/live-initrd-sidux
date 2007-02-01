@@ -265,7 +265,7 @@ case "$CMDLINE" in
 esac
 
 FSTAB=""
-FSTABFILE="${FLL_DISTRO_NAME_EC}.FSTAB"
+FSTABFILE="${FLL_DISTRO_NAME_UC}.FSTAB"
 case "$CMDLINE" in
 	*fstab*)
 		FSTAB="1"
@@ -1358,8 +1358,10 @@ if test -n "$FOUND_KNOPPIX"; then
 		[ -d "$FLL_MOUNTPOINT" ] && UNION="$UNION:$FLL_MOUNTPOINT=ro"
 
 		# Do the actual mount
-		[ "$UNIONFS" = "yes" ] && /bin/mount -t unionfs -o "dirs=$UNION,delete=whiteout" /UNIONFS /UNIONFS
-		[ "$AUFS" = "yes" ] && /bin/mount -t aufs -o "br:$UNION" /UNIONFS /UNIONFS
+		if ! grep UNIONFS /etc/mtab; then
+			[ "$UNIONFS" = "yes" ] && /bin/mount -t unionfs -o "dirs=$UNION,delete=whiteout" /UNIONFS /UNIONFS
+			[ "$AUFS" = "yes" ] && /bin/mount -t aufs -o "br:$UNION" /UNIONFS /UNIONFS
+		fi
 		if grep -q \\/UNIONFS\ \\/UNIONFS /proc/mounts; then
 			# We now have unionfs, copy some data from the initial ramdisk first
 			cp -a	/etc/fstab \

@@ -1,8 +1,13 @@
 live-initrd-sidux (0.0.49) UNRELEASED; urgency=low
 
+  [ Stefan Lippers-Hollmann ]
   * NOT RELEASED YET
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Thu,  1 Feb 2007 00:09:42 +0100
+  [ Niall Walsh ]
+  * Fix fstab so default is $FLL_DISTRO_NAME_UC.FSTAB (e.g. SIDUX>FSTAB)
+  * Don't mount /UNIONFS again in unionfs/aufs if fstab has already mounted it
+
+ -- Niall Walsh <niallwalsh@users.berlios.de>  Thu,  1 Feb 2007 01:38:52 +0000
 
 live-initrd-sidux (0.0.48) unstable; urgency=low
 
