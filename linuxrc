@@ -1275,6 +1275,7 @@ if test -n "$FOUND_KNOPPIX"; then
 	$FLL_MOUNTPOINT/bin/rm -rf /modules /static
 
 	if test -n "$FOUND_FSTAB"; then
+		grep isosrc /etc/fstab && mount -o remount,rw /isosrc
 		cat /etc/fstab | awk '!/^#/{if ($6=="1"){print $2}}' | xargs mkdir -p
 		echo "${CRE}${GREEN}Mounting from fstab${NORMAL}"
 		/bin/mount -a
