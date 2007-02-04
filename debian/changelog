@@ -1,8 +1,8 @@
-live-initrd-sidux (0.0.50) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.50) unstable; urgency=low
 
-  * NOT RELEASED YET
+  * disable -o delete=whiteout for unionfs.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Fri,  2 Feb 2007 04:06:51 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun,  4 Feb 2007 20:32:37 +0100
 
 live-initrd-sidux (0.0.49) unstable; urgency=low
 
