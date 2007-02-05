@@ -1,3 +1,9 @@
+live-initrd-sidux (0.0.52) UNRELEASED; urgency=low
+
+  * NOT RELEASED YET
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Mon,  5 Feb 2007 02:47:49 +0100
+
 live-initrd-sidux (0.0.51) unstable; urgency=low
 
   * revert to known working unionfs mount options, 2.6.20 isn't supported
