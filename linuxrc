@@ -1360,8 +1360,7 @@ if test -n "$FOUND_KNOPPIX"; then
 
 		# Do the actual mount
 		if ! grep UNIONFS /etc/mtab; then
-			#[ "$UNIONFS" = "yes" ] && /bin/mount -t unionfs -o "dirs=$UNION,delete=whiteout" /UNIONFS /UNIONFS	# doesn't work with -mm
-			[ "$UNIONFS" = "yes" ] && /bin/mount -t unionfs -o "dirs=$UNION" /UNIONFS /UNIONFS			# -mm compatible unionfs
+			[ "$UNIONFS" = "yes" ] && /bin/mount -t unionfs -o "dirs=$UNION,delete=whiteout" /UNIONFS /UNIONFS	# doesn't work with -mm
 			[ "$AUFS" = "yes" ] && /bin/mount -t aufs -o "br:$UNION" /UNIONFS /UNIONFS
 		fi
 		if grep -q \\/UNIONFS\ \\/UNIONFS /proc/mounts; then
