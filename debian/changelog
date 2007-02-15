@@ -1,8 +1,13 @@
 live-initrd-sidux (0.0.52) UNRELEASED; urgency=low
 
+  [ Stefan Lippers-Hollmann ]
   * NOT RELEASED YET
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Mon,  5 Feb 2007 02:47:49 +0100
+  [ Niall Walsh ]
+  * Unconditionally load sr_mod (for sata/scsi/usb/firewire cd drives)
+  * Load sd_mod for fromiso, fromhd, tohd, bootfrom and fstab
+
+ -- Niall Walsh <niallwalsh@users.berlios.de>  Thu, 15 Feb 2007 16:25:00 +0000
 
 live-initrd-sidux (0.0.51) unstable; urgency=low
 

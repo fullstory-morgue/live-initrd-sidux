@@ -198,10 +198,12 @@ case "$CMDLINE" in
 esac
 
 NOCD=""
+MODSD=""
 case "$CMDLINE" in
 	*fromhd*)
 		NOCD="yes"
 		MODFS="yes"
+		MODSD="yes"
 		;;
 esac
 case "$CMDLINE" in
@@ -214,6 +216,7 @@ case "$CMDLINE" in
 		FROMISO="yes"
 		mkdir $FLL_MEDIA_MOUNTPOINT
 		MODFS="yes"
+		MODSD="yes"
 		;;
 esac
 case "$CMDLINE" in
@@ -227,6 +230,8 @@ case "$CMDLINE" in
 	*ideraid*)
 		NOIDERAID=""
 		MODFS="yes"
+		# does ideraid need sd_mod
+		# MODSD="yes"
 		;;
 esac
 case "$CMDLINE" in
@@ -270,6 +275,7 @@ case "$CMDLINE" in
 	*fstab*)
 		FSTAB="1"
 		MODFS="yes"
+		MODSD="yes"
 		;;
 esac
 case "$CMDLINE" in
@@ -277,6 +283,33 @@ case "$CMDLINE" in
 		FSTABFILE="$fstab"
 		;;
 esac
+
+COPYTO=""
+BOOTFROM=""
+DO_REMOUNT=""
+case "$CMDLINE" in
+	 *toram*)
+	 	DO_REMOUNT="yes"
+		COPYTO="ram"
+		;;
+esac
+
+case "$CMDLINE" in
+	*tohd=*)
+		DO_REMOUNT="yes"
+		COPYTO="hd"
+		MODSD="yes"
+		;;
+esac
+
+case "$CMDLINE" in
+	*bootfrom=*)
+		DO_REMOUNT="yes"
+		BOOTFROM="yes"
+		MODSD="yes"
+		;;
+esac
+ 
 
 if [ -n "$MODFS" ]; then
 	MOUNTIT_FS="ext3 $BUILTIN_FS $MODULAR_FS"
@@ -671,8 +704,8 @@ fi
 
 if [ -z "$NOSCSI" ] && [ -n "$MODULES" ]; then
 	loadmodules SCSI $MODULES
-	loadmodule sr_mod >/dev/null 2>&1
-	loadmodule sd_mod >/dev/null 2>&1
+	# Do we need to load sd_mod here
+	# MODSD="yes"
 fi
 # End of SCSI check
 
@@ -800,6 +833,14 @@ if test -d /proc/scsi/usb-storage; then
 	echo -n "${CRE}${BLUE}Allowing slow USB-devices some more time to register...${NORMAL}"
 	ash -c "sleep 6"
 	echo "${BLUE}Ok.${NORMAL}"
+fi
+
+# Just load sr_mod for usb/firewire/scsi/sata cd drives
+loadmodule sr_mod >/dev/null 2>&1
+
+# Load sd_mod for: from(iso|hd) bootfrom tohd fstab
+if [ -n "$MODSD" ]; then
+	loadmodule sd_mod >/dev/null 2>&1
 fi
 
 # Check for ide-scsi supported CD-Roms et al.
@@ -1174,34 +1215,10 @@ copy_to()
 
 mount_knoppix /$FLL_MEDIUM
 
-COPYTO=""
-BOOTFROM=""
-DO_REMOUNT=""
 REAL_TARGET=""
 UNIONFS=""
 AUFS=""
 
-case "$CMDLINE" in
-	 *toram*)
-	 	DO_REMOUNT="yes"
-		COPYTO="ram"
-		;;
-esac
-
-case "$CMDLINE" in
-	*tohd=*)
-		DO_REMOUNT="yes"
-		COPYTO="hd"
-		;;
-esac
-
-case "$CMDLINE" in
-	*bootfrom=*)
-		DO_REMOUNT="yes"
-		BOOTFROM="yes"
-		;;
-esac
- 
 # Remount later after copying/isoloading/driverloading?
 # pre-test if everything succeeded
 if  test -n "$DO_REMOUNT" -a -n "$FOUND_KNOPPIX"; then
