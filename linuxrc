@@ -31,6 +31,30 @@ FLL_MEDIA_MOUNTPOINT="/isosrc"
 RAMSIZE=1000000
 # End of options
 
+# Option Defaults
+NOSCSI=""
+NOUSB="yes"
+NOFIREWIRE="yes"
+NOCD=""
+MODSD=""
+NOIDERAID="yes"
+FSTAB=""
+COPYTO=""
+BOOTFROM=""
+DO_REMOUNT=""
+FSTABFILE="${FLL_IMAGE_FILE}.FSTAB"
+REAL_TARGET=""
+UNIONFS=""
+AUFS=""
+INTERACTIVE=""
+MODULES=""
+
+# (some) Status variables
+SCSI_PROBE=""
+FOUND_SCSI=""
+FOUND_KNOPPIX=""
+FOUND_FSTAB=""
+
 # Builtin filesystems
 BUILTIN_FS="iso9660 ext2"
 # Modular filesystems
@@ -84,10 +108,6 @@ mountit()
 
 	return 1
 }
-
-FOUND_SCSI=""
-FOUND_KNOPPIX=""
-INTERACTIVE=""
 
 # Clean input/output
 exec >/dev/console </dev/console 2>&1
@@ -169,19 +189,18 @@ case "$CMDLINE" in
 esac
 
 # Does the user want to skip scsi detection?
-NOSCSI=""
 case "$CMDLINE" in
 	*noscsi*|*nobootscsi*)
 	NOSCSI="yes"
 	;;
 esac
+
 case "$CMDLINE" in
 	*scsiisa*)
 	SCSI_PROBE="$ISA_SCSI $SCSI_PROBE"
 	;;
 esac
 
-NOUSB="yes"
 case "$CMDLINE" in
 	*bootusb*)
 		NOUSB=""
@@ -189,7 +208,6 @@ case "$CMDLINE" in
 		;;
 esac
 
-NOFIREWIRE="yes"
 case "$CMDLINE" in
 	*bootfirewire*)
 		NOFIREWIRE=""
@@ -197,8 +215,6 @@ case "$CMDLINE" in
 		;;
 esac
 
-NOCD=""
-MODSD=""
 case "$CMDLINE" in
 	*fromhd*)
 		NOCD="yes"
@@ -206,11 +222,13 @@ case "$CMDLINE" in
 		MODSD="yes"
 		;;
 esac
+
 case "$CMDLINE" in
 	*fromdvd*)
 		FROMDVD="yes"
 		;;
 esac
+
 case "$CMDLINE" in
 	*fromiso*)
 		FROMISO="yes"
@@ -219,13 +237,13 @@ case "$CMDLINE" in
 		MODSD="yes"
 		;;
 esac
+
 case "$CMDLINE" in
 	*idecd*|*atapicd*)
 		IDECD="yes"
 		;;
 esac
 
-NOIDERAID="yes"
 case "$CMDLINE" in
 	*ideraid*)
 		NOIDERAID=""
@@ -234,6 +252,7 @@ case "$CMDLINE" in
 		# MODSD="yes"
 		;;
 esac
+
 case "$CMDLINE" in
 	*bootusb2*)
 	USB2="ehci-hcd.ko"
@@ -246,31 +265,37 @@ case "$CMDLINE" in
 		FLL_IMAGE_DIR="$image_dir"
 		;;
 esac
+
 case "$CMDLINE" in
 	*image_name=*)
 		FLL_IMAGE_FILE="$image_name"
 		;;
 esac
+
+# Needs possibly updated FLL_IMAGE_DIR and FLL_IMAGE_FILE
 FLL_IMAGE_LOCATION="$FLL_IMAGE_DIR/$FLL_IMAGE_FILE"
+
 case "$CMDLINE" in
 	*iso_dir=*)
 		FLL_MEDIA_DIR="$media_dir"
 		;;
 esac
+
 case "$CMDLINE" in
 	*iso_name=*)
 		FLL_MEDIA_NAME="$media_name"
 		;;
 esac
+
+# Needs possibly updated FLL_MEDIA_DIR and FLL_MEDIA_NAME
 FLL_MEDIA="$FLL_MEDIA_DIR/$FLL_MEDIA_NAME"
+
 case "$CMDLINE" in
 	*fromiso=*)
 		FLL_MEDIA="$fromiso"
 		;;
 esac
 
-FSTAB=""
-FSTABFILE="${FLL_DISTRO_NAME_UC}.FSTAB"
 case "$CMDLINE" in
 	*fstab*)
 		FSTAB="1"
@@ -278,15 +303,13 @@ case "$CMDLINE" in
 		MODSD="yes"
 		;;
 esac
+
 case "$CMDLINE" in
 	*fstab=*)
 		FSTABFILE="$fstab"
 		;;
 esac
 
-COPYTO=""
-BOOTFROM=""
-DO_REMOUNT=""
 case "$CMDLINE" in
 	 *toram*)
 	 	DO_REMOUNT="yes"
@@ -309,7 +332,6 @@ case "$CMDLINE" in
 		MODSD="yes"
 		;;
 esac
- 
 
 if [ -n "$MODFS" ]; then
 	MOUNTIT_FS="ext3 $BUILTIN_FS $MODULAR_FS"
@@ -1214,10 +1236,6 @@ copy_to()
 }
 
 mount_knoppix /$FLL_MEDIUM
-
-REAL_TARGET=""
-UNIONFS=""
-AUFS=""
 
 # Remount later after copying/isoloading/driverloading?
 # pre-test if everything succeeded

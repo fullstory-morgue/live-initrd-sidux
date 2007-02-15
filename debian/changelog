@@ -6,8 +6,10 @@ live-initrd-sidux (0.0.52) UNRELEASED; urgency=low
   [ Niall Walsh ]
   * Unconditionally load sr_mod (for sata/scsi/usb/firewire cd drives)
   * Load sd_mod for fromiso, fromhd, tohd, bootfrom and fstab
+  * Cosmetic changes to CMDLINE cases and inital variable setting
+  * Fix default FSTABFILE to use ${FLL_IMAGE_FILE}.FSTAB (no FLL_DISTRO_NAME_UC)
 
- -- Niall Walsh <niallwalsh@users.berlios.de>  Thu, 15 Feb 2007 16:25:00 +0000
+ -- Niall Walsh <niallwalsh@users.berlios.de>  Thu, 15 Feb 2007 16:48:27 +0000
 
 live-initrd-sidux (0.0.51) unstable; urgency=low
 
