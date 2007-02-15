@@ -1,9 +1,5 @@
-live-initrd-sidux (0.0.52) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.52) unstable; urgency=low
 
-  [ Stefan Lippers-Hollmann ]
-  * NOT RELEASED YET
-
-  [ Niall Walsh ]
   * Unconditionally load sr_mod (for sata/scsi/usb/firewire cd drives)
   * Load sd_mod for fromiso, fromhd, tohd, bootfrom and fstab
   * Cosmetic changes to CMDLINE cases and inital variable setting
