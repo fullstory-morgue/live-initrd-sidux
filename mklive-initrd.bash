@@ -167,6 +167,7 @@ SCSI_MODULES="
 	sbp2
 	ehci-hcd
 	ohci-hcd
+	uhci-hcd
 	usb-storage
 "
 
@@ -186,6 +187,7 @@ MODULES="
 	jfs
 	vfat
 	isofs
+	usbhid
 "
 
 #####################################################################

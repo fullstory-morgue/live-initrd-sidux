@@ -1,8 +1,9 @@
-live-initrd-sidux (0.0.53) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.53) unstable; urgency=low
 
-  * NOT RELEASED YET
+  * add uhci-hcd to initrd, thanks to x-un-i for noticing.
+  * add usbhid to support USB keyboards within busybox.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Thu, 15 Feb 2007 21:18:32 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 18 Feb 2007 15:07:52 +0100
 
 live-initrd-sidux (0.0.52) unstable; urgency=low
 
