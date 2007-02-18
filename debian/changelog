@@ -1,3 +1,9 @@
+live-initrd-sidux (0.0.54) UNRELEASED; urgency=low
+
+  * NOT RELEASED YET
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 18 Feb 2007 15:10:07 +0100
+
 live-initrd-sidux (0.0.53) unstable; urgency=low
 
   * add uhci-hcd to initrd, thanks to x-un-i for noticing.
