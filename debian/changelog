@@ -1,9 +1,5 @@
-live-initrd-sidux (0.0.56) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.56) unstable; urgency=low
 
-  [ Stefan Lippers-Hollmann ]
-  * NOT RELEASED YET
-
-  [ Kel Modderman ]
   * Fix bastard getopt typo.
 
  -- Kel Modderman <kel@otaku42.de>  Tue, 20 Feb 2007 08:20:16 +1000
