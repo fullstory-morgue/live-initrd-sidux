@@ -64,7 +64,7 @@ while true; do
 			FINAL_INITRD=$1
 			;;
 		-q|--quiet)
-			VERBOSITY=0
+			VERBOSITY=
 			;;
 		--supported-host-version|--supported-target-version)
 			# required for mkinitramfs compat.
