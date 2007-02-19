@@ -901,7 +901,7 @@ DEVICES="$DEVICES /dev/pcd?"
 test -n "$FOUND_SCSI" -a -z "$NOSCSI" && DEVICES="$DEVICES /dev/sd?[1-9] /dev/sd?[1-9][0-9] /dev/sd?[1-9][0-9]"
 
 # Look for CDROMs first
-CDROM=$(awk '/name/{for (i=NF;i>=3;i--) {print "/dev/" $i}}' /proc/sys/dev/cdrom/info)
+test -z "$NOCD" && CDROM=$(awk '/name/{for (i=NF;i>=3;i--) {print "/dev/" $i}}' /proc/sys/dev/cdrom/info)
 DEVICES="$CDROM /dev/hd?[1-9] $DEVICES /dev/ub?[1-9] /dev/ub?[1-9][0-9] /dev/ub? /dev/hd?[1-9][0-9]"
 case "$CMDLINE" in
 	*fromhd=/dev/*)
