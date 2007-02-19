@@ -1,7 +1,4 @@
-live-initrd-sidux (0.0.54) UNRELEASED; urgency=low
-
-  [ Stefan Lippers-Hollmann ]
-  * NOT RELEASED YET
+live-initrd-sidux (0.0.54) unstable; urgency=low
 
   [ Niall Walsh ]
   * Override hardcoded linuxrc variables with /etc/default/distro,
@@ -13,7 +10,11 @@ live-initrd-sidux (0.0.54) UNRELEASED; urgency=low
   * Remove some commented code.
   * Add a comment about mkinitramfs compat.
 
- -- Kel Modderman <kel@otaku42.de>  Mon, 19 Feb 2007 11:16:33 +1000
+  [ Stefan Lippers-Hollmann ]
+  * probe USB on default.
+  * get rid of potentially problematic kanotix linuxrc.
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Mon, 19 Feb 2007 18:57:13 +0100
 
 live-initrd-sidux (0.0.53) unstable; urgency=low
 

@@ -37,9 +37,10 @@ RAMSIZE=1000000
 
 # Option Defaults
 NOSCSI=""
-NOUSB="yes"
+NOUSB=""
 NOFIREWIRE="yes"
 NOCD=""
+MODFS="yes"
 MODSD=""
 NOIDERAID="yes"
 FSTAB=""
@@ -49,6 +50,7 @@ DO_REMOUNT=""
 FSTABFILE="${FLL_IMAGE_FILE}.FSTAB"
 REAL_TARGET=""
 UNIONFS=""
+USB2="ehci-hcd.ko"
 AUFS=""
 INTERACTIVE=""
 MODULES=""
@@ -206,9 +208,8 @@ case "$CMDLINE" in
 esac
 
 case "$CMDLINE" in
-	*bootusb*)
-		NOUSB=""
-		MODFS="yes"
+	*nousb*)
+		NOUSB="yes"
 		;;
 esac
 
@@ -255,13 +256,6 @@ case "$CMDLINE" in
 		# does ideraid need sd_mod
 		# MODSD="yes"
 		;;
-esac
-
-case "$CMDLINE" in
-	*bootusb2*)
-	USB2="ehci-hcd.ko"
-	MODFS="yes"
-	;;
 esac
 
 case "$CMDLINE" in
