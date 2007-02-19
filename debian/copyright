@@ -1,8 +1,8 @@
-This is live-initrd-kanotix, written and maintained by Kel Modderman <kelmo@kanotixguide.org>
+This is live-initrd-kanotix, written and maintained by Kel Modderman <kel@otaku42.de>
 on Tue, 31 Oct 2006 23:10:58 +1000.
 
 The original source can always be found at:
-	http://sidux.com/debian/pool/main/
+	http://developer.berlios.de/projects/fullstory
 
 Copyright Holders:  
 	Kel Modderman
@@ -12,7 +12,7 @@ Copyright Holders:
 Files in the /contrib subdirectory are copyright to various authors, and serve
 histories purpose only.
 
-contrib/sidux/linuxrc:
+contrib/*/linuxrc:
 	(C) Klaus Knopper <knoppix@knopper.net>
 	modified for KANOTIX Jörg Schirottke <master@kanotix.com>
 
