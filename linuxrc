@@ -12,7 +12,6 @@
 
 # override tool behaviour through distro-defaults
 FLL_DISTRO_NAME="sidux"
-FLL_DISTRO_MODE="live"
 FLL_LIVE_USER="sidux"
 FLL_IMAGE_DIR="SIDUX"
 FLL_IMAGE_FILE="SIDUX"
@@ -25,6 +24,15 @@ FLL_MEDIA_DIR="SIDUX"
 FLL_MEDIA_NAME="SIDUX.ISO"
 FLL_MEDIUM="cdrom"
 FLL_MEDIA_MOUNTPOINT="/isosrc"
+
+if [ -e /etc/distro ]; then
+	mkdir /etc/default
+	mv /etc/distro /etc/default/
+	. /etc/default/distro
+fi
+
+# We are always live
+FLL_DISTRO_MODE="live"
 
 # hardcoded configurable options
 # Default maximum size of dynamic ramdisk in kilobytes
