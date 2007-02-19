@@ -40,7 +40,6 @@ NOSCSI=""
 NOUSB=""
 NOFIREWIRE="yes"
 NOCD=""
-MODFS="yes"
 MODSD=""
 NOIDERAID="yes"
 FSTAB=""
@@ -216,14 +215,12 @@ esac
 case "$CMDLINE" in
 	*bootfirewire*)
 		NOFIREWIRE=""
-		MODFS="yes"
 		;;
 esac
 
 case "$CMDLINE" in
 	*fromhd*)
 		NOCD="yes"
-		MODFS="yes"
 		MODSD="yes"
 		;;
 esac
@@ -238,7 +235,6 @@ case "$CMDLINE" in
 	*fromiso*)
 		FROMISO="yes"
 		mkdir $FLL_MEDIA_MOUNTPOINT
-		MODFS="yes"
 		MODSD="yes"
 		;;
 esac
@@ -252,7 +248,6 @@ esac
 case "$CMDLINE" in
 	*ideraid*)
 		NOIDERAID=""
-		MODFS="yes"
 		# does ideraid need sd_mod
 		# MODSD="yes"
 		;;
@@ -297,7 +292,6 @@ esac
 case "$CMDLINE" in
 	*fstab*)
 		FSTAB="1"
-		MODFS="yes"
 		MODSD="yes"
 		;;
 esac
@@ -331,9 +325,13 @@ case "$CMDLINE" in
 		;;
 esac
 
-if [ -n "$MODFS" ]; then
-	MOUNTIT_FS="ext3 $BUILTIN_FS $MODULAR_FS"
-fi
+case $CMDLINE in
+	*fromhd*|*fromiso*|*bootusb*|*bootusb2*|*tohd*|*fstab*|*modules-disk*|*ideraid*)
+	# strictly perhaps
+	# *fromhd*|*tohd*|*fstab*|*modules-disk*)
+		MOUNTIT_FS="iso9660 ext3 ext2 $MODULAR_FS"
+		;;
+esac
 
 # Print CPU info
 echo -n "${GREEN}"
