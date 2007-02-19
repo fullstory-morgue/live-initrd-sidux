@@ -1,3 +1,9 @@
+live-initrd-sidux (0.0.56) UNRELEASED; urgency=low
+
+  * NOT RELEASED YET
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Mon, 19 Feb 2007 20:19:00 +0100
+
 live-initrd-sidux (0.0.55) unstable; urgency=low
 
   * live-initrd-sidux: remove modfs, set mountit_fs based on fromhd, fromiso,
