@@ -25,11 +25,7 @@ FLL_MEDIA_NAME="SIDUX.ISO"
 FLL_MEDIUM="cdrom"
 FLL_MEDIA_MOUNTPOINT="/isosrc"
 
-if [ -e /etc/distro ]; then
-	mkdir /etc/default
-	mv /etc/distro /etc/default/
-	. /etc/default/distro
-fi
+. /etc/default/distro
 
 # We are always live
 FLL_DISTRO_MODE="live"

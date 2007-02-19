@@ -4,11 +4,11 @@ live-initrd-sidux (0.0.54) UNRELEASED; urgency=low
   * NOT RELEASED YET
 
   [ Niall Walsh ]
-  * Override hardcoded linuxrc variables with /etc/distro (moved to
-    /etc/default/distro before reading though subsequently overwritten from
-    the mounted ${FLL_MOUNTPOINT}/etc/default/distro)
+  * Override hardcoded linuxrc variables with /etc/default/distro,
+    subsequently overwritten from the mounted
+    ${FLL_MOUNTPOINT}/etc/default/distro
 
- -- Niall Walsh <niallwalsh@users.berlios.de>  Mon, 19 Feb 2007 00:41:44 +0000
+ -- Niall Walsh <niallwalsh@users.berlios.de>  Mon, 19 Feb 2007 01:02:00 +0000
 
 live-initrd-sidux (0.0.53) unstable; urgency=low
 

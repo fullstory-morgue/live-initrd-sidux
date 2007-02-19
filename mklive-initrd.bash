@@ -273,7 +273,7 @@ echo "Creating initrd base layout."
 make_initrd_dirs \
 	cdrom	 		\
 	dev			\
-	etc			\
+	etc/default		\
 	mnt			\
 	modules			\
 	proc			\
@@ -322,7 +322,7 @@ touch ${TARGET_INITRD_DIR}/etc/exports
 
 # Copy /etc templates to staging area
 cp ${TEMPLATE_DIR}/etc/* ${TARGET_INITRD_DIR}/etc/
-cp /etc/default/distro ${TARGET_INITRD_DIR}/etc/
+cp /etc/default/distro ${TARGET_INITRD_DIR}/etc/default
 chmod 0644 ${TARGET_INITRD_DIR}/etc/*
 chmod 0755 ${TARGET_INITRD_DIR}/etc/init
 
