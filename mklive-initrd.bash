@@ -18,10 +18,6 @@
 #####################################################################
 # Sanity checks
 
-#FILE=/tmp/mklive-initrd
-#exec > $FILE 2>&1
-#echo $@
-
 if [[ $UID != "0" ]]; then
 	echo "Must be run by root user."
 	exit 1
@@ -40,12 +36,9 @@ VERBOSITY=1
 
 #####################################################################
 # Process arguments
-ARGS=$(
-	getopt -o o:q \
-		--long output:,quiet,supported-host-version:,supported-target-version: \
-		-n "$0" \
-		-- "$@"
-)
+ARGS=$( gettopt -n "$0" -o o:q \
+	--long output:,quiet,supported-host-version:,supported-target-version: \
+	-- "$@" )
 
 # Check for non-GNU getopt
 if [ $? != 0 ]; then
@@ -65,6 +58,8 @@ while true; do
 			VERBOSITY=0
 			;;
 		--supported-host-version|--supported-target-version)
+			# required for mkinitramfs compat.
+			# we return success unconditionally
 			exit 0
 			;;
 		--)
