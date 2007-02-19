@@ -1,7 +1,16 @@
 #!/bin/bash
 
 #####################################################################
-# Copyright (C) 2006 Kel Modderman <kelmo@kanotixguide.org>
+# Copyright (C) 2006 - 2007 F.U.L.L.S.T.O.R.Y Project
+#
+# F.U.L.L.S.T.O.R.Y Project Homepage:
+# http://developer.berlios.de/projects/fullstory
+#
+# F.U.L.L.S.T.O.R.Y Subversion Archive:
+# svn://svn.berlios.de/fullstory/trunk
+# http://svn.berlios.de/svnroot/repos/fullstory
+# http://svn.berlios.de/viewcvs/fullstory (viewcvs)
+# http://svn.berlios.de/wsvn/fullstory (websvn)
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
