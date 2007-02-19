@@ -45,7 +45,7 @@ VERBOSITY=1
 
 #####################################################################
 # Process arguments
-ARGS=$( gettopt -n "$0" -o o:q \
+ARGS=$( getopt -n "$0" -o o:q \
 	--long output:,quiet,supported-host-version:,supported-target-version: \
 	-- "$@" )
 
