@@ -1,8 +1,8 @@
-live-initrd-sidux (0.0.58) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.58) unstable; urgency=low
 
-  * NOT RELEASED YET
+  * busybox' cp doesn't obey --remove-destination.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Fri,  2 Mar 2007 01:48:36 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Fri,  2 Mar 2007 02:20:49 +0100
 
 live-initrd-sidux (0.0.57) unstable; urgency=low
 
