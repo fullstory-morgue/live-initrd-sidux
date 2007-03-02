@@ -1,3 +1,9 @@
+live-initrd-sidux (0.0.58) UNRELEASED; urgency=low
+
+  * NOT RELEASED YET
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Fri,  2 Mar 2007 01:48:36 +0100
+
 live-initrd-sidux (0.0.57) unstable; urgency=low
 
   * busybox-sidux does no longer provide a precomputed link list, generate it
