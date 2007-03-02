@@ -1,8 +1,9 @@
-live-initrd-sidux (0.0.59) UNRELEASED; urgency=low
+live-initrd-sidux (0.0.59) unstable; urgency=low
 
-  * NOT RELEASED YET
+  * revert r5278 and fix cp --remove-destination usage to use GNU coreutils in
+    /bin/cp.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Fri,  2 Mar 2007 02:22:40 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Fri,  2 Mar 2007 02:28:19 +0100
 
 live-initrd-sidux (0.0.58) unstable; urgency=low
 
