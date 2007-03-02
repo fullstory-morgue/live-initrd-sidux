@@ -114,7 +114,6 @@ TARGET_INITRD_DIR=$(mktemp -d)
 
 # Static shell binary provided by busybox-sidux
 BUSYBOX_BIN="/usr/lib/busybox-sidux/busybox.static"
-BUSYBOX_LINKS="/usr/share/busybox-sidux/busybox.links"
 
 # XXX: are all these files in /etc really required?
 if [[ -d ${PWD}/templates ]]; then
@@ -312,13 +311,10 @@ esac
 install -m 0755 ${BUSYBOX_BIN} ${TARGET_INITRD_DIR}/static/busybox
 
 # Create busybox softlinks
-for bb in $(< ${BUSYBOX_LINKS}); do
-	case "$bb" in
-		*linuxrc)
-			continue
-			;;
-	esac
-	make_initrd_symlinks busybox static/${bb/*\//}
+for bb in `${BUSYBOX_BIN} | \
+	sed -n '/functions:$/,$p' | \
+	sed -e '/functions\:/d; s/[[:space:]]*//g; s/,$//; s/,/\n/g; /busybox/d'`; do
+		make_initrd_symlinks busybox "static/${bb}"
 done
 
 # Populate miniroot /etc
