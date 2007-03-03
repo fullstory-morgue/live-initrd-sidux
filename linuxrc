@@ -1474,7 +1474,7 @@ if test -n "$FOUND_KNOPPIX"; then
 				/var/lib/ 2>/dev/null
 	
 		# Link device files (real device file copies should NOT require more space, but in fact, they do)
-		cp -aus /dev/capi /dev/ 2>/dev/null
+		/bin/cp -aus /dev/capi /dev/ 2>/dev/null
 		ln -s $FLL_MOUNTPOINT/dev/* /dev/ 2>/dev/null
 	
 		# Problematic directories in /var/lib (lots and lots of inodes)
@@ -1494,8 +1494,8 @@ if test -n "$FOUND_KNOPPIX"; then
 		# Index files can be HUGE, so better replace cache/man tree by links later
 		# cp -a $FLL_MOUNTPOINT/var/cache/man /var/cache/ 2>/dev/null
 		# Create links from CDROM for UNWRITABLE (remaining) files
-		cp -aus $FLL_MOUNTPOINT/var/* /var/ 2>/dev/null
-		cp -aus $FLL_MOUNTPOINT/etc/* /etc/ 2>/dev/null
+		/bin/cp -aus $FLL_MOUNTPOINT/var/* /var/ 2>/dev/null
+		/bin/cp -aus $FLL_MOUNTPOINT/etc/* /etc/ 2>/dev/null
 
 		###############
 	fi
@@ -1586,7 +1586,7 @@ EOF
 
 	# Clean up /etc/mtab (and - just in case - make a nice entry for looped ISO)
 	# FIXME Multi-Image
-	/bin/egrep " $FLL_MOUNTPOINT | /$FLL_MEDIUM " /proc/mounts | sed 's|/dev/loop0 /$FLL_MEDIUM \(.*\) 0 0|'$LOOP_SOURCE$ISO_PATH' /$FLL_MEDIUM/ \1,loop=/dev/loop0 0 0|g' >> /etc/mtab
+	/bin/egrep " $FLL_MOUNTPOINT | /$FLL_MEDIUM " /proc/mounts | /bin/sed 's|/dev/loop0 /$FLL_MEDIUM \(.*\) 0 0|'$LOOP_SOURCE$ISO_PATH' /$FLL_MEDIUM/ \1,loop=/dev/loop0 0 0|g' >> /etc/mtab
 
 	# Now tell kernel where the real modprobe lives
 	echo "/sbin/modprobe" > /proc/sys/kernel/modprobe
