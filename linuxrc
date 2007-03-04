@@ -1474,7 +1474,6 @@ if test -n "$FOUND_KNOPPIX"; then
 				/var/lib/ 2>/dev/null
 	
 		# Link device files (real device file copies should NOT require more space, but in fact, they do)
-		/bin/cp -aus /dev/capi /dev/ 2>/dev/null
 		ln -s $FLL_MOUNTPOINT/dev/* /dev/ 2>/dev/null
 	
 		# Problematic directories in /var/lib (lots and lots of inodes)
