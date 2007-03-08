@@ -1,9 +1,9 @@
 live-initrd-sidux (0.1.1) unstable; urgency=low
 
-  * NOT RELEASED YET
   * leave /dev/capi/ as it is intended, udev will void this change anyways.
+  * tell the user if we're using unionfs or aufs.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun,  4 Mar 2007 02:15:06 +0100
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Thu,  8 Mar 2007 14:36:46 +0100
 
 live-initrd-sidux (0.1.0) unstable; urgency=low
 
