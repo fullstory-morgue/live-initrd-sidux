@@ -1,3 +1,9 @@
+live-initrd-sidux (0.1.2) UNRELEASED; urgency=low
+
+  * NOT RELEASED YET
+
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Thu,  8 Mar 2007 14:38:33 +0100
+
 live-initrd-sidux (0.1.1) unstable; urgency=low
 
   * leave /dev/capi/ as it is intended, udev will void this change anyways.
