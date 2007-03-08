@@ -1384,8 +1384,8 @@ if test -n "$FOUND_KNOPPIX"; then
 		## unionfs adventure ##
 		#######################
 
-		[ "$UNIONFS" = "yes" ] && echo -n "${CRE}${BLUE}Creating unified filesystem (${MAGENTA}unionfs${NORMAL}) and symlinks on ramdisk...${NORMAL}"
-		[ "$AUFS" = "yes" ] && echo -n "${CRE}${BLUE}Creating unified filesystem (${MAGENTA}aufs${NORMAL}) and symlinks on ramdisk...${NORMAL}"
+		[ "$UNIONFS" = "yes" ] && echo -n "${CRE}${BLUE}Creating unified filesystem (${MAGENTA}unionfs${BLUE}) and symlinks on ramdisk...${NORMAL}"
+		[ "$AUFS" = "yes" ] && echo -n "${CRE}${BLUE}Creating unified filesystem (${MAGENTA}aufs${BLUE}) and symlinks on ramdisk...${NORMAL}"
 		mkdir -p /UNIONFS
 		[ "$UNIONFS" = "yes" ] && UNION="/ramdisk=rw"
 		[ "$AUFS" = "yes" ] && UNION="/ramdisk"
