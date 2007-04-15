@@ -1384,7 +1384,7 @@ if test -n "$FOUND_KNOPPIX"; then
 		## unionfs adventure ##
 		#######################
 
-		[ "$UNIONFS" = "yes" ] && echo -n "${CRE}${BLUE}Creating unified filesystem (${MAGENTA}unionfs${BLUE}) and symlinks on ramdisk...${NORMAL}"
+		[ "$UNIONFS" = "yes" ] && echo -n "${CRE}${BLUE}Creating unified filesystem (${MAGENTA}unionfs 2.x${BLUE}) and symlinks on ramdisk...${NORMAL}"
 		[ "$AUFS" = "yes" ] && echo -n "${CRE}${BLUE}Creating unified filesystem (${MAGENTA}aufs${BLUE}) and symlinks on ramdisk...${NORMAL}"
 		mkdir -p /UNIONFS
 		[ "$UNIONFS" = "yes" ] && UNION="/ramdisk=rw"
@@ -1402,10 +1402,14 @@ if test -n "$FOUND_KNOPPIX"; then
 
 		# Do the actual mount
 		if ! grep UNIONFS /etc/mtab; then
-			[ "$UNIONFS" = "yes" ] && /bin/mount -t unionfs -o "dirs=$UNION,delete=whiteout" /UNIONFS /UNIONFS	# doesn't work with -mm
-			[ "$AUFS" = "yes" ] && /bin/mount -t aufs -o "br:$UNION" /UNIONFS /UNIONFS
+			[ "$UNIONFS" = "yes" ] && /bin/mount -t unionfs -o "dirs=$UNION" none /UNIONFS
+			[ "$AUFS" = "yes" ] && /bin/mount -t aufs -o "br:$UNION" none /UNIONFS
 		fi
-		if grep -q \\/UNIONFS\ \\/UNIONFS /proc/mounts; then
+		
+		stage=3
+		rundebugshell
+		
+		if grep -q \\none\ \\/UNIONFS /proc/mounts; then
 			# We now have unionfs, copy some data from the initial ramdisk first
 			cp -a	/etc/fstab \
 				/etc/mtab \
@@ -1433,13 +1437,20 @@ if test -n "$FOUND_KNOPPIX"; then
 				test "$i" = "home" -o "$i" = "tmp" && continue
 				test -L "/$i" || test -d "/$i" || test -f "/$i" || ln -snf "/UNIONFS/$i" /$i
 			done
+
+			echo ""
+			echo "${GREEN}>> Read-only ${FLL_MEDIUM} system successfully merged with read-write /ramdisk.${NORMAL}"
+		
+			stage=4
+			rundebugshell
 		else
 			echo -n "${CRE}${RED}ERROR: CANNOT UNITE READ-ONLY MEDIA AND INITIAL RAMDISK!${NORMAL}"
+		
+			stage=4
+			rundebugshell
+
 			$FLL_MOUNTPOINT/sbin/halt -f -n
 		fi
-	
-		echo ""
-		echo "${GREEN}>> Read-only ${FLL_MEDIUM} system successfully merged with read-write /ramdisk.${NORMAL}"
 
 		#######################
 	else
@@ -1617,7 +1628,7 @@ EOF
 	ln -fs "$FLL_MOUNTPOINT/etc/init.d/live-halt" "/etc/rc0.d/S90live-halt"
 	ln -fs "$FLL_MOUNTPOINT/etc/init.d/live-reboot" "/etc/rc6.d/S90live-reboot"
 
-	stage=3
+	stage=5
 	rundebugshell	
 	# Give control to the init process.
 	echo "${CRE}${BLUE}Starting init process.${NORMAL}"
