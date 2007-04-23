@@ -1,8 +1,9 @@
-live-initrd-sidux (0.2.1) UNRELEASED; urgency=low
+live-initrd-sidux (0.2.1) ORPHANED; urgency=low
 
   * NOT RELEASED YET
+  * ORPHAN PACKAGE.
 
- -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Sun, 15 Apr 2007 19:35:03 +0200
+ -- Stefan Lippers-Hollmann <s.l-h@gmx.de>  Mon, 23 Apr 2007 19:49:33 +0200
 
 live-initrd-sidux (0.2.0) unstable; urgency=low
 
